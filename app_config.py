@@ -1,5 +1,6 @@
 import os
 
+
 if (os.getenv('B2C_TENANT_NAME')
     and os.getenv('SIGNUPSIGNIN_USER_FLOW') and os.getenv('EDITPROFILE_USER_FLOW')):
     # This branch is for B2C. You can delete this branch if you are not using B2C.
