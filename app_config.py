@@ -44,3 +44,5 @@ SCOPE = ["User.ReadBasic.All"]
 SESSION_TYPE = "filesystem"
 # Using the file system will not work in most production systems,
 # it's better to use a database-backed session store instead.
+
+AUTHORIZED_USER = os.getenv("AUTHORIZED_USER")

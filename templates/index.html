@@ -8,6 +8,8 @@
     <h1>Microsoft Identity Python Web App</h1>
     <h2>Welcome {{ user.get("name") }}!</h2>
 
+    <p>Your subscription ID is {{ user.get("sub") }}.</p>
+
     <ul>
     {% if config.get("ENDPOINT") %}
       <li><a href='/call_downstream_api'>Call a downstream API</a></li>
