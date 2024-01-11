@@ -79,7 +79,7 @@ def index():
         return redirect(url_for("login"))
     # here there's a user, but we need to check if the user has permissions
     sub = auth.get_user().get("sub")
-    if not sub or sub != app_config.AUTHORIZED_USER:
+    if (not sub) or (sub != app_config.AUTHORIZED_USER):
         return render_template('not_authorized.html')
     return render_template('index.html', user=auth.get_user(), version=__version__)
 
@@ -91,7 +91,7 @@ def call_downstream_api():
     # here there's a user, but we need to check if the user has permissions
     sub = auth.get_user().get("sub")
     if not sub or sub != app_config.AUTHORIZED_USER:
-        return render_template('not_authorized.html')
+        return render_template('not_authorized.html', user=auth.get_user())
 
     token = auth.get_token_for_user(app_config.SCOPE)
     if "error" in token:
