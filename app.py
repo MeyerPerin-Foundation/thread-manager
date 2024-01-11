@@ -2,6 +2,7 @@ import identity.web
 import requests
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_session import Session
+from azure.cosmos import CosmosClient, exceptions, PartitionKey
 
 import app_config
 
@@ -26,6 +27,29 @@ auth = identity.web.Auth(
     client_id=app.config["CLIENT_ID"],
     client_credential=app.config["CLIENT_SECRET"],
 )
+
+def checkUserIsAuthorized(user) -> bool:
+    if not user:
+        return False
+    sub = user.get("sub")
+    # Connect to Cosmos DB
+    client = CosmosClient(app_config.COSMOS_ENDPOINT, app_config.COSMOS_KEY)
+    database = client.get_database_client(app_config.COSMOS_DATABASE)
+    container = database.get_container_client("allowed_users")
+
+    # Query to retrieve a specific record
+    query = f"SELECT * FROM c WHERE c.id = 'sub'"
+
+    # Fetching the record
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+
+    if not items:
+        print("No item found with the given ID")
+    else:
+        for item in items:
+            print(item)
+
+
 
 @app.route("/login")
 def login():
