@@ -8,7 +8,7 @@ load_dotenv()
 
 STORAGE_ACCOUNT_NAME = os.getenv("STORAGE_ACCOUNT_NAME")
 STORAGE_ACCOUNT_KEY = os.getenv("STORAGE_ACCOUNT_KEY")
-CONTAINER_NAME = os.getenv("CONTAINER_NAME")
+CONTAINER_NAME = os.getenv("THREADS_CONTAINER_NAME")
 
 connect_str = f"DefaultEndpointsProtocol=https;AccountName={STORAGE_ACCOUNT_NAME};AccountKey={STORAGE_ACCOUNT_KEY};EndpointSuffix=core.windows.net"
 container_name = CONTAINER_NAME

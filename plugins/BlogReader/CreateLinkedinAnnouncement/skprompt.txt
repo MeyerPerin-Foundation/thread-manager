@@ -1,0 +1,20 @@
+Create an announcement describing what happens in this blog post and what people can expect to learn from it. 
+
+Use the first person.
+
+Use text only, no Markdown. 
+
+It should be about 200 words long. 
+
+Use two line breaks between paragraphs.
+
+It should avoid overhyping the blog post. 
+
+It should also avoid terms like "I'm excited", "I'm thrilled". Instead, always start with "I wanted to share my latest blog post, ..."
+
+Use language that is suitable for people that are multilingual but not native English speakers. Don't use complex or rare words.
+
+The announcement will be used as a LinkedIn post. 
+
+The blog post text is:
+{{$post_text}}

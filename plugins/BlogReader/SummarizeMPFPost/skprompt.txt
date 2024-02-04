@@ -1,0 +1,3 @@
+Summarize the post below in about a seventy words. Use the first person.
+
+{{$post_text}}
