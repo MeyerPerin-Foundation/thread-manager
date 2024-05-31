@@ -47,22 +47,19 @@ async def generate_linkedin_announcement_text(kernel: sk.Kernel, content: str, u
 async def main():
     kernel = create_kernel()
 
-    url = "https://meyerperin.org/posts/2024-02-01-openai-concurrency.html"
+    
+
     title, content = blog_reader.get_mpf_blog_post_content(url)
 
-    # blog_post_summary = summarize_post(kernel, content)
-    # send_notification_emails(title, blog_post_summary, url)
+    blog_post_summary = summarize_post(kernel, content)
+    send_notification_emails(title, blog_post_summary, url)
  
     li_text = await generate_linkedin_announcement_text(kernel, content, url)  
-
     final_text = f"{li_text}\n\n{url}"
+    linkedin_poster = kernel.plugins["LinkedInPlugin"]["CreateTextPost"]
+    result = await kernel.run(linkedin_poster, input_str=final_text)
 
-    print(final_text)
-
-    # linkedin_poster = kernel.plugins["LinkedInPlugin"]["CreateTextPost"]
-    # result = await kernel.run(linkedin_poster, input_str=li_text)
-
-    # print(result)
+    print(result)
 
 if __name__ == "__main__":
     load_dotenv()
