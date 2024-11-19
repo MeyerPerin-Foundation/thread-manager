@@ -18,7 +18,6 @@ Session(app)
 from werkzeug.middleware.proxy_fix import ProxyFix
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-app.jinja_env.globals.update(Auth=identity.web.Auth)  # Useful in template for B2C
 auth = identity.web.Auth(
     session=session,
     authority=app.config["AUTHORITY"],
@@ -28,9 +27,9 @@ auth = identity.web.Auth(
 
 @app.route("/login")
 def login():
-    return render_template("login.html", **auth.log_in(
+    return render_template("login.html", version=identity.__version__, **auth.log_in(
         scopes=app_config.SCOPE, # Have user consent to scopes during log-in
-        prompt="select_account",  # Optional. More values defined in  https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest
+        redirect_uri=url_for("auth_response", _external=True), # Optional. If present, this absolute URL must match your app's redirect_uri registered in Azure Portal
         ))
 
 
@@ -49,17 +48,29 @@ def logout():
 
 @app.route("/")
 def index():
-    user = auth.get_user()
-    if not user:
+    if not (app.config["CLIENT_ID"] and app.config["CLIENT_SECRET"]):
+        # This check is not strictly necessary.
+        # You can remove this check from your production code.
+        return render_template('config_error.html')
+    if not auth.get_user():
         return redirect(url_for("login"))
-    # here there's a user, but we need to check if the user has authorization
-    authorized = checkUserIsAuthorized(app_config, user)
+    return render_template('index.html', user=auth.get_user(), version=identity.__version__)
 
-    if authorized:
-        return render_template('index.html', user=user)
-    else:
-        return render_template('not_authorized.html', user=user)
+
+@app.route("/call_downstream_api")
+def call_downstream_api():
+    token = auth.get_token_for_user(app_config.SCOPE)
+    if "error" in token:
+        return redirect(url_for("login"))
+    # Use access token to call downstream api
+    api_result = requests.get(
+        app_config.ENDPOINT,
+        headers={'Authorization': 'Bearer ' + token['access_token']},
+        timeout=30,
+    ).json()
+    return render_template('display.html', result=api_result)
 
 
 if __name__ == "__main__":
     app.run()
+
