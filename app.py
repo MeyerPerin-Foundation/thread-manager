@@ -74,6 +74,7 @@ def call_downstream_api():
 def bsky():
     # Note that currently this is running without authentication
     post_to_bsky()
+    return render_template('bsky_posted.html')
 
 if __name__ == "__main__":
     app.run()
