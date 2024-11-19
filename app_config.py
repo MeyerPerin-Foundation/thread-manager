@@ -1,6 +1,5 @@
 import os
 
-
 AUTHORITY = os.getenv("AUTHORITY") 
 AUTHORIZED_USER = os.getenv("AUTHORIZED_USER")
 
@@ -33,3 +32,4 @@ COSMOS_DATABASE = os.getenv("COSMOS_DATABASE")
 
 API_TOKEN = os.getenv("API_TOKEN")  
 BSKY_APP_PWD = os.getenv("BSKY_APP_PWD")
+BSKY_USER = os.getenv("BSKY_USER")
