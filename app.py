@@ -70,7 +70,7 @@ def call_downstream_api():
     ).json()
     return render_template('display.html', result=api_result)
 
-@app.route("/bsky")
+@app.route("/bsky", methods=["POST"])
 def bsky():
     # Read the token from the request headers
     token = request.headers.get("Authorization")
