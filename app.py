@@ -2,7 +2,7 @@ import identity.web
 import requests
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_session import Session
-from authorization import checkUserIsAuthorized
+from authorization import checkUserIsAuthorized, checkApiAuthorized
 from post_to_bluesky import post_to_bsky
 
 import app_config
@@ -70,11 +70,26 @@ def call_downstream_api():
     ).json()
     return render_template('display.html', result=api_result)
 
-@app.route("/bsky")
+@app.route("/bsky", methods=["POST"])
 def bsky():
-    # Note that currently this is running without authentication
-    post_to_bsky()
-    return render_template('bsky_posted.html')
+    # Read the token from the request headers
+    token = request.headers.get("Authorization")
+
+    # Check if the token is valid
+    if not checkApiAuthorized(token):
+        return "Unauthorized", 401
+    
+    # Read the message from the POST data (JSON payload)
+    data = request.get_json()
+    if not data or 'message' not in data:
+        return "Missing 'message' in request data", 400
+    
+    message = data['message']
+    
+    # Call the function with the token and message
+    post_to_bsky(message)
+    
+    return "OK", 200
 
 if __name__ == "__main__":
     app.run()

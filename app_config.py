@@ -30,3 +30,6 @@ SESSION_TYPE = "filesystem"
 COSMOS_KEY = os.getenv("COSMOS_KEY")
 COSMOS_ENDPOINT = os.getenv("COSMOS_ENDPOINT")
 COSMOS_DATABASE = os.getenv("COSMOS_DATABASE")
+
+API_TOKEN = os.getenv("API_TOKEN")  
+BSKY_APP_PWD = os.getenv("BSKY_APP_PWD")

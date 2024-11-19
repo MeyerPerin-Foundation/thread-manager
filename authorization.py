@@ -1,4 +1,5 @@
 from azure.cosmos import CosmosClient, exceptions, PartitionKey
+import app_config
 
 def checkUserIsAuthorized(app_config, user) -> bool:
     client = CosmosClient(app_config.COSMOS_ENDPOINT, app_config.COSMOS_KEY)
@@ -18,6 +19,13 @@ def checkUserIsAuthorized(app_config, user) -> bool:
     items = list(container.query_items(query=query, enable_cross_partition_query=True))
 
     if not items:
+        return False
+    else:
+        return True
+
+
+def checkApiAuthorized(token) -> bool:
+    if token != app_config.API_TOKEN:
         return False
     else:
         return True
