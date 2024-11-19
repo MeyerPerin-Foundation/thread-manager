@@ -1,8 +1,7 @@
 from bsky_bridge import BskySession, post_text
-import os
+import app_config
 
-
-def post_to_bsky():
-    session = BskySession("lucasmeyer.bsky.social", os.getenv("BSKY_APP_PWD"))
-    response = post_text(session, "This is an automated post from the bsky_bridge module.")
+def post_to_bsky(message):
+    session = BskySession("lucasmeyer.bsky.social", app_config.BSKY_APP_PWD)
+    response = post_text(session, message)
     print(response)
