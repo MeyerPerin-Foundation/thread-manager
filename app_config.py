@@ -1,7 +1,7 @@
 import os
 
 
-AUTHORITY = os.getenv("AUTHORITY") or "https://login.microsoftonline.com/consumer"
+AUTHORITY = os.getenv("AUTHORITY") 
 AUTHORIZED_USER = os.getenv("AUTHORIZED_USER")
 
 # Application (client) ID of app registration
