@@ -70,7 +70,7 @@ def call_downstream_api():
     ).json()
     return render_template('display.html', result=api_result)
 
-@app.route("/bksy"):
+@app.route("/bksy")
 def bsky():
     # Note that currently this is running without authentication
     post_to_bsky()
