@@ -4,7 +4,7 @@ from flask import Flask, redirect, render_template, request, session, url_for
 from flask_session import Session
 from authorization import checkUserIsAuthorized, checkApiAuthorized
 from post_to_bluesky import post_to_bsky
-
+from content_gererator import days_until_midterms
 import app_config
 
 app = Flask(__name__)
@@ -70,10 +70,11 @@ def call_downstream_api():
     ).json()
     return render_template('display.html', result=api_result)
 
-@app.route("/bsky", methods=["POST"])
+@app.route("/bsky")
 def bsky():
     # Read the token from the request headers
     token = request.headers.get("Authorization")
+    print(token)
 
     # Check if the token is valid
     if not checkApiAuthorized(token):
@@ -81,15 +82,21 @@ def bsky():
     
     # Read the message from the POST data (JSON payload)
     data = request.get_json()
-    if not data or 'message' not in data:
-        return "Missing 'message' in request data", 400
-    
-    message = data['message']
-    
-    # Call the function with the token and message
-    post_to_bsky(message)
-    
-    return "OK", 200
+
+    if not data or 'command' not in data:
+        return "Missing 'command' in request data", 400
+
+    command = data['command']
+
+    if command == 'midterms':
+        message = days_until_midterms()
+        post_to_bsky(message)
+        return "OK", 200
+    else:
+        return "Invalid command", 400
+        
+
+
 
 if __name__ == "__main__":
     app.run()

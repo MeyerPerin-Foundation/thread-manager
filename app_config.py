@@ -1,4 +1,12 @@
 import os
+from dotenv import load_dotenv
+
+if os.getenv("WEBSITE_HTTPLOGGING_RETENTION_DAYS") is None:
+    # running locally
+    print("Running locally")
+    load_dotenv()
+else:
+    print("Running in Azure")
 
 AUTHORITY = os.getenv("AUTHORITY") 
 AUTHORIZED_USER = os.getenv("AUTHORIZED_USER")

@@ -25,6 +25,9 @@ def checkUserIsAuthorized(app_config, user) -> bool:
 
 
 def checkApiAuthorized(token) -> bool:
+    # Parse out the bearer
+    token = token.split(" ")[1]
+
     if token != app_config.API_TOKEN:
         return False
     else:
