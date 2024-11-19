@@ -3,6 +3,7 @@ import requests
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_session import Session
 from authorization import checkUserIsAuthorized
+from post_to_bluesky import post_to_bsky
 
 import app_config
 
@@ -56,7 +57,6 @@ def index():
         return redirect(url_for("login"))
     return render_template('index.html', user=auth.get_user(), version=identity.__version__)
 
-
 @app.route("/call_downstream_api")
 def call_downstream_api():
     token = auth.get_token_for_user(app_config.SCOPE)
@@ -70,6 +70,10 @@ def call_downstream_api():
     ).json()
     return render_template('display.html', result=api_result)
 
+@app.route("/bksy"):
+def bsky():
+    # Note that currently this is running without authentication
+    post_to_bsky()
 
 if __name__ == "__main__":
     app.run()
