@@ -80,6 +80,6 @@ starkbank-ecdsa==2.2.0
 tqdm==4.66.1
 typing_extensions==4.9.0
 tzdata==2023.4
-urllib3==2.1.0
+urllib3>=2.2.2
 Werkzeug>=3.0.6
-yarl==1.9.4
+yarl
