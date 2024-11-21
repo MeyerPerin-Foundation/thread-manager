@@ -2,9 +2,8 @@ import identity.web
 import requests
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_session import Session
-from authorization import checkUserIsAuthorized, checkApiAuthorized
-from post_to_bluesky import post_to_bsky
-from content_gererator import days_until_midterms
+import authorization
+import content_generator
 import app_config
 
 app = Flask(__name__)
@@ -57,46 +56,21 @@ def index():
         return redirect(url_for("login"))
     return render_template('index.html', user=auth.get_user(), version=identity.__version__)
 
-@app.route("/call_downstream_api")
-def call_downstream_api():
-    token = auth.get_token_for_user(app_config.SCOPE)
-    if "error" in token:
-        return redirect(url_for("login"))
-    # Use access token to call downstream api
-    api_result = requests.get(
-        app_config.ENDPOINT,
-        headers={'Authorization': 'Bearer ' + token['access_token']},
-        timeout=30,
-    ).json()
-    return render_template('display.html', result=api_result)
-
-@app.route("/bsky", methods=["POST"])
-def bsky():
-    # Read the token from the request headers
-    token = request.headers.get("Authorization")
-    print(token)
-
-    # Check if the token is valid
-    if not checkApiAuthorized(token):
+@app.route("/post_motd", methods=["POST"])
+def post_motd():
+    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
         return "Unauthorized", 401
     
-    # Read the message from the POST data (JSON payload)
-    data = request.get_json()
-
-    if not data or 'command' not in data:
-        return "Missing 'command' in request data", 400
-
-    command = data['command']
-
-    if command == 'midterms':
-        message = days_until_midterms()
-        post_to_bsky(message)
-        return "OK", 200
-    else:
-        return "Invalid command", 400
-        
+    return content_generator.generate_and_post_motd()
 
 
+@app.route("/post_midterms", methods=["POST"])
+def post_midterms():
+     if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+        return "Unauthorized", 401
+    
+     return content_generator.generate_and_post_midterms_countdown()
+       
 
 if __name__ == "__main__":
     app.run()

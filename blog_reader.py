@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
-def get_mpf_blog_post_content(url: str) -> (str, str):
+def get_mpf_blog_post_content(url: str):
     # Fetch the content of the URL
     response = requests.get(url)
     response.raise_for_status()  # Ensure the request was successful
