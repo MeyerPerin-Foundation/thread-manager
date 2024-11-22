@@ -69,3 +69,23 @@ def generate_and_post_midterms_countdown():
     print(f"Generated midterms_dict: {midterms_dict}")
     return social_media_poster.post(midterms_dict)
 
+def generate_and_post_ungovernable():
+    ungovernable_dict = cosmosdb.get_random_ungovernable()
+
+    if not ungovernable_dict:
+        print("No ungovernable content found")
+        return "No ungovernable content found", 404
+    
+    # Create a dictionary with the post text and the social media platforms to post to
+    post_data = {
+        "text": ungovernable_dict["title"],
+        "image": ungovernable_dict["blob_url"],
+        "hashtags": ["BecomeUngovernable"],
+        "topic": "become ungovernable",
+        "threads": True,
+        "instagram": False,
+        "bluesky": True,
+        "linkedin": False
+    }
+
+    return social_media_poster.post(post_data)

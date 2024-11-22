@@ -1,5 +1,6 @@
 from azure.cosmos import CosmosClient
 import app_config
+import random
 import datetime
 
 def get_motd():
@@ -41,3 +42,14 @@ def check_user_in_db(user):
     else:
         return True    
     
+def get_random_ungovernable():
+    client = CosmosClient(app_config.COSMOS_ENDPOINT, app_config.COSMOS_KEY)
+    database = client.get_database_client("content")
+    container = database.get_container_client("ungovernable")
+
+    query = "SELECT * FROM c"
+    
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+    # get a random item from the list
+    return random.choice(items)
+

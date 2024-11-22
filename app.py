@@ -70,7 +70,15 @@ def post_midterms():
         return "Unauthorized", 401
     
      return content_generator.generate_and_post_midterms_countdown()
-       
+
+
+@app.route("/post_ungovernable", methods=["POST"])
+def post_ungovernable():
+    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+        return "Unauthorized", 401
+    
+    return content_generator.generate_and_post_ungovernable()
+
 
 if __name__ == "__main__":
     app.run()

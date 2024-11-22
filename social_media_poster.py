@@ -1,25 +1,50 @@
-from bsky_bridge import BskySession, post_text
+from bsky_bridge import BskySession, post_text, post_image
 import app_config
 import json
 import requests
+import random
+import os
 
-def post_to_instagram(text, image = None):
+def post_to_instagram(text, image = None, hashtags = None):
     print(f"Right now, I don't know how to post to Instagram")
     return "OK", 200
 
-def post_to_threads(text, image = None):
+def post_to_threads(text, image = None, topic = None):
     print(f"Right now, I don't know how to post to Threads")
     return "OK", 200
 
-def post_to_bluesky(text, image = None):
+def post_to_bluesky(text, image = None, hashtags = None):
     message = text
+
+    # remove high unicode characters
+    message = message.encode('ascii', 'ignore').decode('ascii')
+
+    for hashtag in hashtags:
+        message += f" #{hashtag}"
+    
     session = BskySession(app_config.BSKY_USER, app_config.BSKY_APP_PWD)
-    response = post_text(session, message)
+
+    if image is None:
+        response = post_text(session, message)
+    else:
+        # get image data from url
+        image_data = requests.get(image).content
+
+        # write the image data to a file named temp and a random number between 1 and 1000
+        file_name = "temp" + str(random.randint(1, 1000)) + ".jpg"
+        with open(file_name, "wb") as file:
+            file.write(image_data)
+            file.close()
+
+        response = post_image(session, message, file_name)
+        # remove the temporary file
+        os.remove(file_name)
+
 
     print(f"Result of post_to_bluesky:\n{response}")
     return "OK", 200
 
-def post_to_linkedin(text, image = None):
+def post_to_linkedin(text, image = None, hashtags = None):
         data = {}
         with open('text_share.json') as json_file:
             data = json.load(json_file)
@@ -48,32 +73,42 @@ def post(standard_document):
     if standard_document is None:
         return None
 
-    # The standard document is a JSON with post_text and optional post_image, and booleans for threads, instagram, linkedin and bluesky
+    # The standard document is a JSON with text and optional image, and booleans for threads, instagram, linkedin and bluesky
     if 'text' in standard_document:
         text = standard_document['text']
     else:
         return None
     
-    # Check if the message of the day has a post_image
+    # Check if the message of the day has an image
     if 'image' in standard_document:
         image = standard_document['image']
     else:
         image = None
 
+    if 'hashtags' in standard_document:
+        hashtags = standard_document['hashtags']
+    else:
+        hashtags = None
+
+    if 'topic' in standard_document:
+        topic = standard_document['topic']
+    else:
+        topic = None
+
     # Check if the message of the day has a threads boolean
     if 'threads' in standard_document and standard_document['threads']:
-        post_to_threads(text, image)
+        post_to_threads(text, image, topic)
     
     # Check if the message of the day has a instagram boolean
     if 'instagram' in standard_document and standard_document['instagram']:
-        post_to_instagram(text, image)
+        post_to_instagram(text, image, hashtags)
 
     # Check if the message of the day has a linkedin boolean
     if 'linkedin' in standard_document and standard_document['linkedin']:
-        post_to_linkedin(text, image)
+        post_to_linkedin(text, image, hashtags)
 
     # Check if the message of the day has a bluesky boolean
     if 'bluesky' in standard_document and standard_document['bluesky']:
-        post_to_bluesky(text, image)
+        post_to_bluesky(text, image, hashtags)
 
     return "OK", 200
