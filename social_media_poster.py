@@ -19,8 +19,9 @@ def post_to_bluesky(text, image = None, hashtags = None):
     # remove high unicode characters
     message = message.encode('ascii', 'ignore').decode('ascii')
 
-    for hashtag in hashtags:
-        message += f" #{hashtag}"
+    # I don't know yet how to use hashtags
+    # for hashtag in hashtags:
+    #     message += f" #{hashtag}"
     
     session = BskySession(app_config.BSKY_USER, app_config.BSKY_APP_PWD)
 
@@ -37,6 +38,7 @@ def post_to_bluesky(text, image = None, hashtags = None):
             file.close()
 
         response = post_image(session, message, file_name)
+
         # remove the temporary file
         os.remove(file_name)
 
