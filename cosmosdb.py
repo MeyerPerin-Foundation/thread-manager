@@ -53,3 +53,13 @@ def get_random_ungovernable():
     # get a random item from the list
     return random.choice(items)
 
+def get_random_too_far():
+    client = CosmosClient(app_config.COSMOS_ENDPOINT, app_config.COSMOS_KEY)
+    database = client.get_database_client("content")
+    container = database.get_container_client("gone_too_far")
+
+    query = "SELECT * FROM c"
+    
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+    # get a random item from the list
+    return random.choice(items)

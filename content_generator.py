@@ -89,3 +89,24 @@ def generate_and_post_ungovernable():
     }
 
     return social_media_poster.post(post_data)
+
+def generate_and_post_too_far():
+    too_far_dict = cosmosdb.get_random_too_far()
+
+    if not too_far_dict:
+        print("No too far content found")
+        return "No too far content found", 404
+    
+    # Create a dictionary with the post text and the social media platforms to post to
+    post_data = {
+        "text": too_far_dict["title"],
+        "image": too_far_dict["blob_url"],
+        "hashtags": ["GoneTooFar"],
+        "topic": "gone too far",
+        "threads": True,
+        "instagram": False,
+        "bluesky": True,
+        "linkedin": False
+    }
+
+    return social_media_poster.post(post_data)

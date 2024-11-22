@@ -79,6 +79,13 @@ def post_ungovernable():
     
     return content_generator.generate_and_post_ungovernable()
 
+@app.route("/post_too_far", methods=["POST"])
+def post_too_far():
+    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+        return "Unauthorized", 401
+    
+    return content_generator.generate_and_post_too_far()
+
 
 if __name__ == "__main__":
     app.run()
