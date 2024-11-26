@@ -30,8 +30,7 @@ def post_to_bluesky(text, image = None, hashtags = None, emojis = None):
             message += emoji
 
     text_builder = client_utils.TextBuilder()
-    text_builder.text(message)
-
+    text_builder.text(message + "\n")
 
     for hashtag in hashtags:
         # if the hashtag does not start with a #, add it
@@ -105,6 +104,9 @@ def post(standard_document):
     else:
         topic = None
 
+    if 'emojis' in standard_document:
+        emojis = standard_document['emojis']
+
     # Check if the message of the day has a threads boolean
     if 'threads' in standard_document and standard_document['threads']:
         post_to_threads(text, image, topic)
@@ -119,6 +121,6 @@ def post(standard_document):
 
     # Check if the message of the day has a bluesky boolean
     if 'bluesky' in standard_document and standard_document['bluesky']:
-        post_to_bluesky(text, image, hashtags)
+        post_to_bluesky(text, image, hashtags, emojis)
 
     return "OK", 200
