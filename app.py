@@ -94,7 +94,7 @@ async def update_birds():
     if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
         return "Unauthorized", 401
     
-    since = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=5))
+    since = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=25))
   
     await birdbuddy_to_cosmos.update_birds(since)
     return "OK", 200
