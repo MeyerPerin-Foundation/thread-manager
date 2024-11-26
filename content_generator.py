@@ -1,6 +1,8 @@
 from datetime import datetime
 import cosmosdb
 import social_media_poster
+from openai import OpenAI
+import app_config
 
 def calculate_date_difference(target_date):
     try:
@@ -51,6 +53,7 @@ def days_until(event_name, event_date, threads=False, instagram=False, bluesky=F
     # Create a dictionary with the post text and the social media platforms to post to
     post_data = {
         "text": text,
+        "hashtags": ["DaysUntil"],
         "threads": threads,
         "instagram": instagram,
         "bluesky": bluesky,
@@ -62,6 +65,7 @@ def days_until(event_name, event_date, threads=False, instagram=False, bluesky=F
 def generate_and_post_motd():
     motd_dict = cosmosdb.get_motd()
     print(f"Generated motd_dict: {motd_dict}")
+    motd_dict["hashtags"] = ["OnThisDay"]
     return social_media_poster.post(motd_dict)
 
 def generate_and_post_midterms_countdown():
@@ -110,3 +114,49 @@ def generate_and_post_too_far():
     }
 
     return social_media_poster.post(post_data)
+
+def generate_and_post_birdbuddy_picture():
+    birdbuddy_dict = cosmosdb.get_random_birdbuddy()
+
+    if not birdbuddy_dict:
+        print("No Bird Buddy content found")
+        return "No Bird Buddy content found", 404
+
+    # get the caption for the bird picture
+    caption = generate_caption_for_bird_picture(birdbuddy_dict["blob_url"])
+
+    # Create a dictionary with the post text and the social media platforms to post to
+    post_data = {
+        "text": f"{caption} 🪶",
+        "image": birdbuddy_dict["blob_url"],
+        "hashtags": ["Birds"],
+        "threads": True,
+        "instagram": False,
+        "bluesky": True,
+        "linkedin": False
+    }
+
+    cosmosdb.update_birdbuddy_posted(birdbuddy_dict)
+
+    return social_media_poster.post(post_data)
+
+
+def generate_caption_for_bird_picture(image_url):
+
+    client = OpenAI(api_key=app_config.OPENAI_API_KEY)
+
+    prompt = "Generate a caption for this bird image that was capture on a bird feeder camera. The caption will be used in a social media post and should be less than 200 characters. The caption should be fun and lighthearted. Do not use emojis or hashtags.  Do not ask for or encourage engagement."
+
+    response = client.chat.completions.create(
+        model="gpt-4o", 
+        messages=[
+            {"role": "system", "content": "You are a photography critic and social media content creator"},
+            {"role": "user", "content": [
+                {"type": "text", "text": prompt},
+                {"type": "image_url", "image_url": {
+                    "url": image_url}}
+            ]}
+        ],
+    )
+
+    return response.choices[0].message.content

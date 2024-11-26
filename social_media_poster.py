@@ -1,9 +1,8 @@
-from bsky_bridge import BskySession, post_text, post_image
 import app_config
 import json
 import requests
-import random
-import os
+from atproto import Client, client_utils
+
 
 def post_to_instagram(text, image = None, hashtags = None):
     print(f"Right now, I don't know how to post to Instagram")
@@ -18,32 +17,35 @@ def post_to_bluesky(text, image = None, hashtags = None):
 
     # remove high unicode characters
     message = message.encode('ascii', 'ignore').decode('ascii')
-
-    # I don't know yet how to use hashtags
-    # for hashtag in hashtags:
-    #     message += f" #{hashtag}"
     
-    session = BskySession(app_config.BSKY_USER, app_config.BSKY_APP_PWD)
+    # if the message is in quotes, remove the quotes
+    if message.startswith('"') and message.endswith('"'):
+        message = message[1:-1]
+
+    if message.startswith("'") and message.endswith("'"):
+        message = message[1:-1]
+    
+    text_builder = client_utils.TextBuilder()
+    text_builder.text(message)
+    for hashtag in hashtags:
+        # if the hashtag does not start with a #, add it
+        if not hashtag.startswith("#"):
+            hashtag = "#" + hashtag
+        text_builder.tag(hashtag, hashtag)
+
+    client = Client()
+    client.login(app_config.BSKY_USER, app_config.BSKY_APP_PWD)
 
     if image is None:
-        response = post_text(session, message)
+        post = client.send_post(text_builder)
     else:
         # get image data from url
         image_data = requests.get(image).content
+        post = client.send_image(text_builder, image=image_data, image_alt="")
 
-        # write the image data to a file named temp and a random number between 1 and 1000
-        file_name = "temp" + str(random.randint(1, 1000)) + ".jpg"
-        with open(file_name, "wb") as file:
-            file.write(image_data)
-            file.close()
+    post_uri = post.uri
 
-        response = post_image(session, message, file_name)
-
-        # remove the temporary file
-        os.remove(file_name)
-
-
-    print(f"Result of post_to_bluesky:\n{response}")
+    print(f"Result of post_to_bluesky: {post_uri}")
     return "OK", 200
 
 def post_to_linkedin(text, image = None, hashtags = None):

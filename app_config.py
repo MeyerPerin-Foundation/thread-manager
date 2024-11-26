@@ -17,6 +17,9 @@ CLIENT_ID = os.getenv("CLIENT_ID")
 # Application's generated client secret: never check this into source control!
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 
+# Security token to prevent unauthorized access to my API
+API_TOKEN = os.getenv("API_TOKEN")  
+
 REDIRECT_PATH = "/getAToken"  # Used for forming an absolute URL to your redirect URI.
 # The absolute URL must match the redirect URI you set
 # in the app's registration in the Azure portal.
@@ -34,9 +37,20 @@ SESSION_TYPE = "filesystem"
 # Using the file system will not work in most production systems,
 # it's better to use a database-backed session store instead.
 
+# Cosmos DB
 COSMOS_KEY = os.getenv("COSMOS_KEY")
 COSMOS_ENDPOINT = os.getenv("COSMOS_ENDPOINT")
 
-API_TOKEN = os.getenv("API_TOKEN")  
+# Bluesky
 BSKY_APP_PWD = os.getenv("BSKY_APP_PWD")
 BSKY_USER = os.getenv("BSKY_USER")
+
+# BirdBuddy
+BIRD_BUDDY_USER=os.getenv("BIRD_BUDDY_USER")
+BIRD_BUDDY_PASSWORD=os.getenv("BIRD_BUDDY_PASSWORD")
+
+# OpenAI
+OPENAI_API_KEY=os.getenv("OPENAI_API_KEY")
+
+# Azure Storage
+STORAGE_CONNECTION_STRING=os.getenv("STORAGE_CONNECTION_STRING")

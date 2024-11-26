@@ -1,10 +1,11 @@
 import identity.web
-import requests
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_session import Session
 import authorization
 import content_generator
 import app_config
+import birdbuddy_to_cosmos
+import datetime
 
 app = Flask(__name__)
 app.config.from_object(app_config)
@@ -32,7 +33,6 @@ def login():
         redirect_uri=url_for("auth_response", _external=True), # Optional. If present, this absolute URL must match your app's redirect_uri registered in Azure Portal
         ))
 
-
 @app.route(app_config.REDIRECT_PATH)
 def auth_response():
     result = auth.complete_log_in(request.args)
@@ -40,11 +40,9 @@ def auth_response():
         return render_template("auth_error.html", result=result)
     return redirect(url_for("index"))
 
-
 @app.route("/logout")
 def logout():
     return redirect(auth.log_out(url_for("index", _external=True)))
-
 
 @app.route("/")
 def index():
@@ -63,14 +61,12 @@ def post_motd():
     
     return content_generator.generate_and_post_motd()
 
-
 @app.route("/post_midterms", methods=["POST"])
 def post_midterms():
      if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
         return "Unauthorized", 401
     
      return content_generator.generate_and_post_midterms_countdown()
-
 
 @app.route("/post_ungovernable", methods=["POST"])
 def post_ungovernable():
@@ -86,7 +82,21 @@ def post_too_far():
     
     return content_generator.generate_and_post_too_far()
 
+@app.route("/post_bird_buddy", methods=["POST"])
+def post_bird_buddy():
+    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+        return "Unauthorized", 401
+    
+    return content_generator.generate_and_post_birdbuddy_picture()
 
-if __name__ == "__main__":
-    app.run()
+@app.route("/update_birds", methods=["POST"])
+async def update_birds():
+    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+        return "Unauthorized", 401
+    
+    since = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=5))
+  
+    await birdbuddy_to_cosmos.update_birds(since)
+    return "OK", 200
+
 
