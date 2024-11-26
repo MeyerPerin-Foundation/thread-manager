@@ -156,7 +156,7 @@ def generate_caption_for_bird_picture(image_url, species=None):
 
     prompt = f"Generate a caption for this bird image {sp} that was captured on a bird feeder camera.\n"
     prompt += f"The caption will be used in a social media post and should be less than 200 characters.\n"
-    prompt += f"The caption should be fun and light hearted, but suitable for a professional brand.\n"
+    prompt += f"The caption should be suitable for a professional brand, although it can be funny.\n"
     prompt += f"Do not use emojis or hashtags.  Do not ask for engagement. Do not ask questions.\n"
 
     response = client.chat.completions.create(
