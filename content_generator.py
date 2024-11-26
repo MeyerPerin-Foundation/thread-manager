@@ -121,14 +121,18 @@ def generate_and_post_birdbuddy_picture():
     if not birdbuddy_dict:
         print("No Bird Buddy content found")
         return "No Bird Buddy content found", 404
+    
+    species = birdbuddy_dict.get("species", None)
+    blob_url = birdbuddy_dict.get("blob_url", None)
 
     # get the caption for the bird picture
-    caption = generate_caption_for_bird_picture(birdbuddy_dict["blob_url"])
+    caption = generate_caption_for_bird_picture(blob_url, species)
 
     # Create a dictionary with the post text and the social media platforms to post to
     post_data = {
-        "text": f"{caption} 🪶",
-        "image": birdbuddy_dict["blob_url"],
+        "text": f"{caption}",
+        "emojis": ["🪶"],
+        "image": blob_url,
         "hashtags": ["Birds"],
         "threads": True,
         "instagram": False,
@@ -141,16 +145,21 @@ def generate_and_post_birdbuddy_picture():
     return social_media_poster.post(post_data)
 
 
-def generate_caption_for_bird_picture(image_url):
+def generate_caption_for_bird_picture(image_url, species=None):
 
     client = OpenAI(api_key=app_config.OPENAI_API_KEY)
 
-    prompt = "Generate a caption for this bird image that was capture on a bird feeder camera. The caption will be used in a social media post and should be less than 200 characters. The caption should be fun and lighthearted. Do not use emojis or hashtags.  Do not ask for or encourage engagement."
+    if species:
+        sp = " of a {species} "
+    else:
+        sp = ""
+
+    prompt = f"Generate a caption for this bird image {sp} that was capture on a bird feeder camera. The caption will be used in a social media post and should be less than 200 characters. The caption should be fun and lighthearted, but suitable for a professional brand. Do not use emojis or hashtags.  Do not ask for or encourage engagement."
 
     response = client.chat.completions.create(
         model="gpt-4o", 
         messages=[
-            {"role": "system", "content": "You are a photography critic and social media content creator"},
+            {"role": "system", "content": "You are a photographer and social media content creator"},
             {"role": "user", "content": [
                 {"type": "text", "text": prompt},
                 {"type": "image_url", "image_url": {

@@ -12,7 +12,7 @@ def post_to_threads(text, image = None, topic = None):
     print(f"Right now, I don't know how to post to Threads")
     return "OK", 200
 
-def post_to_bluesky(text, image = None, hashtags = None):
+def post_to_bluesky(text, image = None, hashtags = None, emojis = None):
     message = text
 
     # remove high unicode characters
@@ -25,13 +25,19 @@ def post_to_bluesky(text, image = None, hashtags = None):
     if message.startswith("'") and message.endswith("'"):
         message = message[1:-1]
     
+    if emojis is not None:
+        for emoji in emojis:
+            message += emoji
+
     text_builder = client_utils.TextBuilder()
     text_builder.text(message)
+
+
     for hashtag in hashtags:
         # if the hashtag does not start with a #, add it
         if not hashtag.startswith("#"):
-            hashtag = "#" + hashtag
-        text_builder.tag(hashtag, hashtag)
+            hashtag_text = "#" + hashtag
+        text_builder.tag(hashtag_text, hashtag)
 
     client = Client()
     client.login(app_config.BSKY_USER, app_config.BSKY_APP_PWD)
