@@ -105,6 +105,9 @@ def post_to_bluesky(text, image = None, hashtags = None, emojis = None):
     return "OK", 200
 
 def post_to_linkedin(text, image = None, hashtags = None):
+        # return not implemented
+        return "Not Implemented", 501
+
         data = {}
         with open('text_share.json') as json_file:
             data = json.load(json_file)
