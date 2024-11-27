@@ -99,6 +99,8 @@ async def update_birds(since = None):
             if not good_birb(openai_client, uri):
                 continue
         
+        print(f"This is a good bird. Saving to Azure Storage and Cosmos DB.")
+        
         # otherwise,  let's save it
         response = requests.get(uri)
         response.raise_for_status()
