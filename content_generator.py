@@ -150,7 +150,7 @@ def generate_caption_for_bird_picture(image_url, species=None):
     client = OpenAI(api_key=app_config.OPENAI_API_KEY)
 
     if species:
-        sp = " of a {species} "
+        sp = f" of a {species} "
     else:
         sp = ""
 
