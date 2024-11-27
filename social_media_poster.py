@@ -13,16 +13,6 @@ def post_to_threads(text, image = None, hashtags = None):
     print(f"Posting {text} to Threads")
     message = text
 
-    # remove high unicode characters
-    message = message.encode('ascii', 'ignore').decode('ascii')
-    
-    # if the message is in quotes, remove the quotes
-    if message.startswith('"') and message.endswith('"'):
-        message = message[1:-1]
-
-    if message.startswith("'") and message.endswith("'"):
-        message = message[1:-1]
-
     if hashtags is not None:
         message = f"{message} #{hashtags[0]}"
 
@@ -65,16 +55,6 @@ def post_to_threads(text, image = None, hashtags = None):
 
 def post_to_bluesky(text, image = None, hashtags = None, emojis = None):
     message = text
-
-    # remove high unicode characters
-    message = message.encode('ascii', 'ignore').decode('ascii')
-    
-    # if the message is in quotes, remove the quotes
-    if message.startswith('"') and message.endswith('"'):
-        message = message[1:-1]
-
-    if message.startswith("'") and message.endswith("'"):
-        message = message[1:-1]
     
     if emojis is not None:
         for emoji in emojis:
@@ -105,32 +85,38 @@ def post_to_bluesky(text, image = None, hashtags = None, emojis = None):
     return "OK", 200
 
 def post_to_linkedin(text, image = None, hashtags = None):
-        # return not implemented
-        return "Not Implemented", 501
 
-        data = {}
-        with open('text_share.json') as json_file:
-            data = json.load(json_file)
-            data['author'] = f"{app_config.LINKEDIN_PERSON_ID}"
-            data["specificContent"]["com.linkedin.ugc.ShareContent"]["shareCommentary"]["text"] = f"{text}"
+    try:
+        if image is None:
+            data = {}
+            with open('text_share.json') as json_file:
+                data = json.load(json_file)
+                data['author'] = f"{app_config.LINKEDIN_PERSON_ID}"
+                data["specificContent"]["com.linkedin.ugc.ShareContent"]["shareCommentary"]["text"] = f"{text}"
 
-        # use requests to post the data to the LinkedIn API
-        url = "https://api.linkedin.com/v2/ugcPosts"
-        headers = {
-            "Authorization": f"Bearer {app_config.LINKEDIN_ACCESS_TOKEN}",
-            "Content-Type": "application/json",
-            "X-Restli-Protocol-Version": "2.0.0"
-        }
-        response = requests.post(url, headers=headers, data=json.dumps(data))
-        
-        # check if the response is successful
-        if response.status_code == 201:
-            action = f"Success."
-            return action, 201
-        else:
-            action = f"Error: {response.status_code}."
-            action += "\nDetails: " + response.text
-            return action, 400
+            # use requests to post the data to the LinkedIn API
+            url = "https://api.linkedin.com/v2/ugcPosts"
+            headers = {
+                "Authorization": f"Bearer {app_config.LINKEDIN_ACCESS_TOKEN}",
+                "Content-Type": "application/json",
+                "X-Restli-Protocol-Version": "2.0.0"
+            }
+            response = requests.post(url, headers=headers, data=json.dumps(data))
+            
+            # check if the response is successful
+            if response.status_code == 201:
+                action = f"Success."
+                return action, 201
+            else:
+                action = f"Error: {response.status_code}."
+                action += "\nDetails: " + response.text
+                return action, 400
+    except Exception as e:
+        print(f"Error: {e}") 
+        return f"Error: {e}", 400
+    
+    return "OK", 200
+    
 
 def post(standard_document):
     if standard_document is None:
@@ -142,7 +128,7 @@ def post(standard_document):
     else:
         return None
     
-    # Check if the message of the day has an image
+    # Check if the document has an image
     if 'image' in standard_document:
         image = standard_document['image']
     else:
@@ -161,20 +147,20 @@ def post(standard_document):
     if 'emojis' in standard_document:
         emojis = standard_document['emojis']
 
-    # Check if the message of the day has a threads boolean
+    # Check if the document has a bluesky boolean
+    if 'bluesky' in standard_document and standard_document['bluesky']:
+        post_to_bluesky(text, image, hashtags, emojis)
+
+    # Check if the document has a threads boolean
     if 'threads' in standard_document and standard_document['threads']:
         post_to_threads(text, image, hashtags)
     
-    # Check if the message of the day has a instagram boolean
-    if 'instagram' in standard_document and standard_document['instagram']:
-        post_to_instagram(text, image, hashtags)
-
-    # Check if the message of the day has a linkedin boolean
+    # Check if the document has a linkedin boolean
     if 'linkedin' in standard_document and standard_document['linkedin']:
         post_to_linkedin(text, image, hashtags)
 
-    # Check if the message of the day has a bluesky boolean
-    if 'bluesky' in standard_document and standard_document['bluesky']:
-        post_to_bluesky(text, image, hashtags, emojis)
+    # Check if the document has a instagram boolean
+    if 'instagram' in standard_document and standard_document['instagram']:
+        post_to_instagram(text, image, hashtags)
 
     return "OK", 200

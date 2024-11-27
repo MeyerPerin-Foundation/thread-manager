@@ -80,12 +80,16 @@ def generate_and_post_ungovernable():
         print("No ungovernable content found")
         return "No ungovernable content found", 404
     
+    message = ungovernable_dict["title"]
+
+    # remove high unicode characters
+    message = message.encode('ascii', 'ignore').decode('ascii')
+        
     # Create a dictionary with the post text and the social media platforms to post to
     post_data = {
-        "text": ungovernable_dict["title"],
+        "text": message,
         "image": ungovernable_dict["blob_url"],
         "hashtags": ["BecomeUngovernable"],
-        "topic": "become ungovernable",
         "threads": True,
         "instagram": False,
         "bluesky": True,
@@ -95,18 +99,21 @@ def generate_and_post_ungovernable():
     return social_media_poster.post(post_data)
 
 def generate_and_post_too_far():
-    too_far_dict = cosmosdb.get_random_too_far()
+    too_far_dict = cosmosdb.get_random_too_far()    
 
     if not too_far_dict:
         print("No too far content found")
         return "No too far content found", 404
-    
+
+    # remove high unicode characters
+    message = too_far_dict["title"]
+    message = message.encode('ascii', 'ignore').decode('ascii')    
+
     # Create a dictionary with the post text and the social media platforms to post to
     post_data = {
-        "text": too_far_dict["title"],
+        "text": message,
         "image": too_far_dict["blob_url"],
         "hashtags": ["GoneTooFar"],
-        "topic": "gone too far",
         "threads": True,
         "instagram": False,
         "bluesky": True,
@@ -127,8 +134,12 @@ def generate_and_post_birdbuddy_picture():
 
     # get the caption for the bird picture
     caption = generate_caption_for_bird_picture(blob_url, species)
+   
+    # if the message is in quotes, remove the quotes
+    if caption.startswith('"') and caption.endswith('"'):
+        caption = caption[1:-1]
 
-    # Create a dictionary with the post text and the social media platforms to post to
+  # Create a dictionary with the post text and the social media platforms to post to
     post_data = {
         "text": f"{caption}",
         "emojis": ["🪶"],
@@ -155,6 +166,7 @@ def generate_caption_for_bird_picture(image_url, species=None):
         sp = ""
 
     prompt = f"Generate a caption for this bird image {sp} that was captured on a bird feeder camera.\n"
+    prompt += f"Do not assume the bird's gender.\n"
     prompt += f"The caption will be used in a social media post and should be less than 200 characters.\n"
     prompt += f"The caption should be suitable for a professional brand, although it can be funny.\n"
     prompt += f"Do not use emojis or hashtags.  Do not ask for engagement. Do not ask questions.\n"
