@@ -2,15 +2,66 @@ import app_config
 import json
 import requests
 from atproto import Client, client_utils
+from time import sleep
 
 
 def post_to_instagram(text, image = None, hashtags = None):
     print(f"Right now, I don't know how to post to Instagram")
     return "OK", 200
 
-def post_to_threads(text, image = None, topic = None):
-    print(f"Right now, I don't know how to post to Threads")
-    return "OK", 200
+def post_to_threads(text, image = None, hashtags = None):
+    print(f"Posting {text} to Threads")
+    message = text
+
+    # remove high unicode characters
+    message = message.encode('ascii', 'ignore').decode('ascii')
+    
+    # if the message is in quotes, remove the quotes
+    if message.startswith('"') and message.endswith('"'):
+        message = message[1:-1]
+
+    if message.startswith("'") and message.endswith("'"):
+        message = message[1:-1]
+
+    if hashtags is not None:
+        message = f"{message} #{hashtags[0]}"
+
+    payload = {
+        "access_token": app_config.THREADS_TEST_TOKEN,
+        "text": message,
+        "media_type": "TEXT"
+    }
+
+    if image is not None:
+        payload["image_url"] = image
+        payload["media_type"] = "IMAGE"
+
+    post_url = f"https://graph.threads.net/v1.0/{app_config.THREADS_USER_ID}/threads/"
+
+    response = requests.post(post_url, json=payload)
+
+    if response.status_code == 200:
+        # get response id
+        response_json = response.json()
+        creation_id = response_json["id"]
+        print("Waiting 10 seconds for Threads to process the post")
+        sleep(10)
+    else:
+        return "Error", 400
+    
+    publish_payload = {
+        "access_token": app_config.THREADS_TEST_TOKEN,
+        "creation_id": creation_id
+    }
+
+    publish_url = f"https://graph.threads.net/v1.0/{app_config.THREADS_USER_ID}/threads_publish/"
+
+    response = requests.post(publish_url, json=publish_payload)
+
+    if response.status_code == 200:
+        return "OK", 200
+    else:
+        return "Error", 400
 
 def post_to_bluesky(text, image = None, hashtags = None, emojis = None):
     message = text
@@ -109,7 +160,7 @@ def post(standard_document):
 
     # Check if the message of the day has a threads boolean
     if 'threads' in standard_document and standard_document['threads']:
-        post_to_threads(text, image, topic)
+        post_to_threads(text, image, hashtags)
     
     # Check if the message of the day has a instagram boolean
     if 'instagram' in standard_document and standard_document['instagram']:

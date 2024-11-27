@@ -41,16 +41,22 @@ SESSION_TYPE = "filesystem"
 COSMOS_KEY = os.getenv("COSMOS_KEY")
 COSMOS_ENDPOINT = os.getenv("COSMOS_ENDPOINT")
 
-# Bluesky
-BSKY_APP_PWD = os.getenv("BSKY_APP_PWD")
-BSKY_USER = os.getenv("BSKY_USER")
+# Azure Storage
+STORAGE_CONNECTION_STRING=os.getenv("STORAGE_CONNECTION_STRING")
+
+# OpenAI
+OPENAI_API_KEY=os.getenv("OPENAI_API_KEY")
 
 # BirdBuddy
 BIRD_BUDDY_USER=os.getenv("BIRD_BUDDY_USER")
 BIRD_BUDDY_PASSWORD=os.getenv("BIRD_BUDDY_PASSWORD")
 
-# OpenAI
-OPENAI_API_KEY=os.getenv("OPENAI_API_KEY")
+# Bluesky
+BSKY_APP_PWD = os.getenv("BSKY_APP_PWD")
+BSKY_USER = os.getenv("BSKY_USER")
 
-# Azure Storage
-STORAGE_CONNECTION_STRING=os.getenv("STORAGE_CONNECTION_STRING")
+# Threads
+THREADS_USER_ID = os.getenv("THREADS_USER_ID")
+THREADS_TEST_TOKEN = os.getenv("THREADS_TEST_TOKEN")
+
+# LinkedIn
