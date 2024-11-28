@@ -64,7 +64,9 @@ def days_until(event_name, event_date, threads=False, instagram=False, bluesky=F
 
 def generate_and_post_motd():
     motd_dict = cosmosdb.get_motd()
-    print(f"Generated motd_dict: {motd_dict}")
+    if not motd_dict:
+        return "No MotD for today", 200
+    
     motd_dict["hashtags"] = ["OnThisDay"]
     return social_media_poster.post(motd_dict)
 

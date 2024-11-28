@@ -139,13 +139,10 @@ def post(standard_document):
     else:
         hashtags = None
 
-    if 'topic' in standard_document:
-        topic = standard_document['topic']
-    else:
-        topic = None
-
     if 'emojis' in standard_document:
         emojis = standard_document['emojis']
+    else:
+        emojis = None
 
     # Check if the document has a bluesky boolean
     if 'bluesky' in standard_document and standard_document['bluesky']:
