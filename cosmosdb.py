@@ -97,3 +97,23 @@ def insert_bird(media_id, created_at, postcard_id, species, blob_url):
         "blob_url": blob_url
     }
     container.upsert_item(item)
+
+def count_birds():
+    client = CosmosClient(app_config.COSMOS_ENDPOINT, app_config.COSMOS_KEY)
+    database = client.get_database_client("content")
+    container = database.get_container_client("bird_buddy")
+
+    query = "SELECT VALUE COUNT(1) FROM c"
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+    all_birds = items[0]
+
+    query = "SELECT VALUE COUNT(1) FROM c where NOT IS_DEFINED(c.last_posted)"
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+    unposted_birds = items[0]
+
+    d = {
+        "all_birds": all_birds,
+        "unposted_birds": unposted_birds
+    }
+
+    return d

@@ -6,6 +6,7 @@ import content_generator
 import app_config
 import birdbuddy_to_cosmos
 import datetime
+import cosmosdb
 
 app = Flask(__name__)
 app.config.from_object(app_config)
@@ -99,4 +100,12 @@ async def update_birds():
     await birdbuddy_to_cosmos.update_birds(since)
     return "OK", 200
 
+@app.route("/dashboard", methods=["GET"])
+def dashboard():
+    if not auth.get_user():
+        return redirect(url_for("login"))
+    
+    bird_count = cosmosdb.count_birds()
+
+    return render_template('dashboard.html', data_payload=bird_count)   
 
