@@ -9,6 +9,11 @@ import datetime
 import cosmosdb
 import threads_data
 import bluesky_data
+from azure.monitor.opentelemetry import configure_azure_monitor
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = Flask(__name__)
 app.config.from_object(app_config)
