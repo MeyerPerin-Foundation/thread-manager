@@ -3,11 +3,15 @@ import app_config
 import random
 import datetime
 
+def _get_container(database_name, container_name):
+    client = CosmosClient(app_config.COSMOS_ENDPOINT, app_config.COSMOS_KEY)
+    database = client.get_database_client(database_name)
+    container = database.get_container_client(container_name)
+    return container
+
 def get_motd():
     # get current month and day in the format MMDD
-    client = CosmosClient(app_config.COSMOS_ENDPOINT, app_config.COSMOS_KEY)
-    database = client.get_database_client("content")
-    container = database.get_container_client("post_of_the_day")
+    container = _get_container("content", "post_of_the_day")
 
     month_day = datetime.datetime.now().strftime("%m%d")
     query = f"SELECT * FROM c WHERE c.day_month = '{month_day}'"
@@ -21,9 +25,7 @@ def get_motd():
 
 
 def check_user_in_db(user):
-    client = CosmosClient(app_config.COSMOS_ENDPOINT, app_config.COSMOS_KEY)
-    database = client.get_database_client("users")
-    container = database.get_container_client("users")
+    container = _get_container("users", "users")
 
     # Get the sub from the user
     sub = user.get("sub")
@@ -43,10 +45,7 @@ def check_user_in_db(user):
         return True    
     
 def get_random_ungovernable():
-    client = CosmosClient(app_config.COSMOS_ENDPOINT, app_config.COSMOS_KEY)
-    database = client.get_database_client("content")
-    container = database.get_container_client("ungovernable")
-
+    container = _get_container("content", "ungovernable")
     query = "SELECT * FROM c"
     
     items = list(container.query_items(query=query, enable_cross_partition_query=True))
@@ -54,10 +53,7 @@ def get_random_ungovernable():
     return random.choice(items)
 
 def get_random_too_far():
-    client = CosmosClient(app_config.COSMOS_ENDPOINT, app_config.COSMOS_KEY)
-    database = client.get_database_client("content")
-    container = database.get_container_client("gone_too_far")
-
+    container = _get_container("content", "too_far")
     query = "SELECT * FROM c"
     
     items = list(container.query_items(query=query, enable_cross_partition_query=True))
@@ -65,10 +61,7 @@ def get_random_too_far():
     return random.choice(items)
 
 def get_random_birdbuddy():
-    client = CosmosClient(app_config.COSMOS_ENDPOINT, app_config.COSMOS_KEY)
-    database = client.get_database_client("content")
-    container = database.get_container_client("bird_buddy")
-
+    container = _get_container("content", "bird_buddy")
     query = "SELECT * FROM c where NOT IS_DEFINED(c.last_posted)"
     
     items = list(container.query_items(query=query, enable_cross_partition_query=True))
@@ -76,19 +69,13 @@ def get_random_birdbuddy():
     return random.choice(items)
 
 def update_birdbuddy_posted(birdbuddy_dict):
-    client = CosmosClient(app_config.COSMOS_ENDPOINT, app_config.COSMOS_KEY)
-    database = client.get_database_client("content")
-    container = database.get_container_client("bird_buddy")
-
+    container = _get_container("content", "bird_buddy")
     birdbuddy_dict["last_posted"] = datetime.datetime.now().isoformat()
     container.upsert_item(birdbuddy_dict)
     return birdbuddy_dict
 
 def insert_bird(media_id, created_at, postcard_id, species, blob_url):
-    client = CosmosClient(app_config.COSMOS_ENDPOINT, app_config.COSMOS_KEY)
-    database = client.get_database_client("content")
-    container = database.get_container_client("bird_buddy")
-
+    container = _get_container("content", "bird_buddy")
     item = {
         "id": media_id,
         "created_at": created_at,
@@ -99,10 +86,7 @@ def insert_bird(media_id, created_at, postcard_id, species, blob_url):
     container.upsert_item(item)
 
 def count_birds():
-    client = CosmosClient(app_config.COSMOS_ENDPOINT, app_config.COSMOS_KEY)
-    database = client.get_database_client("content")
-    container = database.get_container_client("bird_buddy")
-
+    container = _get_container("content", "bird_buddy")
     query = "SELECT VALUE COUNT(1) FROM c"
     items = list(container.query_items(query=query, enable_cross_partition_query=True))
     all_birds = items[0]
@@ -116,4 +100,51 @@ def count_birds():
         "unposted_birds": unposted_birds
     }
 
+    return d
+
+def get_prompt(function: str, version:int=None) -> str:
+    container = _get_container("control", "prompts")
+    
+    if not version:
+        # get the latest version
+        query = f"SELECT * FROM c WHERE c.function = '{function}' ORDER BY c.version DESC"
+
+    else:
+        query = f"SELECT * FROM c WHERE c.function = '{function}' AND c.version = {version}"    
+
+    records = list(container.query_items(query=query, enable_cross_partition_query=True))
+
+    # if there are no records, raise an error
+    if not records:
+        raise ValueError(f"No prompt found for function {function} and version {version}")
+
+    # else, get the record with the highest version
+    record = records[0]
+    prompt = record.get("prompt", None)
+
+    if not prompt or prompt == "":
+        raise ValueError(f"No prompt found for function {function} and version {version}")
+    
+    return prompt
+
+def update_dashboard(d: dict):
+    container = _get_container("control", "daily_dashboard")
+
+    # get the date in UTC in the format YYYYMMDD
+    date = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d")
+
+    # select the record for the current date
+    query = f"SELECT * FROM c WHERE c.id = '{date}'"
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+
+    if items:
+        # update the existing record
+        item = items[0]
+        item.update(d)
+        container.upsert_item(item)
+    else:
+        # create a new record
+        d["id"] = date
+        container.upsert_item(d)
+    
     return d

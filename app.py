@@ -107,5 +107,15 @@ def dashboard():
     
     bird_count = cosmosdb.count_birds()
 
-    return render_template('dashboard.html', data_payload=bird_count)   
+    return render_template('dashboard.html', data_payload=bird_count)
+
+@app.route("/take_data_snapshot", methods=["POST"])
+def data_snapshot():
+    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+        return "Unauthorized", 401
+    
+    bird_count = cosmosdb.count_birds()
+    cosmosdb.update_dashboard(bird_count)
+
+    return "OK", 200
 
