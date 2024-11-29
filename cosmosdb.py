@@ -53,7 +53,7 @@ def get_random_ungovernable():
     return random.choice(items)
 
 def get_random_too_far():
-    container = _get_container("content", "too_far")
+    container = _get_container("content", "gone_too_far")
     query = "SELECT * FROM c where NOT IS_DEFINED(c.last_posted)"
     
     items = list(container.query_items(query=query, enable_cross_partition_query=True))
@@ -75,7 +75,7 @@ def update_birdbuddy_posted(birdbuddy_dict):
     return birdbuddy_dict
 
 def update_too_far_posted(too_far_dict):
-    container = _get_container("content", "too_far")
+    container = _get_container("content", "gone_too_far")
     too_far_dict["last_posted"] = datetime.datetime.now().isoformat()
     container.upsert_item(too_far_dict)
     return too_far_dict
@@ -133,7 +133,7 @@ def count_ungovernable():
     return d
 
 def count_too_far():
-    container = _get_container("content", "too_far")
+    container = _get_container("content", "gone_too_far")
     query = "SELECT VALUE COUNT(1) FROM c"
     items = list(container.query_items(query=query, enable_cross_partition_query=True))
     all_too_far = items[0]
