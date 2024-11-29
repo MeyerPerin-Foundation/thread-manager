@@ -46,7 +46,7 @@ def check_user_in_db(user):
     
 def get_random_ungovernable():
     container = _get_container("content", "ungovernable")
-    query = "SELECT * FROM c"
+    query = "SELECT * FROM c where NOT IS_DEFINED(c.last_posted)"
     
     items = list(container.query_items(query=query, enable_cross_partition_query=True))
     # get a random item from the list
@@ -54,7 +54,7 @@ def get_random_ungovernable():
 
 def get_random_too_far():
     container = _get_container("content", "too_far")
-    query = "SELECT * FROM c"
+    query = "SELECT * FROM c where NOT IS_DEFINED(c.last_posted)"
     
     items = list(container.query_items(query=query, enable_cross_partition_query=True))
     # get a random item from the list
@@ -73,6 +73,19 @@ def update_birdbuddy_posted(birdbuddy_dict):
     birdbuddy_dict["last_posted"] = datetime.datetime.now().isoformat()
     container.upsert_item(birdbuddy_dict)
     return birdbuddy_dict
+
+def update_too_far_posted(too_far_dict):
+    container = _get_container("content", "too_far")
+    too_far_dict["last_posted"] = datetime.datetime.now().isoformat()
+    container.upsert_item(too_far_dict)
+    return too_far_dict
+
+def update_ungovernable_posted(ungovernable_dict):
+    container = _get_container("content", "ungovernable")
+    ungovernable_dict["last_posted"] = datetime.datetime.now().isoformat()
+    container.upsert_item(ungovernable_dict)
+    return ungovernable_dict
+
 
 def insert_bird(media_id, created_at, postcard_id, species, blob_url):
     container = _get_container("content", "bird_buddy")

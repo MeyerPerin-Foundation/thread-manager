@@ -7,6 +7,8 @@ import app_config
 import birdbuddy_to_cosmos
 import datetime
 import cosmosdb
+import threads_data
+import bluesky_data
 
 app = Flask(__name__)
 app.config.from_object(app_config)
@@ -114,8 +116,17 @@ def data_snapshot():
     if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
         return "Unauthorized", 401
     
-    bird_count = cosmosdb.count_birds()
-    cosmosdb.update_dashboard(bird_count)
+    payload = {}
+    bird_data_payload = cosmosdb.count_birds()
+    threads_data_payload = {"threads_followers": threads_data.get_follower_count()}
+    bluesky_data_payload = {"bluesky_followers": bluesky_data.get_follower_count()}
+
+    # Combine the data into a single payload
+    payload.update(bird_data_payload)
+    payload.update(threads_data_payload)
+    payload.update(bluesky_data_payload)
+
+    cosmosdb.update_dashboard(payload)
 
     return "OK", 200
 

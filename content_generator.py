@@ -98,6 +98,9 @@ def generate_and_post_ungovernable():
         "linkedin": False
     }
 
+    ungovernable_dict["title"] = message
+    cosmosdb.update_ungovernable_posted(ungovernable_dict)
+
     return social_media_poster.post(post_data)
 
 def generate_and_post_too_far():
@@ -121,6 +124,9 @@ def generate_and_post_too_far():
         "bluesky": True,
         "linkedin": False
     }
+
+    too_far_dict["title"] = message
+    cosmosdb.update_too_far_posted(too_far_dict)
 
     return social_media_poster.post(post_data)
 
