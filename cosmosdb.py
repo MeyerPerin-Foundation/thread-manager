@@ -115,6 +115,40 @@ def count_birds():
 
     return d
 
+def count_ungovernable():
+    container = _get_container("content", "ungovernable")
+    query = "SELECT VALUE COUNT(1) FROM c"
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+    all_ungovernable = items[0]
+
+    query = "SELECT VALUE COUNT(1) FROM c where NOT IS_DEFINED(c.last_posted)"
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+    unposted_ungovernable = items[0]
+
+    d = {
+        "all_ungovernable": all_ungovernable,
+        "unposted_ungovernable": unposted_ungovernable
+    }
+
+    return d
+
+def count_too_far():
+    container = _get_container("content", "too_far")
+    query = "SELECT VALUE COUNT(1) FROM c"
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+    all_too_far = items[0]
+
+    query = "SELECT VALUE COUNT(1) FROM c where NOT IS_DEFINED(c.last_posted)"
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+    unposted_too_far = items[0]
+
+    d = {
+        "all_too_far": all_too_far,
+        "unposted_too_far": unposted_too_far
+    }
+
+    return d
+
 def get_prompt(function: str, version:int=None) -> str:
     container = _get_container("control", "prompts")
     

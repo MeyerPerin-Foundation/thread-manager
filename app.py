@@ -117,14 +117,13 @@ def data_snapshot():
         return "Unauthorized", 401
     
     payload = {}
-    bird_data_payload = cosmosdb.count_birds()
-    threads_data_payload = {"threads_followers": threads_data.get_follower_count()}
-    bluesky_data_payload = {"bluesky_followers": bluesky_data.get_follower_count()}
 
     # Combine the data into a single payload
-    payload.update(bird_data_payload)
-    payload.update(threads_data_payload)
-    payload.update(bluesky_data_payload)
+    payload.update(cosmosdb.count_birds())
+    payload.update(cosmosdb.count_ungovernable())
+    payload.update(cosmosdb.count_too_far())
+    payload.update({"threads_followers": threads_data.get_follower_count()})
+    payload.update({"bluesky_followers": bluesky_data.get_follower_count()})
 
     cosmosdb.update_dashboard(payload)
 
