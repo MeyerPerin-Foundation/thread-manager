@@ -112,7 +112,7 @@ def dashboard():
     if not auth.get_user():
         return redirect(url_for("login"))
     
-    bird_count = cosmosdb.count_birds()
+    bird_count = cosmosdb.latest_dashboard_data()
 
     return render_template('dashboard.html', data_payload=bird_count)
 

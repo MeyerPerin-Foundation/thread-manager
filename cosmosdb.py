@@ -195,3 +195,15 @@ def update_dashboard(d: dict):
         container.upsert_item(d)
     
     return d
+
+def latest_dashboard_data():
+    container = _get_container("control", "daily_dashboard")
+
+    # select the record for the current date
+    query = f"SELECT * FROM c ORDER BY c.id DESC"
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+
+    if items:
+        return items[0]
+    else:
+        return None
