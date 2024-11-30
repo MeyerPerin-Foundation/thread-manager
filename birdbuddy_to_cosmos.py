@@ -78,6 +78,8 @@ async def update_birds(since = None):
     if since is None:
         since = datetime.datetime.now() - datetime.timedelta(hours=25)
     
+    print(f"Updating birds captured by BirdBuddy since {since}")
+
     openai_client = OpenAI(api_key=app_config.OPENAI_API_KEY)
     blob_service_client = BlobServiceClient.from_connection_string(app_config.STORAGE_CONNECTION_STRING)
     bb = BirdBuddy(app_config.BIRD_BUDDY_USER, app_config.BIRD_BUDDY_PASSWORD)
@@ -86,6 +88,8 @@ async def update_birds(since = None):
     # number of items in the media_list
     N = len(media_list)
     i = 0
+
+    print(f"Processing {N} bird items")
 
     # insert each item from media_list into cosmosdb
     for item in media_list:
