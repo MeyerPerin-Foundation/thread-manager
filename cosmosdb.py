@@ -69,6 +69,17 @@ def get_random_birdbuddy():
     # get a random item from the list
     return random.choice(items)
 
+def get_latest_birdbuddy():
+    container = _get_container("content", "bird_buddy")
+    query = "SELECT * FROM c ORDER BY c.created_at DESC where NOT IS_DEFINED(c.last_posted)"
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+
+    # return the first item in the list
+    if items:
+        return items[0]
+    else:
+        return None
+
 def get_latest_blog_post():
     container = _get_container("content", "blog_posts")
     query = "SELECT TOP 1 * FROM c where NOT IS_DEFINED(c.last_posted) ORDER BY c.lastmod DESC"
@@ -233,3 +244,25 @@ def insert_blog_post(url, lastmod):
         "lastmod": lastmod
     }
     container.upsert_item(item)
+
+def set_latest_bird_update(latest_update_isoformat=None):
+    if not latest_update_isoformat:
+        latest_update_isoformat = datetime.datetime.now(datetime.UTC).isoformat()
+
+    container = _get_container("control", "settings")
+    item = {
+        "id": "v1",
+        "latest_bird_update": latest_update_isoformat
+    }
+    container.upsert_item(item)
+
+def get_latest_bird_update():
+    container = _get_container("control", "settings")
+    query = "SELECT * FROM c WHERE c.id = 'v1'"
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+
+    if items:
+        return items[0].get("latest_bird_update")
+    else:
+        return None
+    

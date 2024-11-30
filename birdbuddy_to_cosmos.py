@@ -3,7 +3,7 @@ from birdbuddy.client import BirdBuddy
 from openai import OpenAI
 from io import BytesIO
 from azure.storage.blob import BlobServiceClient
-from cosmosdb import insert_bird
+from cosmosdb import insert_bird, get_prompt
 import requests
 import app_config
 
@@ -57,7 +57,7 @@ async def get_media_list(api_client, since):
     return media_list
 
 def good_birb(openai_client, image_url):
-    prompt = f"I want to post cute and interesting images of birds to social media. Is this image such a picture? Reply 'Yes' if it is good, otherwise 'No'."
+    prompt = get_prompt("good_birb")
 
     response = openai_client.chat.completions.create(
         model="gpt-4o", 
@@ -78,7 +78,7 @@ async def update_birds(since = None):
     if since is None:
         since = datetime.datetime.now() - datetime.timedelta(hours=25)
     
-    print(f"Updating birds captured by BirdBuddy since {since}")
+    print(f"Updating birds captured by Birdbuddy since {since}")
 
     openai_client = OpenAI(api_key=app_config.OPENAI_API_KEY)
     blob_service_client = BlobServiceClient.from_connection_string(app_config.STORAGE_CONNECTION_STRING)

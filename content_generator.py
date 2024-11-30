@@ -4,6 +4,7 @@ import social_media_poster
 from openai import OpenAI
 import app_config
 import blog_reader
+import pytz
 
 def calculate_date_difference(target_date):
     try:
@@ -130,8 +131,12 @@ def generate_and_post_too_far():
 
     return social_media_poster.post(post_data)
 
-def generate_and_post_birdbuddy_picture():
-    birdbuddy_dict = cosmosdb.get_random_birdbuddy()
+def generate_and_post_birdbuddy_picture(latest=True):
+
+    if latest:
+        birdbuddy_dict = cosmosdb.get_latest_birdbuddy()
+    else:
+        birdbuddy_dict = cosmosdb.get_random_birdbuddy()
 
     if not birdbuddy_dict:
         print("No Bird Buddy content found")
@@ -139,9 +144,11 @@ def generate_and_post_birdbuddy_picture():
     
     species = birdbuddy_dict.get("species", None)
     blob_url = birdbuddy_dict.get("blob_url", None)
+    created_at = birdbuddy_dict.get("created_at", None)
+    location = "Fulshear, TX"
 
     # get the caption for the bird picture
-    caption = generate_caption_for_bird_picture(blob_url, species)
+    caption = generate_caption_for_bird_picture(blob_url, species, created_at, location)
    
     # if the message is in quotes, remove the quotes
     if caption.startswith('"') and caption.endswith('"'):
@@ -163,7 +170,7 @@ def generate_and_post_birdbuddy_picture():
 
     return social_media_poster.post(post_data)
 
-def generate_caption_for_bird_picture(image_url, species=None):
+def generate_caption_for_bird_picture(image_url, species=None, created_at=None, location=None):
 
     client = OpenAI(api_key=app_config.OPENAI_API_KEY)
 
@@ -172,8 +179,32 @@ def generate_caption_for_bird_picture(image_url, species=None):
     else:
         sp = ""
 
+    if created_at:
+        # Convert the created_at iso formatted string to a datetime object
+        utc_time = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+
+                # Define the Central Time timezone
+        central_tz = pytz.timezone("US/Central")
+
+        # Convert UTC time to Central Time
+        central_time = utc_time.astimezone(central_tz)
+
+        # Format the date and time
+        picture_time = central_time.strftime("%B %d, %Y at %I:%M %p")
+
+        pt = f" on {picture_time} "
+    else:
+        pt = ""
+
+    if location:
+        loc = f" in {location}"
+    else:
+        loc = ""
+    
     prompt = cosmosdb.get_prompt("bird_caption")
-    prompt.replace("{sp}", sp)
+    prompt = prompt.replace("{sp}", sp)
+    prompt = prompt.replace("{pt}", pt)
+    prompt = prompt.replace("{loc}", loc)
 
     response = client.chat.completions.create(
         model="gpt-4o", 

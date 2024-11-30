@@ -103,9 +103,11 @@ async def update_birds():
     if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
         return "Unauthorized", 401
     
-    since = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=25))
+    now = datetime.datetime.now(datetime.UTC).isoformat()
+    last_update = cosmosdb.get_latest_bird_update()
   
-    await birdbuddy_to_cosmos.update_birds(since)
+    await birdbuddy_to_cosmos.update_birds(since=last_update)
+    cosmosdb.set_latest_bird_update(now)
     return "OK", 200
 
 @app.route("/dashboard", methods=["GET"])
