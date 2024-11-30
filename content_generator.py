@@ -35,7 +35,11 @@ def days_until(event_name, event_date, threads=False, instagram=False, bluesky=F
     else:
         print(f"Days until {event_name}: {difference}")   
 
-    text = None 
+    if not(difference % 365 == 0 or difference % 100 == 0 or difference <= 90):
+        return None
+    
+    text = "" 
+
     if difference > 1:
         text = f"There are {difference} days until {event_name}"
     elif difference == 1:
@@ -66,14 +70,17 @@ def days_until(event_name, event_date, threads=False, instagram=False, bluesky=F
 def generate_and_post_motd():
     motd_dict = cosmosdb.get_motd()
     if not motd_dict:
-        return "No MotD for today", 200
+        return "No MotD for today", 204
     
     motd_dict["hashtags"] = ["OnThisDay"]
     return social_media_poster.post(motd_dict)
 
 def generate_and_post_midterms_countdown():
-    midterms_dict = days_until('the next midterms', '2026-11-03', bluesky=True)
-    print(f"Generated midterms_dict: {midterms_dict}")
+    midterms_dict = days_until('the next midterms', '2026-11-03', bluesky=True, threads=True)
+    
+    if not midterms_dict:
+        return "No midterms content", 204
+
     return social_media_poster.post(midterms_dict)
 
 def generate_and_post_ungovernable():
@@ -81,7 +88,7 @@ def generate_and_post_ungovernable():
 
     if not ungovernable_dict:
         print("No ungovernable content found")
-        return "No ungovernable content found", 404
+        return "No ungovernable content found", 204
     
     message = ungovernable_dict["title"]
 
@@ -109,7 +116,7 @@ def generate_and_post_too_far():
 
     if not too_far_dict:
         print("No too far content found")
-        return "No too far content found", 404
+        return "No too far content found", 204
 
     # remove high unicode characters
     message = too_far_dict["title"]
@@ -140,7 +147,7 @@ def generate_and_post_birdbuddy_picture(latest=True):
 
     if not birdbuddy_dict:
         print("No Bird Buddy content found")
-        return "No Bird Buddy content found", 404
+        return "No Bird Buddy content found", 204
     
     species = birdbuddy_dict.get("species", None)
     blob_url = birdbuddy_dict.get("blob_url", None)
@@ -226,7 +233,7 @@ def generate_and_post_blog_promo():
 
     if not blog_post_metadata:
         print("No too far content found")
-        return "No too far content found", 404
+        return "No too far content found", 204
 
     # Different promo for LinkedIn and Threads/Bluesky
     bt_message = blog_reader.blog_bt_summary(blog_post_metadata["url"])

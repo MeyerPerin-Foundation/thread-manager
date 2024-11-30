@@ -143,7 +143,7 @@ def post_to_linkedin(text, image = None, hashtags = None, url = None):
 
 def post(standard_document):
     if standard_document is None:
-        return None
+        return "No content", 204
 
     # The standard document is a JSON with text and optional image, and booleans for threads, instagram, linkedin and bluesky
     if 'text' in standard_document:
