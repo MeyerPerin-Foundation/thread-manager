@@ -9,12 +9,16 @@ def post_to_instagram(text, image = None, hashtags = None):
     print(f"Right now, I don't know how to post to Instagram")
     return "OK", 200
 
-def post_to_threads(text, image = None, hashtags = None):
+def post_to_threads(text, image = None, hashtags = None, url = None):
     print(f"Posting {text} to Threads")
+
     message = text
 
     if hashtags is not None:
         message = f"{message} #{hashtags[0]}"
+
+    if url is not None:
+        message = f"{message}\n\n{url}"
 
     payload = {
         "access_token": app_config.THREADS_TEST_TOKEN,
@@ -53,7 +57,7 @@ def post_to_threads(text, image = None, hashtags = None):
     else:
         return "Error", 400
 
-def post_to_bluesky(text, image = None, hashtags = None, emojis = None):
+def post_to_bluesky(text, image = None, hashtags = None, emojis = None, url = None):
     message = text
     
     if emojis is not None:
@@ -63,11 +67,17 @@ def post_to_bluesky(text, image = None, hashtags = None, emojis = None):
     text_builder = client_utils.TextBuilder()
     text_builder.text(message + "\n")
 
+    if hashtags is None:
+        hashtags = []
+
     for hashtag in hashtags:
         # if the hashtag does not start with a #, add it
         if not hashtag.startswith("#"):
             hashtag_text = "#" + hashtag
         text_builder.tag(hashtag_text, hashtag)
+
+    if url is not None:
+        text_builder.link("\nRead more...", url)    
 
     client = Client()
     client.login(app_config.BSKY_USER, app_config.BSKY_APP_PWD)
@@ -84,8 +94,20 @@ def post_to_bluesky(text, image = None, hashtags = None, emojis = None):
     print(f"Result of post_to_bluesky: {post_uri}")
     return "OK", 200
 
-def post_to_linkedin(text, image = None, hashtags = None):
+def post_to_linkedin(text, image = None, hashtags = None, url = None):
 
+    if url is not None:
+        text = f"{text}\n\n{url}"
+
+    if hashtags is None:
+        hashtags = []
+
+    for hashtag in hashtags:
+        # if the hashtag does not start with a #, add it
+        if not hashtag.startswith("#"):
+            hashtag_text = "#" + hashtag
+        text += f" {hashtag_text}"
+    
     try:
         if image is None:
             data = {}
@@ -144,17 +166,20 @@ def post(standard_document):
     else:
         emojis = None
 
+    if 'url' in standard_document:
+        url = standard_document['url']
+
     # Check if the document has a bluesky boolean
     if 'bluesky' in standard_document and standard_document['bluesky']:
-        post_to_bluesky(text, image, hashtags, emojis)
+        post_to_bluesky(text, image=image, hashtags=hashtags, emojis=emojis, url=url)
 
     # Check if the document has a threads boolean
     if 'threads' in standard_document and standard_document['threads']:
-        post_to_threads(text, image, hashtags)
+        post_to_threads(text, image=image, hashtags=hashtags, url=url)
     
     # Check if the document has a linkedin boolean
     if 'linkedin' in standard_document and standard_document['linkedin']:
-        post_to_linkedin(text, image, hashtags)
+        post_to_linkedin(text, image=image, hashtags=hashtags, url=url)
 
     # Check if the document has a instagram boolean
     if 'instagram' in standard_document and standard_document['instagram']:

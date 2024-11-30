@@ -9,6 +9,7 @@ import datetime
 import cosmosdb
 import threads_data
 import bluesky_data
+import sitemaps
 from azure.monitor.opentelemetry import configure_azure_monitor
 from dotenv import load_dotenv
 import os
@@ -134,3 +135,20 @@ def data_snapshot():
 
     return "OK", 200
 
+@app.route("/update_sitemap", methods=["POST"])
+def update_sitemap():
+    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+        return "Unauthorized", 401
+    
+    # sitemap_url = request.json["sitemap_url"]
+    sitemap_url = "https://meyerperin.org/sitemap.xml"
+    sitemaps.process_sitemap(sitemap_url)
+
+    return "OK", 200
+
+@app.route("/post_blog_promo", methods=["POST"])
+def post_blog_promo():
+    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+        return "Unauthorized", 401
+    
+    return content_generator.generate_and_post_blog_promo()

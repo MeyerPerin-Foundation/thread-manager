@@ -3,6 +3,7 @@ import cosmosdb
 import social_media_poster
 from openai import OpenAI
 import app_config
+import blog_reader
 
 def calculate_date_difference(target_date):
     try:
@@ -19,7 +20,6 @@ def calculate_date_difference(target_date):
     except ValueError:
         print("Error in calculating the date difference")
         return None
-
 
 def days_until(event_name, event_date, threads=False, instagram=False, bluesky=False, linkedin=False):
     
@@ -163,7 +163,6 @@ def generate_and_post_birdbuddy_picture():
 
     return social_media_poster.post(post_data)
 
-
 def generate_caption_for_bird_picture(image_url, species=None):
 
     client = OpenAI(api_key=app_config.OPENAI_API_KEY)
@@ -190,3 +189,38 @@ def generate_caption_for_bird_picture(image_url, species=None):
     )
 
     return response.choices[0].message.content
+
+def generate_and_post_blog_promo():
+    blog_post_metadata = cosmosdb.get_latest_blog_post()    
+
+    if not blog_post_metadata:
+        print("No too far content found")
+        return "No too far content found", 404
+
+    # Different promo for LinkedIn and Threads/Bluesky
+    bt_message = blog_reader.blog_bt_summary(blog_post_metadata["url"])
+    bt_post_data = {
+        "text": bt_message,
+        "url": blog_post_metadata["url"],
+        "threads": True,
+        "instagram": False,
+        "bluesky": True,
+        "linkedin": False
+    }
+
+    social_media_poster.post(bt_post_data)
+
+    linkedin_message = blog_reader.blog_li_summary(blog_post_metadata["url"])
+    linkedin_post_data = {
+        "text": linkedin_message,
+        "url": blog_post_metadata["url"],
+        "threads": False,
+        "instagram": False,
+        "bluesky": False,
+        "linkedin": True
+    }
+    
+    social_media_poster.post(linkedin_post_data)
+    cosmosdb.update_blog_posted(blog_post_metadata)
+
+    return "Accepted", 202 

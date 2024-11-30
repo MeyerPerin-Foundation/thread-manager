@@ -2,6 +2,7 @@ from azure.cosmos import CosmosClient
 import app_config
 import random
 import datetime
+import uuid
 
 def _get_container(database_name, container_name):
     client = CosmosClient(app_config.COSMOS_ENDPOINT, app_config.COSMOS_KEY)
@@ -68,6 +69,16 @@ def get_random_birdbuddy():
     # get a random item from the list
     return random.choice(items)
 
+def get_latest_blog_post():
+    container = _get_container("content", "blog_posts")
+    query = "SELECT TOP 1 * FROM c where NOT IS_DEFINED(c.last_posted) ORDER BY c.lastmod DESC"
+    
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+    if items:
+        return items[0]
+    else:
+        return None
+
 def update_birdbuddy_posted(birdbuddy_dict):
     container = _get_container("content", "bird_buddy")
     birdbuddy_dict["last_posted"] = datetime.datetime.now().isoformat()
@@ -86,6 +97,11 @@ def update_ungovernable_posted(ungovernable_dict):
     container.upsert_item(ungovernable_dict)
     return ungovernable_dict
 
+def update_blog_posted(blog_post_dict):
+    container = _get_container("content", "blog_posts")
+    blog_post_dict["last_posted"] = datetime.datetime.now().isoformat()
+    container.upsert_item(blog_post_dict)
+    return blog_post_dict
 
 def insert_bird(media_id, created_at, postcard_id, species, blob_url):
     container = _get_container("content", "bird_buddy")
@@ -207,3 +223,13 @@ def latest_dashboard_data():
         return items[0]
     else:
         return None
+    
+def insert_blog_post(url, lastmod):
+    container = _get_container("content", "blog_posts")
+
+    item = {
+        "id": url.replace("/", "|"),
+        "url": url,
+        "lastmod": lastmod
+    }
+    container.upsert_item(item)
