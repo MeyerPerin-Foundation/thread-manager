@@ -98,6 +98,7 @@ def post_to_linkedin(text, image = None, hashtags = None, url = None):
 
     if url is not None:
         text = f"{text}\n\n{url}"
+    
 
     if hashtags is None:
         hashtags = []
@@ -168,6 +169,8 @@ def post(standard_document):
 
     if 'url' in standard_document:
         url = standard_document['url']
+    else:
+        url = None
 
     # Check if the document has a bluesky boolean
     if 'bluesky' in standard_document and standard_document['bluesky']:
