@@ -6,6 +6,7 @@ from azure.storage.blob import BlobServiceClient
 from cosmosdb import insert_bird, get_prompt
 import requests
 import app_config
+from pprint import pprint
 
 def upload_to_azure_storage(blob_service_client, container_name, blob_name, data):
     blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
@@ -35,7 +36,8 @@ async def get_media_list(api_client, since):
                 sighting = await api_client.sighting_from_postcard(node_id) 
                 species = sighting.report.sightings[0].species.name
                 feeder = sighting.get('feeder', {})
-                feeder_name = feeder.get('name')                
+                feeder_name = feeder.get('name')
+                feeder_location = feeder.get('location')
 
                 if feeder_name == "MeyerPerin Bird Buddy" or feeder_name == "MeyerPerin Birdbuddy Pro":
                     media_collection = sighting.medias
@@ -48,6 +50,8 @@ async def get_media_list(api_client, since):
                                 'id': item['id'], 
                                 'date_created': item['createdAt'], 
                                 'species': species,
+                                'feeder_name': feeder_name,
+                                'location': feeder_location,
                                 'media_type': item['__typename'], 
                                 'image_url': item['contentUrl']} for item in media_collection if item['__typename'] == 'MediaImage' or item['__typename'] == 'MediaVideo']
                 media_list.extend(media_items)
@@ -123,3 +127,9 @@ async def update_birds(since = None):
             insert_bird(media_id=item['id'], created_at = item['date_created'], postcard_id = item['encounter_id'], species = item['species'], blob_url=blob_url)
 
 
+if __name__ == "__main__":
+    import asyncio
+
+    now = datetime.datetime.now(datetime.UTC)
+    since = now - datetime.timedelta(hours=2, minutes=31)
+    asyncio.run(update_birds(since.isoformat()))

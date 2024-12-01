@@ -152,7 +152,8 @@ def generate_and_post_birdbuddy_picture(latest=True):
     species = birdbuddy_dict.get("species", None)
     blob_url = birdbuddy_dict.get("blob_url", None)
     created_at = birdbuddy_dict.get("created_at", None)
-    location = "Fulshear, TX"
+    feeder_name = birdbuddy_dict.get("feeder_name", None)
+    location = birdbuddy_dict.get("location", "Fulshear,  Texas")
 
     # get the caption for the bird picture
     caption = generate_caption_for_bird_picture(blob_url, species, created_at, location)
