@@ -47,7 +47,7 @@ def check_user_in_db(user):
     
 def get_random_ungovernable():
     container = _get_container("content", "ungovernable")
-    query = "SELECT * FROM c where NOT IS_DEFINED(c.last_posted)"
+    query = "SELECT * FROM c WHERE NOT IS_DEFINED(c.last_posted)"
     
     items = list(container.query_items(query=query, enable_cross_partition_query=True))
     # get a random item from the list
@@ -55,7 +55,7 @@ def get_random_ungovernable():
 
 def get_random_too_far():
     container = _get_container("content", "gone_too_far")
-    query = "SELECT * FROM c where NOT IS_DEFINED(c.last_posted)"
+    query = "SELECT * FROM c WHERE NOT IS_DEFINED(c.last_posted)"
     
     items = list(container.query_items(query=query, enable_cross_partition_query=True))
     # get a random item from the list
@@ -63,7 +63,7 @@ def get_random_too_far():
 
 def get_random_birdbuddy():
     container = _get_container("content", "bird_buddy")
-    query = "SELECT * FROM c where NOT IS_DEFINED(c.last_posted)"
+    query = "SELECT * FROM c WHERE NOT IS_DEFINED(c.last_posted)"
     
     items = list(container.query_items(query=query, enable_cross_partition_query=True))
     # get a random item from the list
@@ -71,7 +71,7 @@ def get_random_birdbuddy():
 
 def get_latest_birdbuddy():
     container = _get_container("content", "bird_buddy")
-    query = "SELECT * FROM c ORDER BY c.created_at DESC where NOT IS_DEFINED(c.last_posted)"
+    query = "SELECT * FROM c WHERE NOT IS_DEFINED(c.last_posted) ORDER BY c.created_at DESC "
     items = list(container.query_items(query=query, enable_cross_partition_query=True))
 
     # return the first item in the list
@@ -82,7 +82,7 @@ def get_latest_birdbuddy():
 
 def get_latest_blog_post():
     container = _get_container("content", "blog_posts")
-    query = "SELECT TOP 1 * FROM c where NOT IS_DEFINED(c.last_posted) ORDER BY c.lastmod DESC"
+    query = "SELECT TOP 1 * FROM c WHERE NOT IS_DEFINED(c.last_posted) ORDER BY c.lastmod DESC"
     
     items = list(container.query_items(query=query, enable_cross_partition_query=True))
     if items:
