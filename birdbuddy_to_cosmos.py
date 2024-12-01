@@ -37,7 +37,7 @@ async def get_media_list(api_client, since):
                 feeder = sighting.get('feeder', {})
                 feeder_name = feeder.get('name')                
 
-                if feeder_name == "MeyerPerin Bird Buddy":
+                if feeder_name == "MeyerPerin Bird Buddy" or feeder_name == "MeyerPerin Birdbuddy Pro":
                     media_collection = sighting.medias
                     encounter_id = sighting.postcard_id
 
