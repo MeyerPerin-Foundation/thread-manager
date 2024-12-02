@@ -38,8 +38,9 @@ def post_to_threads(text, image = None, hashtags = None, url = None):
         # get response id
         response_json = response.json()
         creation_id = response_json["id"]
-        print("Waiting 10 seconds for Threads to process the post")
-        sleep(10)
+        wait = 3
+        print(f"Waiting {wait} seconds for Threads to process the post")
+        sleep(wait)
     else:
         return "Error", 400
     

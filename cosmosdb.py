@@ -74,9 +74,9 @@ def get_latest_birdbuddy():
     query = "SELECT * FROM c WHERE NOT IS_DEFINED(c.last_posted) ORDER BY c.created_at DESC "
     items = list(container.query_items(query=query, enable_cross_partition_query=True))
 
-    # return the first item in the list
     if items:
-        return items[0]
+        # return a random item from the first 10 items
+        return random.choice(items[:min(10, len(items))])
     else:
         return None
 

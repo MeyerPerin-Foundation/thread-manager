@@ -5,6 +5,7 @@ from openai import OpenAI
 import app_config
 import blog_reader
 import pytz
+import random
 
 def calculate_date_difference(target_date):
     try:
@@ -155,12 +156,26 @@ def generate_and_post_birdbuddy_picture(latest=True):
     feeder_name = birdbuddy_dict.get("feeder_name", None)
     location = birdbuddy_dict.get("location", "Fulshear,  Texas")
 
+    # Create a dictionary with voice options and weights and choose a random one. 
+    voices = [{"voice": "Sir David Attenborough","weight": 4},
+              {"voice": "a fashion critic","weight": 4},
+              {"voice": "a Shakespearean poet","weight": 3},
+              {"voice": "a gossip blogger","weight": 2},
+              {"voice": "a detective noir","weight": 4},
+              {"voice": "a stand-up comedian","weight": 3}]
+    
+
+    # Choose a random voice based on the weights
+    voice = random.choices(voices, weights=[voice["weight"] for voice in voices], k=1)[0]["voice"]
+
     # get the caption for the bird picture
-    caption = generate_caption_for_bird_picture(blob_url, species, created_at, location)
+    caption = generate_caption_for_bird_picture(blob_url, species, created_at, location, voice)
    
     # if the message is in quotes, remove the quotes
     if caption.startswith('"') and caption.endswith('"'):
         caption = caption[1:-1]
+
+    caption = f'In the voice of {voice}: "{caption}"\n\nCaptured with Birdbuddy.'
 
   # Create a dictionary with the post text and the social media platforms to post to
     post_data = {
@@ -178,7 +193,7 @@ def generate_and_post_birdbuddy_picture(latest=True):
 
     return social_media_poster.post(post_data)
 
-def generate_caption_for_bird_picture(image_url, species=None, created_at=None, location=None):
+def generate_caption_for_bird_picture(image_url, species=None, created_at=None, location=None, voice=None):
 
     client = OpenAI(api_key=app_config.OPENAI_API_KEY)
 
@@ -208,11 +223,15 @@ def generate_caption_for_bird_picture(image_url, species=None, created_at=None, 
         loc = f" in {location}"
     else:
         loc = ""
+
+    if not voice:
+        voice = "Sir David Attenborough"
     
     prompt = cosmosdb.get_prompt("bird_caption")
     prompt = prompt.replace("{sp}", sp)
     prompt = prompt.replace("{pt}", pt)
     prompt = prompt.replace("{loc}", loc)
+    prompt = prompt.replace("{voice}", voice)
 
     response = client.chat.completions.create(
         model="gpt-4o", 
