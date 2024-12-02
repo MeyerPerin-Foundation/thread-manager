@@ -1,5 +1,5 @@
 import requests
-from openai import OpenAI
+from openai import AzureOpenAI
 import app_config
 import cosmosdb
 from bs4 import BeautifulSoup
@@ -20,7 +20,9 @@ def get_mpf_blog_post_content(url: str):
 
 def blog_li_summary(url):
     title, content = get_mpf_blog_post_content(url)
-    openai_client = OpenAI(api_key=app_config.OPENAI_API_KEY)
+    openai_client = AzureOpenAI(azure_endpoint=app_config.AZURE_OPENAI_ENDPOINT, 
+                         api_key=app_config.AZURE_OPENAI_KEY, 
+                         api_version=app_config.AZURE_OPENAI_API_VERSION)
 
     prompt = cosmosdb.get_prompt("li_blog_promo")
     prompt = prompt.replace("{title}", title)

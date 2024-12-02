@@ -69,16 +69,22 @@ def get_random_birdbuddy():
     # get a random item from the list
     return random.choice(items)
 
-def get_latest_birdbuddy():
+def get_best_birdbuddy():
     container = _get_container("content", "bird_buddy")
     query = "SELECT * FROM c WHERE NOT IS_DEFINED(c.last_posted) ORDER BY c.created_at DESC "
     items = list(container.query_items(query=query, enable_cross_partition_query=True))
 
-    if items:
-        # return a random item from the first 10 items
-        return random.choice(items[:min(10, len(items))])
+    # items is a list of N items
+    # get up to 12 items from the list
+    N = len(items)
+    if N > 12:
+        items = items[:12]
+
+    # from the list of items, get four random items
+    if N > 4:
+        return random.sample(items, 4)
     else:
-        return None
+        return items
 
 def get_latest_blog_post():
     container = _get_container("content", "blog_posts")

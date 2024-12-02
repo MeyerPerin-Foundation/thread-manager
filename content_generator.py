@@ -1,11 +1,12 @@
 from datetime import datetime
 import cosmosdb
 import social_media_poster
-from openai import OpenAI
+from openai import AzureOpenAI
 import app_config
 import blog_reader
 import pytz
 import random
+import ai
 
 def calculate_date_difference(target_date):
     try:
@@ -139,17 +140,21 @@ def generate_and_post_too_far():
 
     return social_media_poster.post(post_data)
 
-def generate_and_post_birdbuddy_picture(latest=True):
+def generate_and_post_birdbuddy_picture():
 
-    if latest:
-        birdbuddy_dict = cosmosdb.get_latest_birdbuddy()
-    else:
-        birdbuddy_dict = cosmosdb.get_random_birdbuddy()
+    birdbuddy_list = cosmosdb.get_best_birdbuddy()
 
-    if not birdbuddy_dict:
+    if not birdbuddy_list:
         print("No Bird Buddy content found")
         return "No Bird Buddy content found", 204
+
+    # create a list with the image urls
+    image_url_list = [birdbuddy_dict["blob_url"] for birdbuddy_dict in birdbuddy_list]
+    best_image = ai.choose_best_bird_image(image_url_list)
     
+    # get the birdbuddy_dict for the best image
+    birdbuddy_dict = next((item for item in birdbuddy_list if item["blob_url"] == best_image), None)
+
     species = birdbuddy_dict.get("species", None)
     blob_url = birdbuddy_dict.get("blob_url", None)
     created_at = birdbuddy_dict.get("created_at", None)
@@ -195,7 +200,9 @@ def generate_and_post_birdbuddy_picture(latest=True):
 
 def generate_caption_for_bird_picture(image_url, species=None, created_at=None, location=None, voice=None):
 
-    client = OpenAI(api_key=app_config.OPENAI_API_KEY)
+    client = AzureOpenAI(azure_endpoint=app_config.AZURE_OPENAI_ENDPOINT, 
+                         api_key=app_config.AZURE_OPENAI_KEY, 
+                         api_version=app_config.AZURE_OPENAI_API_VERSION)
 
     if species:
         sp = f" of a {species} "
@@ -282,3 +289,6 @@ def generate_and_post_blog_promo():
     cosmosdb.update_blog_posted(blog_post_metadata)
 
     return "Accepted", 202 
+
+if __name__ == "__main__":
+    print(generate_and_post_birdbuddy_picture())

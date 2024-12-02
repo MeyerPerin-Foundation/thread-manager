@@ -1,6 +1,6 @@
 import datetime
 from birdbuddy.client import BirdBuddy
-from openai import OpenAI
+from openai import AzureOpenAI
 from io import BytesIO
 from azure.storage.blob import BlobServiceClient
 from cosmosdb import insert_bird, get_prompt
@@ -84,7 +84,9 @@ async def update_birds(since = None):
     
     print(f"Updating birds captured by Birdbuddy since {since}")
 
-    openai_client = OpenAI(api_key=app_config.OPENAI_API_KEY)
+    openai_client = AzureOpenAI(azure_endpoint=app_config.AZURE_OPENAI_ENDPOINT, 
+                         api_key=app_config.AZURE_OPENAI_KEY, 
+                         api_version=app_config.AZURE_OPENAI_API_VERSION)
     blob_service_client = BlobServiceClient.from_connection_string(app_config.STORAGE_CONNECTION_STRING)
     bb = BirdBuddy(app_config.BIRD_BUDDY_USER, app_config.BIRD_BUDDY_PASSWORD)
     media_list = await get_media_list(bb, since)
