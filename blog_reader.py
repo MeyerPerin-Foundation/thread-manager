@@ -3,6 +3,7 @@ from openai import AzureOpenAI
 import app_config
 import cosmosdb
 from bs4 import BeautifulSoup
+import ai
 
 def get_mpf_blog_post_content(url: str):
     # Fetch the content of the URL
@@ -20,45 +21,12 @@ def get_mpf_blog_post_content(url: str):
 
 def blog_li_summary(url):
     title, content = get_mpf_blog_post_content(url)
-    openai_client = AzureOpenAI(azure_endpoint=app_config.AZURE_OPENAI_ENDPOINT, 
-                         api_key=app_config.AZURE_OPENAI_KEY, 
-                         api_version=app_config.AZURE_OPENAI_API_VERSION)
-
-    prompt = cosmosdb.get_prompt("li_blog_promo")
-    prompt = prompt.replace("{title}", title)
-    prompt = prompt.replace("{content}", content)
-
-    response = openai_client.chat.completions.create(
-        model="gpt-4o", 
-        messages=[
-            {"role": "system", "content": "You are a social media manager for Wired, posting to LinkedIn"},
-            {"role": "user", "content": prompt}],
-        temperature=0.2,
-    )
-
-    return response.choices[0].message.content
+    return ai.generate_blog_post_summary(title, content, "LinkedIn")
 
 def blog_bt_summary(url):
     title, content = get_mpf_blog_post_content(url)
-    openai_client = AzureOpenAI(azure_endpoint=app_config.AZURE_OPENAI_ENDPOINT, 
-                         api_key=app_config.AZURE_OPENAI_KEY, 
-                         api_version=app_config.AZURE_OPENAI_API_VERSION)
-    prompt = cosmosdb.get_prompt("bt_blog_promo")
-    prompt = prompt.replace("{title}", title)
-    prompt = prompt.replace("{content}", content)
-
-    response = openai_client.chat.completions.create(
-        model="gpt-4o", 
-        messages=[
-            {"role": "system", "content": "You are a social media manager for Wired Magazine"},
-            {"role": "user", "content": prompt}],
-        temperature=0.8,
-    )
-
-    return response.choices[0].message.content
+    return ai.generate_blog_post_summary(title, content, "Bluesky")
 
 if __name__ == "__main__":
-    url =  "https://meyerperin.org/posts/2024-03-06-luddites.html"
-    print(blog_bt_summary(url))
-    print("\n\n***************\n\n")
+    url =  "https://meyerperin.org/posts/2024-12-02-blog-comments.html"
     print(blog_li_summary(url))

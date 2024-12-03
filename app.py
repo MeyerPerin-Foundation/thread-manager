@@ -77,6 +77,13 @@ def post_midterms():
     
      return content_generator.generate_and_post_midterms_countdown()
 
+@app.route("/post_severance", methods=["POST"])
+def post_severance():
+     if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+        return "Unauthorized", 401
+    
+     return content_generator.generate_and_post_severance_s2_countdown()
+
 @app.route("/post_ungovernable", methods=["POST"])
 def post_ungovernable():
     if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
