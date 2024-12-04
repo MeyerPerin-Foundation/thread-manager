@@ -6,6 +6,7 @@ from azure.storage.blob import BlobServiceClient
 from cosmosdb import insert_bird, get_prompt
 import requests
 import app_config
+import ai
 from pprint import pprint
 
 def upload_to_azure_storage(blob_service_client, container_name, blob_name, data):
@@ -60,23 +61,6 @@ async def get_media_list(api_client, since):
     
     return media_list
 
-def good_birb(openai_client, image_url):
-    prompt = get_prompt("good_birb")
-
-    response = openai_client.chat.completions.create(
-        model="gpt-4o", 
-        messages=[
-            {"role": "system", "content": "You are a photography critic and social media content creator"},
-            {"role": "user", "content": [
-                {"type": "text", "text": prompt},
-                {"type": "image_url", "image_url": {
-                    "url": image_url}}
-            ]}
-        ],
-    )
-
-    return 'yes' in response.choices[0].message.content.lower()
-
 async def update_birds(since = None):
 
     if since is None:
@@ -106,7 +90,7 @@ async def update_birds(since = None):
         # upload all videos, but check images with OpenAI first
         if item['media_type'] == 'MediaImage':
             # if it's not a good bird, just skip it
-            if not good_birb(openai_client, uri):
+            if not ai.good_birb(uri):
                 continue
         
         print(f"This is a good bird. Saving to Azure Storage and Cosmos DB.")
