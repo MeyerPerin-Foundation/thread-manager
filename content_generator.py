@@ -184,13 +184,13 @@ def generate_and_post_birdbuddy_picture():
     location = birdbuddy_dict.get("location", "Fulshear,  Texas")
 
     # Create a dictionary with voice options and weights and choose a random one. 
-    voices = [{"voice": "Sir David Attenborough","weight": 4},
-              {"voice": "a fashion critic","weight": 4},
-              {"voice": "a Shakespearean poet","weight": 4},
-              {"voice": "a gossip blogger","weight": 4},
+    voices = [{"voice": "Sir David Attenborough","weight": 3},
+              {"voice": "a fashion critic","weight": 2},
+              {"voice": "a Shakespearean poet","weight": 2},
+              {"voice": "a gossip blogger","weight": 2},
               {"voice": "a detective noir","weight": 4},
-              {"voice": "a stand-up comedian","weight": 4},
-              {"voice": "Steve Irwin","weight": 4}]
+              {"voice": "a stand-up comedian","weight": 2},
+              {"voice": "Steve Irwin","weight": 3}]
     
 
     # Choose a random voice based on the weights
@@ -316,4 +316,5 @@ def generate_and_post_blog_promo():
 
 if __name__ == "__main__":
     # print(generate_and_post_birdbuddy_picture())
-    print(generate_and_post_severance_s2_countdown())
+    # print(generate_and_post_severance_s2_countdown())
+    print(generate_and_post_birdbuddy_picture())
