@@ -118,7 +118,7 @@ def generate_caption_for_bird_picture(image_url, species=None, created_at=None, 
 
     if created_at:
         # Convert the created_at iso formatted string to a datetime object
-        utc_time = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+        utc_time = datetime.datetime.fromisoformat(created_at.replace("Z", "+00:00"))
 
                 # Define the Central Time timezone
         central_tz = pytz.timezone("US/Central")
