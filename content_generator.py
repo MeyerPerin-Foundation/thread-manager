@@ -38,9 +38,11 @@ def _generate_days_until_dict(event_name, event_date, threads=False, instagram=F
         print(f"Event {event_name} happened more than {abs(max)} days ago. No content will be generated.")
         return None   
 
-    if not(difference % 365 == 0 or difference % 100 == 0 or difference <= 90):
-        return None
-    
+    # If the difference is more than 90 days, it should be a multiple of 100 or 365
+    if difference > 90:
+        if not((difference % 100 == 0) and (difference % 365 == 0)):
+            return None
+
     text = "" 
 
     if plural:
