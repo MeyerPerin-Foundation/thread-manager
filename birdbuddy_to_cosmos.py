@@ -1,13 +1,11 @@
 import datetime
 from birdbuddy.client import BirdBuddy
-from openai import AzureOpenAI
 from io import BytesIO
 from azure.storage.blob import BlobServiceClient
-from cosmosdb import insert_bird, get_prompt
+import cosmosdb 
 import requests
 import app_config
 import ai
-from pprint import pprint
 
 def upload_to_azure_storage(blob_service_client, container_name, blob_name, data):
     blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
@@ -68,9 +66,6 @@ async def update_birds(since = None):
     
     print(f"Updating birds captured by Birdbuddy since {since}")
 
-    openai_client = AzureOpenAI(azure_endpoint=app_config.AZURE_OPENAI_ENDPOINT, 
-                         api_key=app_config.AZURE_OPENAI_KEY, 
-                         api_version=app_config.AZURE_OPENAI_API_VERSION)
     blob_service_client = BlobServiceClient.from_connection_string(app_config.STORAGE_CONNECTION_STRING)
     bb = BirdBuddy(app_config.BIRD_BUDDY_USER, app_config.BIRD_BUDDY_PASSWORD)
     media_list = await get_media_list(bb, since)
@@ -93,7 +88,7 @@ async def update_birds(since = None):
             if not ai.good_birb(uri):
                 continue
         
-        print(f"This is a good bird. Saving to Azure Storage and Cosmos DB.")
+        print("This is a good bird. Saving to Azure Storage and Cosmos DB.")
         
         # otherwise,  let's save it
         response = requests.get(uri)
@@ -110,7 +105,7 @@ async def update_birds(since = None):
 
         # Save to Cosmos DB
         if blob_url:
-            insert_bird(media_id=item['id'], created_at = item['date_created'], postcard_id = item['encounter_id'], species = item['species'], blob_url=blob_url)
+            cosmosdb.insert_bird(media_id=item['id'], created_at = item['date_created'], postcard_id = item['encounter_id'], species = item['species'], blob_url=blob_url)
 
 
 if __name__ == "__main__":

@@ -177,17 +177,15 @@ def generate_and_post_birdbuddy_picture():
     species = birdbuddy_dict.get("species", None)
     blob_url = birdbuddy_dict.get("blob_url", None)
     created_at = birdbuddy_dict.get("created_at", None)
-    feeder_name = birdbuddy_dict.get("feeder_name", None)
+    # feeder_name = birdbuddy_dict.get("feeder_name", None)
     location = birdbuddy_dict.get("location", "Fulshear,  Texas")
 
     # Create a dictionary with voice options and weights and choose a random one. 
     voices = [{"voice": "Sir David Attenborough","weight": 3},
-              {"voice": "a fashion critic","weight": 2},
-              {"voice": "a Shakespearean poet","weight": 2},
-              {"voice": "a gossip blogger","weight": 2},
-              {"voice": "a detective noir","weight": 4},
-              {"voice": "a stand-up comedian","weight": 2},
-              {"voice": "Steve Irwin","weight": 3}]
+              {"voice": "a dinosaur enthusiast","weight": 3},
+              {"voice": "a detective noir","weight": 5},
+              {"voice": "the fashion police","weight": 3},
+              {"voice": "Steve Irwin","weight": 2}]
     
     # Choose a random voice based on the weights
     voice = random.choices(voices, weights=[voice["weight"] for voice in voices], k=1)[0]["voice"]

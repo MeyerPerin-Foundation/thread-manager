@@ -2,7 +2,6 @@ from azure.cosmos import CosmosClient
 import app_config
 import random
 import datetime
-import uuid
 
 def _get_container(database_name, container_name):
     client = CosmosClient(app_config.COSMOS_ENDPOINT, app_config.COSMOS_KEY)
@@ -122,14 +121,28 @@ def update_blog_posted(blog_post_dict):
 
 def insert_bird(media_id, created_at, postcard_id, species, blob_url):
     container = _get_container("content", "bird_buddy")
-    item = {
-        "id": media_id,
-        "created_at": created_at,
-        "postcard_id": postcard_id,
-        "species": species,
-        "blob_url": blob_url
-    }
+
+    # try to get the item from the database
+    query = f"SELECT * FROM c WHERE c.id = '{media_id}'"
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+
+    if items:
+        item = items[0]
+        item["created_at"] = created_at
+        item["postcard_id"] = postcard_id
+        item["species"] = species
+        item["blob_url"] = blob_url
+    else:
+        item = {
+            "id": media_id,
+            "created_at": created_at,
+            "postcard_id": postcard_id,
+            "species": species,
+            "blob_url": blob_url
+        }
+
     container.upsert_item(item)
+
 
 def count_birds():
     container = _get_container("content", "bird_buddy")
