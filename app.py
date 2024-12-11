@@ -10,9 +10,14 @@ import cosmosdb
 import threads_data
 import bluesky_data
 import sitemaps
-from azure.monitor.opentelemetry import configure_azure_monitor
+import pytz
+from azure.monitor.opentelemetry import configure_azure_monitor  # noqa: F401
 from dotenv import load_dotenv
-import os
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logging.getLogger("azure").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING) 
 
 load_dotenv()
 
@@ -25,7 +30,8 @@ Session(app)
 # generate http scheme when this sample is running on localhost,
 # and to generate https scheme when it is deployed behind reversed proxy.
 # See also https://flask.palletsprojects.com/en/2.2.x/deploying/proxy_fix/
-from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.middleware.proxy_fix import ProxyFix  # noqa: E402
+logging.getLogger("werkzeug").setLevel(logging.WARNING)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 auth = identity.web.Auth(
@@ -35,12 +41,20 @@ auth = identity.web.Auth(
     client_credential=app.config["CLIENT_SECRET"],
 )
 
+
 @app.route("/login")
 def login():
-    return render_template("login.html", version=identity.__version__, **auth.log_in(
-        scopes=app_config.SCOPE, # Have user consent to scopes during log-in
-        redirect_uri=url_for("auth_response", _external=True), # Optional. If present, this absolute URL must match your app's redirect_uri registered in Azure Portal
-        ))
+    return render_template(
+        "login.html",
+        version=identity.__version__,
+        **auth.log_in(
+            scopes=app_config.SCOPE,  # Have user consent to scopes during log-in
+            redirect_uri=url_for(
+                "auth_response", _external=True
+            ),  # Optional. If present, this absolute URL must match your app's redirect_uri registered in Azure Portal
+        ),
+    )
+
 
 @app.route(app_config.REDIRECT_PATH)
 def auth_response():
@@ -49,88 +63,101 @@ def auth_response():
         return render_template("auth_error.html", result=result)
     return redirect(url_for("index"))
 
+
 @app.route("/logout")
 def logout():
     return redirect(auth.log_out(url_for("index", _external=True)))
+
 
 @app.route("/")
 def index():
     if not (app.config["CLIENT_ID"] and app.config["CLIENT_SECRET"]):
         # This check is not strictly necessary.
         # You can remove this check from your production code.
-        return render_template('config_error.html')
+        return render_template("config_error.html")
     if not auth.get_user():
         return redirect(url_for("login"))
-    return render_template('index.html', user=auth.get_user(), version=identity.__version__)
+    return render_template(
+        "index.html", user=auth.get_user(), version=identity.__version__
+    )
+
 
 @app.route("/post_motd", methods=["POST"])
 def post_motd():
     if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
         return "Unauthorized", 401
-    
+
     return content_generator.generate_and_post_motd()
+
 
 @app.route("/post_midterms", methods=["POST"])
 def post_midterms():
-     if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
         return "Unauthorized", 401
-    
-     return content_generator.generate_and_post_midterms_countdown()
+
+    return content_generator.generate_and_post_midterms_countdown()
+
 
 @app.route("/post_severance", methods=["POST"])
 def post_severance():
-     if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
         return "Unauthorized", 401
-    
-     return content_generator.generate_and_post_severance_s2_countdown()
+
+    return content_generator.generate_and_post_severance_s2_countdown()
+
 
 @app.route("/post_ungovernable", methods=["POST"])
 def post_ungovernable():
     if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
         return "Unauthorized", 401
-    
+
     return content_generator.generate_and_post_ungovernable()
+
 
 @app.route("/post_too_far", methods=["POST"])
 def post_too_far():
     if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
         return "Unauthorized", 401
-    
+
     return content_generator.generate_and_post_too_far()
+
 
 @app.route("/post_bird_buddy", methods=["POST"])
 def post_bird_buddy():
     if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
         return "Unauthorized", 401
-    
+
     return content_generator.generate_and_post_birdbuddy_picture()
+
 
 @app.route("/update_birds", methods=["POST"])
 async def update_birds():
     if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
         return "Unauthorized", 401
-    
+
     now = datetime.datetime.now(datetime.UTC).isoformat()
     last_update = cosmosdb.get_latest_bird_update()
-  
+
     await birdbuddy_to_cosmos.update_birds(since=last_update)
     cosmosdb.set_latest_bird_update(now)
     return "OK", 200
+
 
 @app.route("/dashboard", methods=["GET"])
 def dashboard():
     if not auth.get_user():
         return redirect(url_for("login"))
-    
+
     bird_count = cosmosdb.latest_dashboard_data()
 
-    return render_template('dashboard.html', data_payload=bird_count)
+    return render_template("dashboard.html", data_payload=bird_count)
+
 
 @app.route("/take_data_snapshot", methods=["POST"])
 def data_snapshot():
     if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
         return "Unauthorized", 401
-    
+
     payload = {}
 
     # Combine the data into a single payload
@@ -144,20 +171,57 @@ def data_snapshot():
 
     return "OK", 200
 
+
 @app.route("/update_sitemap", methods=["POST"])
 def update_sitemap():
     if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
         return "Unauthorized", 401
-    
+
     # sitemap_url = request.json["sitemap_url"]
     sitemap_url = "https://meyerperin.org/sitemap.xml"
     sitemaps.process_sitemap(sitemap_url)
 
     return "OK", 200
 
+
 @app.route("/post_blog_promo", methods=["POST"])
 def post_blog_promo():
     if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
         return "Unauthorized", 401
-    
+
     return content_generator.generate_and_post_blog_promo()
+
+
+@app.route("/post_bsky_reminder", methods=["POST"])
+def post_bsky_reminder():
+    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+        return "Unauthorized", 401
+
+    return content_generator.generate_and_post_bsky_reminder()
+
+
+@app.route("/update_dogtopia_visits", methods=["POST"])
+def update_dogtopia_visits():
+    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+        return "Unauthorized", 401
+
+    # get the data
+    data = request.json
+
+    if "date" not in data:
+        # get the time in UTC and convert it to the CST timezone using the pytz library
+        now = datetime.datetime.now(datetime.UTC)
+        cst = pytz.timezone("America/Chicago")
+        cst_now = now.astimezone(cst)
+        data["date"] = cst_now.strftime("%Y-%m-%d")
+    
+    visits = data["visits"]
+    cosmosdb.update_dogtopia_visits(data["date"], visits)
+
+    return "OK", 200
+
+
+
+
+
+

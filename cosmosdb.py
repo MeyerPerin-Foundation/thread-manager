@@ -308,3 +308,18 @@ def get_bird_description_voice_options():
 def get_latest_bird_update():
     return get_setting("latest_bird_update")
 
+
+def update_dogtopia_visits(date: str, visits: int):
+    container = _get_container("content", "dogtopia_visits")
+
+    if visits >= 0:
+        type = "deposit"
+    else:
+        type = "withdrawal"
+
+    # build the id record
+    id = f"{date}-{type}"
+
+    item = {"id": id, "date": date, "type": type, "visits": visits}
+    container.upsert_item(item)
+
