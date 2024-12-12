@@ -288,7 +288,11 @@ def set_latest_bird_update(latest_update_isoformat=None):
         latest_update_isoformat = datetime.datetime.now(datetime.UTC).isoformat()
 
     container = _get_container("control", "settings")
-    item = {"id": "v1", "latest_bird_update": latest_update_isoformat}
+    item = get_latest_bird_update()
+    if item:
+        item["latest_bird_update"] = latest_update_isoformat
+    else:
+        item = {"id": "v1", "latest_bird_update": latest_update_isoformat}
     container.upsert_item(item)
 
 def get_setting(setting_name):
