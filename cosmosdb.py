@@ -301,8 +301,10 @@ def set_latest_bird_update(latest_update_isoformat=None):
         latest_update_isoformat = datetime.datetime.now(datetime.UTC).isoformat()
 
     container = _get_container("control", "settings")
-    item = get_latest_bird_update()
-    if item:
+    query = "SELECT * FROM c WHERE c.id = 'v1'"
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+    if items:
+        item = items[0]
         item["latest_bird_update"] = latest_update_isoformat
     else:
         item = {"id": "v1", "latest_bird_update": latest_update_isoformat}
