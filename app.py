@@ -113,7 +113,9 @@ def index():
 
 @app.route("/post_motd", methods=["POST"])
 def post_motd():
-    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
         return "Unauthorized", 401
 
     return content_generator.generate_and_post_motd()
@@ -161,7 +163,9 @@ def post_too_far():
 
 @app.route("/post_bird_buddy", methods=["POST"])
 def post_bird_buddy():
-    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
         return "Unauthorized", 401
 
     return content_generator.generate_and_post_birdbuddy_picture()
@@ -218,7 +222,9 @@ def data_snapshot():
 
 @app.route("/update_sitemap", methods=["POST"])
 def update_sitemap():
-    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
         return "Unauthorized", 401
 
     # sitemap_url = request.json["sitemap_url"]
@@ -230,7 +236,9 @@ def update_sitemap():
 
 @app.route("/post_blog_promo", methods=["POST"])
 def post_blog_promo():
-    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
         return "Unauthorized", 401
 
     return content_generator.generate_and_post_blog_promo()
@@ -238,7 +246,9 @@ def post_blog_promo():
 
 @app.route("/post_bsky_reminder", methods=["POST"])
 def post_bsky_reminder():
-    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
         return "Unauthorized", 401
 
     return content_generator.generate_and_post_bsky_reminder()
@@ -246,7 +256,9 @@ def post_bsky_reminder():
 
 @app.route("/update_dogtopia_visits", methods=["POST"])
 def update_dogtopia_visits():
-    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
         return "Unauthorized", 401
 
     # get the data
@@ -259,7 +271,11 @@ def update_dogtopia_visits():
         cst_now = now.astimezone(cst)
         data["date"] = cst_now.strftime("%Y-%m-%d")
 
-    visits = data["visits"]
+    if "visits" not in data:
+        visits = -1
+    else:
+        visits = data["visits"]
+    
     cosmosdb.update_dogtopia_visits(data["date"], visits)
 
     return "OK", 200
