@@ -9,6 +9,7 @@ import logging
 logger = logging.getLogger("ContGen")
 logger.setLevel(logging.INFO)
 
+
 def _calculate_date_difference(target_date):
     try:
         # Convert the fixed date string to a datetime object
@@ -244,13 +245,14 @@ def generate_and_post_birdbuddy_picture():
         "url": "https://t.ly/birdb",
         "url_title": "Captured with Birdbuddy",
     }
-        
+
     message, code = social_media_poster.post(post_data)
     logger.info(f"Threads post result was {code}: {message}")
 
-    # cosmosdb.update_birdbuddy_posted(birdbuddy_dict)
+    cosmosdb.update_birdbuddy_posted(birdbuddy_dict)
 
     return message, code
+
 
 def generate_and_post_blog_promo():
     blog_post_metadata = cosmosdb.get_latest_blog_post()
