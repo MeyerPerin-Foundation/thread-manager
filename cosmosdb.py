@@ -2,6 +2,7 @@ from azure.cosmos import CosmosClient
 import app_config
 import random
 import datetime
+import uuid
 
 
 def _get_container(database_name, container_name):
@@ -26,8 +27,8 @@ def get_motd():
         return None
 
 
-def check_user_in_db(user):
-    container = _get_container("users", "users")
+def check_user_in_db(user: dict) -> bool:
+    container = _get_container("control", "users")
 
     # Get the sub from the user
     sub = user.get("sub")
@@ -283,6 +284,18 @@ def insert_blog_post(url, lastmod):
     container.upsert_item(item)
 
 
+def insert_test_record(data: dict):
+    container = _get_container("control", "tests")
+
+    if "id" not in data:
+        data["id"] = uuid.uuid4().hex
+
+    if "created_at" not in data:
+        data["created_at_utc"] = datetime.datetime.now().isoformat()
+
+    container.upsert_item(data)
+
+
 def set_latest_bird_update(latest_update_isoformat=None):
     if not latest_update_isoformat:
         latest_update_isoformat = datetime.datetime.now(datetime.UTC).isoformat()
@@ -295,6 +308,7 @@ def set_latest_bird_update(latest_update_isoformat=None):
         item = {"id": "v1", "latest_bird_update": latest_update_isoformat}
     container.upsert_item(item)
 
+
 def get_setting(setting_name):
     container = _get_container("control", "settings")
     query = "SELECT * FROM c WHERE c.id = 'v1'"
@@ -304,6 +318,7 @@ def get_setting(setting_name):
         return items[0].get(setting_name)
     else:
         return None
+
 
 def get_bird_description_voice_options():
     return get_setting("bird_description_voice_options")
@@ -326,4 +341,3 @@ def update_dogtopia_visits(date: str, visits: int):
 
     item = {"id": id, "date": date, "type": type, "visits": visits}
     container.upsert_item(item)
-

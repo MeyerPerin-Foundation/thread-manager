@@ -1,9 +1,9 @@
 import requests
-from openai import AzureOpenAI
-import app_config
-import cosmosdb
 from bs4 import BeautifulSoup
 import ai
+
+import logging
+logger = logging.getLogger("tm-blog-reader")
 
 def get_mpf_blog_post_content(url: str):
     # Fetch the content of the URL
@@ -21,12 +21,16 @@ def get_mpf_blog_post_content(url: str):
 
 def blog_li_summary(url):
     title, content = get_mpf_blog_post_content(url)
-    return ai.generate_blog_post_summary(title, content, "LinkedIn")
+    generated_post = ai.generate_blog_post_summary(title, content, "LinkedIn")
+    logger.info(f"Generated post for LinkedIn:\n {generated_post}")
+    return generated_post
 
 def blog_bt_summary(url):
     title, content = get_mpf_blog_post_content(url)
-    return ai.generate_blog_post_summary(title, content, "Bluesky")
+    generated_post = ai.generate_blog_post_summary(title, content, "Bluesky")
+    logger.info(f"Generated post for Bluesky:\n {generated_post}")
+    return generated_post
 
 if __name__ == "__main__":
     url =  "https://meyerperin.org/posts/2024-12-02-blog-comments.html"
-    print(blog_li_summary(url))
+    logger.info(blog_li_summary(url))

@@ -17,7 +17,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("azure").setLevel(logging.WARNING)
-logging.getLogger("httpx").setLevel(logging.WARNING) 
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 load_dotenv()
 
@@ -31,6 +31,7 @@ Session(app)
 # and to generate https scheme when it is deployed behind reversed proxy.
 # See also https://flask.palletsprojects.com/en/2.2.x/deploying/proxy_fix/
 from werkzeug.middleware.proxy_fix import ProxyFix  # noqa: E402
+
 logging.getLogger("werkzeug").setLevel(logging.WARNING)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
@@ -40,6 +41,31 @@ auth = identity.web.Auth(
     client_id=app.config["CLIENT_ID"],
     client_credential=app.config["CLIENT_SECRET"],
 )
+
+
+def check_auth() -> bool:
+    return authorization.checkUserIsAuthorized(
+        auth.get_user()
+    ) or authorization.checkApiAuthorized(request.headers.get("Authorization"))
+
+
+@app.route("/lucas_test", methods=["POST"])
+def lucas_test():
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
+        return "Unauthorized", 401
+
+    data = {}
+    if request.content_type == "application/x-www-form-urlencoded":
+        data["content_type"] = "form"
+        data["form"] = request.form
+    else:
+        data["content_type"] = "json"
+        data["json"] = request.json
+
+    cosmosdb.insert_test_record(data)
+    return "OK", 200
 
 
 @app.route("/login")
@@ -78,7 +104,10 @@ def index():
     if not auth.get_user():
         return redirect(url_for("login"))
     return render_template(
-        "index.html", user=auth.get_user(), version=identity.__version__
+        "index.html",
+        user=auth.get_user(),
+        api_token=app_config.API_TOKEN,
+        version=identity.__version__,
     )
 
 
@@ -92,7 +121,9 @@ def post_motd():
 
 @app.route("/post_midterms", methods=["POST"])
 def post_midterms():
-    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
         return "Unauthorized", 401
 
     return content_generator.generate_and_post_midterms_countdown()
@@ -100,7 +131,9 @@ def post_midterms():
 
 @app.route("/post_severance", methods=["POST"])
 def post_severance():
-    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
         return "Unauthorized", 401
 
     return content_generator.generate_and_post_severance_s2_countdown()
@@ -108,7 +141,9 @@ def post_severance():
 
 @app.route("/post_ungovernable", methods=["POST"])
 def post_ungovernable():
-    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
         return "Unauthorized", 401
 
     return content_generator.generate_and_post_ungovernable()
@@ -116,7 +151,9 @@ def post_ungovernable():
 
 @app.route("/post_too_far", methods=["POST"])
 def post_too_far():
-    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
         return "Unauthorized", 401
 
     return content_generator.generate_and_post_too_far()
@@ -132,7 +169,9 @@ def post_bird_buddy():
 
 @app.route("/update_birds", methods=["POST"])
 async def update_birds():
-    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
         return "Unauthorized", 401
 
     now = datetime.datetime.now(datetime.UTC).isoformat()
@@ -145,18 +184,24 @@ async def update_birds():
 
 @app.route("/dashboard", methods=["GET"])
 def dashboard():
-    if not auth.get_user():
-        return redirect(url_for("login"))
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
+        return "Unauthorized", 401
 
-    bird_count = cosmosdb.latest_dashboard_data()
+    data_snapshot()
+    dash_data = cosmosdb.latest_dashboard_data()
 
-    return render_template("dashboard.html", data_payload=bird_count)
+    return render_template("dashboard.html", data_payload=dash_data)
 
 
 @app.route("/take_data_snapshot", methods=["POST"])
 def data_snapshot():
-    if not authorization.checkApiAuthorized(request.headers.get("Authorization")):
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
         return "Unauthorized", 401
+
 
     payload = {}
 
@@ -170,7 +215,6 @@ def data_snapshot():
     cosmosdb.update_dashboard(payload)
 
     return "OK", 200
-
 
 @app.route("/update_sitemap", methods=["POST"])
 def update_sitemap():
@@ -214,14 +258,8 @@ def update_dogtopia_visits():
         cst = pytz.timezone("America/Chicago")
         cst_now = now.astimezone(cst)
         data["date"] = cst_now.strftime("%Y-%m-%d")
-    
+
     visits = data["visits"]
     cosmosdb.update_dogtopia_visits(data["date"], visits)
 
     return "OK", 200
-
-
-
-
-
-

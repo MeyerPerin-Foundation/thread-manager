@@ -9,7 +9,7 @@ logger = logging.getLogger("SMPoster")
 logger.setLevel(logging.INFO)
 
 def post_to_instagram(text, image=None, hashtags=None):
-    print("Right now, I don't know how to post to Instagram")
+    logger.warning("Right now, I don't know how to post to Instagram")
     return "OK", 200
 
 
@@ -48,7 +48,7 @@ def post_to_threads(text, image=None, hashtags=None, url=None, url_title=None):
         response_json = response.json()
         creation_id = response_json["id"]
         wait = 3
-        print(f"Waiting {wait} seconds for Threads to process the post")
+        logger.info(f"Waiting {wait} seconds for Threads to process the post")
         sleep(wait)
     else:
         return "Error", 400
@@ -63,11 +63,12 @@ def post_to_threads(text, image=None, hashtags=None, url=None, url_title=None):
     )
 
     response = requests.post(publish_url, json=publish_payload)
+    response_json = response.json()
+    media_id = response_json["id"]
+    logger.info(f"Published to Threads with media_id: {media_id}")
 
     if image is not None and url is not None:
-
-        response_json = response.json()
-        media_id = response_json["id"]
+        logger.info("User has provided both an image and a URL")
         logger.info(f"Posting URL {url} as a reply to {media_id}")
 
         # Post the URL as a reply
@@ -78,13 +79,13 @@ def post_to_threads(text, image=None, hashtags=None, url=None, url_title=None):
             "media_type": "TEXT",
         }
 
-        response = requests.post(post_url, json=reply_payload)
-        logging.info(f"Threads response to reply: {response.text}")  
+        comment_response = requests.post(post_url, json=reply_payload)
+        logging.info(f"Threads response to reply: {comment_response.text}")  
 
         if response.status_code == 200:
             # get response id
-            response_json = response.json()
-            creation_id = response_json["id"]
+            comment_response_json = comment_response.json()
+            comment_creation_id = comment_response_json["id"]
             wait = 3
             logger.info(f"Waiting {wait} seconds for Threads to process the post")
             sleep(wait)
@@ -93,10 +94,13 @@ def post_to_threads(text, image=None, hashtags=None, url=None, url_title=None):
 
         publish_payload = {
             "access_token": app_config.THREADS_TEST_TOKEN,
-            "creation_id": creation_id,
+            "creation_id": comment_creation_id,
         }
     
         response = requests.post(publish_url, json=publish_payload)
+        response_json = response.json()
+        media_id = response_json["id"]
+        logger.info(f"Published comment to Threads with media_id: {media_id}")        
 
     if response.status_code == 200:
         return "OK", 200
@@ -189,7 +193,7 @@ def post_to_linkedin(text, image=None, hashtags=None, url=None):
                 action += "\nDetails: " + response.text
                 return action, 400
     except Exception as e:
-        print(f"Error: {e}")
+        logger.error(f"Error: {e}")
         return f"Error: {e}", 400
 
     return "OK", 200

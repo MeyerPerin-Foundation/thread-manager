@@ -1,9 +1,11 @@
 import xml.etree.ElementTree as ET
 import requests
-import os
 from azure.storage.blob import BlobServiceClient
 import app_config
 import cosmosdb
+import logging
+
+logger = logging.getLogger("tm-sitemaps")
 
 def read_and_parse_xml(root):
     # Extract all URLs (loc elements) from the XML
@@ -92,7 +94,7 @@ def upload_new_posts_to_cosmosdb(sitemap_url):
     # Add the lastmod values to the new URLs
     new_urls_with_lastmod = add_lastmod_to_sitemap(new_urls, new_sitemap)
 
-    print(f"Found {len(new_urls_with_lastmod)} new blog posts")
+    logger.info(f"Found {len(new_urls_with_lastmod)} new blog posts")
 
     for url, lastmod in new_urls_with_lastmod.items():
         cosmosdb.insert_blog_post(url, lastmod)
@@ -100,7 +102,7 @@ def upload_new_posts_to_cosmosdb(sitemap_url):
 def process_sitemap(sitemap_uri):
     upload_new_posts_to_cosmosdb(sitemap_uri)
     blob_url = save_sitemap_file_to_azure_storage(sitemap_uri)
-    print(f"Saved sitemap to {blob_url}") 
+    logger.info(f"Saved sitemap to {blob_url}") 
 
 if __name__ == "__main__":
     sitemap_uri = "https://meyerperin.org/sitemap.xml"

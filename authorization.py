@@ -1,10 +1,32 @@
 import app_config
 import cosmosdb
+import logging
 
-def checkUserIsAuthorized(user) -> bool:
-    return cosmosdb.check_user_in_db(user)
+logger = logging.getLogger("tm-auth")
+
+def checkUserIsAuthorized(user: dict) -> bool:
+    if user is None:
+        return False
+    else:
+        logger.info(f"User dict:\n{user}")
+    
+    auth  = cosmosdb.check_user_in_db(user)
+    username = user.get("preferred_username")
+    usersub = user.get("sub")
+
+    if auth:
+        logger.info(f"Authorized user {username} with sub {usersub} ")
+        return True
+    else:
+        logger.warning(f"NOT AUTHORIZED user {username} with sub {usersub}")
+        return False
+
 
 def checkApiAuthorized(token) -> bool:
+
+    if token is None:
+        return False
+    
     # Parse out the bearer
     token = token.split(" ")[1]
 

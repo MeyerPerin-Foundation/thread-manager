@@ -3,15 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <title>Thread Manager</title>
+    <script>
+        // Improved function for setting up form submissions
+        function setupFormSubmission(formId, token) {
+            const form = document.getElementById(formId);
+            if (!form) return; // Ensure the form exists
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                // Serialize form data
+                const formData = new URLSearchParams(new FormData(form)).toString();
+
+                // Perform the POST request
+                fetch(form.action, {
+                    method: form.method.toUpperCase(),
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData,
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json(); // Expecting JSON from server
+                        } else {
+                            throw new Error('Request failed with status ' + response.status);
+                        }
+                    })
+                    .then(data => {
+                        console.log('Success:', data);
+                        if (data.redirect) {
+                            window.location.href = data.redirect; // Use server-provided redirect
+                        } else {
+                            alert('Action completed successfully!');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred. Please try again.');
+                    });
+            });
+        }
+
+        // Initialize form submission
+        document.addEventListener('DOMContentLoaded', function () {
+            setupFormSubmission('postBirdForm', apiToken);
+            setupFormSubmission('postTooFarForm', apiToken);
+            setupFormSubmission('postTestForm', apiToken);
+
+        });
+    </script>
 </head>
+
 <body>
     <h1>Thread Manager</h1>
     <h2>Welcome {{ user.get("name") }}!</h2>
     <p>Your subscription ID is {{ user.get("sub") }}.</p>
+
+    <h3>Actions</h3>
+
+    <form id="postBirdForm" action="/post_bird_buddy" method="post">
+        <button type="submit">Post Bird</button>
+    </form>
+    <form id="postTooFarForm" action="/post_too_far" method="post">
+        <button type="submit">Post Too Far</button>
+    </form>
+    <form id="postTestForm" action="/lucas_test" method="post">
+        <button type="submit">Insert Test Record</button>
+    </form>
+    <form id="postSeverance" action="/post_severance" method="post">
+        <button type="submit">Post Severance Countdown</button>
+    </form>
+
     <ul>
-    <li><a href="/dashboard">Dashboard</a></li>
-    <li><a href="/logout">Logout</a></li>
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/logout">Logout</a></li>
     </ul>
 </body>
 </html>
-

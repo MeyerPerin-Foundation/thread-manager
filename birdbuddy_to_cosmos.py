@@ -6,6 +6,9 @@ import cosmosdb
 import requests
 import app_config
 import ai
+import logging
+
+logger = logging.getLogger("tm-birdbuddy-loader")
 
 def upload_to_azure_storage(blob_service_client, container_name, blob_name, data):
     blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
@@ -55,6 +58,7 @@ async def get_media_list(api_client, since):
                                 'image_url': item['contentUrl']} for item in media_collection if item['__typename'] == 'MediaImage' or item['__typename'] == 'MediaVideo']
                 media_list.extend(media_items)
             except Exception as e:
+                logger.error(f"Error processing postcard {node_id}: {e}")
                 errors = errors + 1
     
     return media_list
@@ -64,7 +68,7 @@ async def update_birds(since = None):
     if since is None:
         since = datetime.datetime.now() - datetime.timedelta(hours=25)
     
-    print(f"Updating birds captured by Birdbuddy since {since}")
+    logger.info(f"Updating birds captured by Birdbuddy since {since}")
 
     blob_service_client = BlobServiceClient.from_connection_string(app_config.STORAGE_CONNECTION_STRING)
     bb = BirdBuddy(app_config.BIRD_BUDDY_USER, app_config.BIRD_BUDDY_PASSWORD)
@@ -74,12 +78,12 @@ async def update_birds(since = None):
     N = len(media_list)
     i = 0
 
-    print(f"Processing {N} bird items")
+    logger.info(f"Processing {N} bird items")
 
     # insert each item from media_list into cosmosdb
     for item in media_list:
         i += 1
-        print(f"Processing item {i} of {N}")
+        logger.info(f"Processing item {i} of {N}")
         uri = item['image_url']
 
         # upload all videos, but check images with OpenAI first
@@ -88,7 +92,7 @@ async def update_birds(since = None):
             if not ai.good_birb(uri):
                 continue
         
-        print("This is a good bird. Saving to Azure Storage and Cosmos DB.")
+        logger.info("This is a good bird. Saving to Azure Storage and Cosmos DB.")
         
         # otherwise,  let's save it
         response = requests.get(uri)

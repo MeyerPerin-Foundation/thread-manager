@@ -256,7 +256,7 @@ def generate_and_post_blog_promo():
     blog_post_metadata = cosmosdb.get_latest_blog_post()
 
     if not blog_post_metadata:
-        print("No too far content found")
+        logger.info("No too far content found")
         return "No too far content found", 204
 
     # Different promo for LinkedIn and Threads/Bluesky
