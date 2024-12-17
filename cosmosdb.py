@@ -287,8 +287,6 @@ def insert_blog_post(url, lastmod):
 def insert_test_record(data: dict):
     container = _get_container("control", "tests")
 
-    raise ValueError("This is a test error")
-
     if "id" not in data:
         data["id"] = uuid.uuid4().hex
 
