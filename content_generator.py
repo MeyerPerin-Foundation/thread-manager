@@ -243,7 +243,7 @@ def generate_and_post_birdbuddy_picture():
         "bluesky": True,
         "linkedin": False,
         "url": "https://t.ly/birdb",
-        "url_title": "Captured with Birdbuddy",
+        "url_title": "📷: Birdbuddy",
     }
 
     message, code = social_media_poster.post(post_data)

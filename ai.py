@@ -181,7 +181,7 @@ def generate_caption_for_bird_picture(
     prompt = prompt.replace("{pt}", pt)
     prompt = prompt.replace("{loc}", loc)
     prompt = prompt.replace("{voice}", voice)
-    prompt = prompt.replace("{len}, ", str(300 - 42 - len(voice)))
+    prompt = prompt.replace("{len}, ", str(300 - 40 - len(voice)))
 
     response = client.chat.completions.create(
         model="gpt-4o",
