@@ -57,11 +57,11 @@ async def get_media_list(api_client, since):
                                 'media_type': item['__typename'], 
                                 'image_url': item['contentUrl']} for item in media_collection if item['__typename'] == 'MediaImage' or item['__typename'] == 'MediaVideo']
                 
-                species_to_ignore = ['Unknown', 'Mystery Visitor']
+                species_to_ignore = ['Unknown', 'Mystery Visitor', 'Common Grackle', 'Dark-eyed Junco']
                 # if species is not None, and does not contain names in list of species to ignore, add to media_list
                 if species and species not in species_to_ignore:              
                     media_list.extend(media_items)
-                    
+
             except Exception as e:
                 logger.error(f"Error processing postcard {node_id}: {e}")
                 errors = errors + 1
