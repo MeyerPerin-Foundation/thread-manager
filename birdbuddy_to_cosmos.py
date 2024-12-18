@@ -61,6 +61,8 @@ async def get_media_list(api_client, since):
                 # if species is not None, and does not contain names in list of species to ignore, add to media_list
                 if species and species not in species_to_ignore:              
                     media_list.extend(media_items)
+                else:
+                    logger.info(f"Skipping postcard {node_id} with species {species}")
 
             except Exception as e:
                 logger.error(f"Error processing postcard {node_id}: {e}")

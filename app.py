@@ -298,9 +298,11 @@ def insert_visit():
         data["date"] = cst_now.strftime("%Y-%m-%d %H:%M:%S")
 
     if "location" not in data:
+        logging.error(f"Missing location. Payload was {data}")
         return "Missing location", 400
     
     if "person" not in data:
+        logging.error(f"Missing person. Payload was {data}")
         return "Missing person", 400
 
     cosmosdb.insert_visit(date=data["date"], location=data["location"], person=data["person"])
