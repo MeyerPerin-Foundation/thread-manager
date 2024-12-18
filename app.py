@@ -206,7 +206,6 @@ def data_snapshot():
             return render_template("not_authorized.html")
         return "Unauthorized", 401
 
-
     payload = {}
 
     # Combine the data into a single payload
@@ -219,6 +218,7 @@ def data_snapshot():
     cosmosdb.update_dashboard(payload)
 
     return "OK", 200
+
 
 @app.route("/update_sitemap", methods=["POST"])
 def update_sitemap():
@@ -275,7 +275,34 @@ def update_dogtopia_visits():
         visits = -1
     else:
         visits = data["visits"]
-    
+
     cosmosdb.update_dogtopia_visits(data["date"], visits)
+
+    return "OK", 200
+
+
+@app.route("/insert_visit", methods=["POST"])
+def insert_visit():
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
+        return "Unauthorized", 401
+
+    data = request.json
+
+    if "date" not in data:
+        # get the time in UTC and convert it to the CST timezone using the pytz library
+        now = datetime.datetime.now(datetime.UTC)
+        cst = pytz.timezone("America/Chicago")
+        cst_now = now.astimezone(cst)
+        data["date"] = cst_now.strftime("%Y-%m-%d %H:%M:%S")
+
+    if "location" not in data:
+        return "Missing location", 400
+    
+    if "person" not in data:
+        return "Missing person", 400
+
+    cosmosdb.insert_visit(date=data["date"], location=data["location"], person=data["person"])
 
     return "OK", 200

@@ -343,3 +343,11 @@ def update_dogtopia_visits(date: str, visits: int):
 
     item = {"id": id, "date": date, "type": type, "visits": visits}
     container.upsert_item(item)
+
+
+def insert_visit(date: str, person: str, location: str):
+    container = _get_container("content", "visits")
+
+    id = uuid.uuid4().hex
+    item = {"id": id, "date": date, "location": location, "person": person}
+    container.upsert_item(item)
