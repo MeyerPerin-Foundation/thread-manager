@@ -19,6 +19,8 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger("azure").setLevel(logging.WARNING)
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
+logger = logging.getLogger("ThreadManager")
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -283,13 +285,13 @@ def update_dogtopia_visits():
 
 @app.route("/insert_visit", methods=["POST"])
 def insert_visit():
-    logging.info("Called insert_visit")
+    logger.info("Called insert_visit")
     if not check_auth():
         if request.content_type == "application/x-www-form-urlencoded":
             return render_template("not_authorized.html")
         return "Unauthorized", 401
 
-    logging.info(f"Request data: {request.json}")
+    logger.info(f"Request data: {request.json}")
 
     data = request.json
 
@@ -301,11 +303,11 @@ def insert_visit():
         data["date"] = cst_now.strftime("%Y-%m-%d %H:%M:%S")
 
     if "location" not in data:
-        logging.error(f"Missing location. Payload was {data}")
+        logger.error(f"Missing location. Payload was {data}")
         return "Missing location", 400
     
     if "person" not in data:
-        logging.error(f"Missing person. Payload was {data}")
+        logger.error(f"Missing person. Payload was {data}")
         return "Missing person", 400
 
     cosmosdb.insert_visit(date=data["date"], location=data["location"], person=data["person"])
