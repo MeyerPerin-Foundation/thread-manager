@@ -35,7 +35,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix  # noqa: E402
 
 logging.getLogger("werkzeug").setLevel(logging.WARNING)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
-app.logger.setLevel(logging.INFO)
+
 
 auth = identity.web.Auth(
     session=session,
@@ -290,12 +290,6 @@ def insert_visit():
         if request.content_type == "application/x-www-form-urlencoded":
             return render_template("not_authorized.html")
         return "Unauthorized", 401
-
-    print(f"Request headers: {request.headers}")
-    print(f"Request data: {request.data}")
-    print(f"Request JSON: {request.json}")
-
-    app.logger.info(f"Request data: {request.json}")
 
     data = request.json
 
