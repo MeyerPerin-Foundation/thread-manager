@@ -283,10 +283,13 @@ def update_dogtopia_visits():
 
 @app.route("/insert_visit", methods=["POST"])
 def insert_visit():
+    logging.info("Called insert_visit")
     if not check_auth():
         if request.content_type == "application/x-www-form-urlencoded":
             return render_template("not_authorized.html")
         return "Unauthorized", 401
+
+    logging.info(f"Request data: {request.json}")
 
     data = request.json
 
