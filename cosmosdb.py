@@ -75,23 +75,18 @@ def get_random_birdbuddy():
     return random.choice(items)
 
 
-def get_best_birdbuddy():
+def get_latest_unposted_birds(max_items=12):
     container = _get_container("content", "bird_buddy")
     query = "SELECT * FROM c WHERE NOT IS_DEFINED(c.last_posted) ORDER BY c.created_at DESC "
     items = list(container.query_items(query=query, enable_cross_partition_query=True))
 
     # items is a list of N items
-    # get up to 12 items from the list
+    # get up to max_items from the list (this garantees most recent items)
     N = len(items)
-    if N > 12:
-        items = items[:12]
+    if N > max_items:
+        items = items[:max_items]
 
-    # from the list of items, get four random items
-    if N > 4:
-        return random.sample(items, 4)
-    else:
-        return items
-
+    return items
 
 def get_latest_blog_post():
     container = _get_container("content", "blog_posts")
@@ -311,7 +306,7 @@ def set_latest_bird_update(latest_update_isoformat=None):
     container.upsert_item(item)
 
 
-def get_setting(setting_name):
+def get_setting(setting_name: str):
     container = _get_container("control", "settings")
     query = "SELECT * FROM c WHERE c.id = 'v1'"
     items = list(container.query_items(query=query, enable_cross_partition_query=True))

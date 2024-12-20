@@ -192,8 +192,17 @@ def generate_and_post_too_far():
     return social_media_poster.post(post_data)
 
 
-def generate_and_post_birdbuddy_picture():
-    birdbuddy_list = cosmosdb.get_best_birdbuddy()
+def generate_and_post_birdbuddy_picture(n_choices: int = 4, n_latest: int = 20):
+    latest_birds = cosmosdb.get_latest_unposted_birds(n_latest)
+
+    n_birds = len(latest_birds)
+    # from the list of items, get four random items
+    
+    if n_birds > n_choices:
+        birdbuddy_list = random.sample(latest_birds, n_choices)
+    else:
+        birdbuddy_list = latest_birds
+
 
     if not birdbuddy_list:
         print("No Bird Buddy content found")
