@@ -1,5 +1,5 @@
 from datetime import datetime
-import cosmosdb
+from cosmosdb import Birds, Ungovernable, TooFar, MessageOfTheDay, BlogPosts
 import social_media_poster
 import blog_reader
 import random
@@ -25,7 +25,6 @@ def _calculate_date_difference(target_date):
     except ValueError:
         print("Error in calculating the date difference")
         return None
-
 
 def _generate_days_until_dict(
     event_name,
@@ -100,7 +99,8 @@ def _generate_days_until_dict(
 
 
 def generate_and_post_motd():
-    motd_dict = cosmosdb.get_motd()
+    motd = MessageOfTheDay()
+    motd_dict = motd.get_motd()
     if not motd_dict:
         return "No MotD for today", 204
 
@@ -136,7 +136,8 @@ def generate_and_post_severance_s2_countdown():
 
 
 def generate_and_post_ungovernable():
-    ungovernable_dict = cosmosdb.get_random_ungovernable()
+    ungov = Ungovernable()
+    ungovernable_dict = ungov.get_random_ungovernable()
 
     if not ungovernable_dict:
         print("No ungovernable content found")
@@ -159,13 +160,14 @@ def generate_and_post_ungovernable():
     }
 
     ungovernable_dict["title"] = message
-    cosmosdb.update_ungovernable_posted(ungovernable_dict)
+    ungov.update_ungovernable_posted(ungovernable_dict)
 
     return social_media_poster.post(post_data)
 
 
 def generate_and_post_too_far():
-    too_far_dict = cosmosdb.get_random_too_far()
+    too_far = TooFar()
+    too_far_dict = too_far.get_random_too_far()
 
     if not too_far_dict:
         print("No too far content found")
@@ -187,13 +189,14 @@ def generate_and_post_too_far():
     }
 
     too_far_dict["title"] = message
-    cosmosdb.update_too_far_posted(too_far_dict)
+    too_far.update_too_far_posted(too_far_dict)
 
     return social_media_poster.post(post_data)
 
 
 def generate_and_post_birdbuddy_picture(n_choices: int = 4, n_latest: int = 20):
-    latest_birds = cosmosdb.get_latest_unposted_birds(n_latest)
+    birds = Birds()
+    latest_birds = birds.get_latest_unposted_birds(n_latest)
 
     n_birds = len(latest_birds)
     # from the list of items, get four random items
@@ -224,7 +227,7 @@ def generate_and_post_birdbuddy_picture(n_choices: int = 4, n_latest: int = 20):
     location = birdbuddy_dict.get("location", "Fulshear,  Texas")
 
     # Create a dictionary with voice options and weights and choose a random one.
-    voices = cosmosdb.get_bird_description_voice_options()
+    voices = birds.get_bird_description_voice_options()
 
     # Choose a random voice based on the weights
     weights = [voice["weight"] for voice in voices]
@@ -258,13 +261,15 @@ def generate_and_post_birdbuddy_picture(n_choices: int = 4, n_latest: int = 20):
     message, code = social_media_poster.post(post_data)
     logger.info(f"Threads post result was {code}: {message}")
 
-    cosmosdb.update_birdbuddy_posted(birdbuddy_dict)
+    birds.update_birdbuddy_posted(birdbuddy_dict)
 
     return message, code
 
 
 def generate_and_post_blog_promo():
-    blog_post_metadata = cosmosdb.get_latest_blog_post()
+
+    blog = BlogPosts()
+    blog_post_metadata = blog.get_latest_blog_post()
 
     if not blog_post_metadata:
         logger.info("No too far content found")
@@ -296,7 +301,7 @@ def generate_and_post_blog_promo():
     }
 
     social_media_poster.post(linkedin_post_data)
-    cosmosdb.update_blog_posted(blog_post_metadata)
+    blog.update_blog_posted(blog_post_metadata)
 
     return "Accepted", 202
 

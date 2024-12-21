@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 import requests
 from azure.storage.blob import BlobServiceClient
 import app_config
-import cosmosdb
+from cosmosdb import BlogPosts
 import logging
 
 logger = logging.getLogger("tm-sitemaps")
@@ -96,8 +96,9 @@ def upload_new_posts_to_cosmosdb(sitemap_url):
 
     logger.info(f"Found {len(new_urls_with_lastmod)} new blog posts")
 
+    blog = BlogPosts()
     for url, lastmod in new_urls_with_lastmod.items():
-        cosmosdb.insert_blog_post(url, lastmod)
+        blog.insert_blog_post(url, lastmod)
 
 def process_sitemap(sitemap_uri):
     upload_new_posts_to_cosmosdb(sitemap_uri)

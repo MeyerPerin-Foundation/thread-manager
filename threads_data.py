@@ -1,6 +1,5 @@
 import requests
 import app_config
-import json
 
 def get_follower_count() -> int:
     url = f"https://graph.threads.net/v1.0/{app_config.THREADS_USER_ID}/threads_insights?metric=followers_count&access_token={app_config.THREADS_TEST_TOKEN}"

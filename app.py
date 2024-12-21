@@ -6,7 +6,7 @@ import content_generator
 import app_config
 import birdbuddy_to_cosmos
 import datetime
-import cosmosdb
+from cosmosdb import _dbutils, Birds, Dashboard, TooFar, Ungovernable, Visits
 import threads_data
 import bluesky_data
 import sitemaps
@@ -66,7 +66,7 @@ def lucas_test():
         data["content_type"] = "json"
         data["json"] = request.json
 
-    cosmosdb.insert_test_record(data)
+    _dbutils._insert_test_record(data)
     return "OK", 200
 
 
@@ -180,11 +180,12 @@ async def update_birds():
             return render_template("not_authorized.html")
         return "Unauthorized", 401
 
+    birds = Birds()
     now = datetime.datetime.now(datetime.UTC).isoformat()
-    last_update = cosmosdb.get_latest_bird_update()
+    last_update = birds.get_latest_bird_update()
 
     await birdbuddy_to_cosmos.update_birds(since=last_update)
-    cosmosdb.set_latest_bird_update(now)
+    birds.set_latest_bird_update(now)
     return "OK", 200
 
 
@@ -196,7 +197,9 @@ def dashboard():
         return "Unauthorized", 401
 
     data_snapshot()
-    dash_data = cosmosdb.latest_dashboard_data()
+
+    dash = Dashboard()
+    dash_data = dash.latest_dashboard_data()
 
     return render_template("dashboard.html", data_payload=dash_data)
 
@@ -210,14 +213,18 @@ def data_snapshot():
 
     payload = {}
 
+    birds = Birds()
+    ungov = Ungovernable()
+    too_far = TooFar()
+    dash = Dashboard()
     # Combine the data into a single payload
-    payload.update(cosmosdb.count_birds())
-    payload.update(cosmosdb.count_ungovernable())
-    payload.update(cosmosdb.count_too_far())
+    payload.update(birds.count_birds())
+    payload.update(ungov.count_ungovernable())
+    payload.update(too_far.count_too_far())
     payload.update({"threads_followers": threads_data.get_follower_count()})
     payload.update({"bluesky_followers": bluesky_data.get_follower_count()})
 
-    cosmosdb.update_dashboard(payload)
+    dash.update_dashboard(payload)
 
     return "OK", 200
 
@@ -278,7 +285,8 @@ def update_dogtopia_visits():
     else:
         visits = data["visits"]
 
-    cosmosdb.update_dogtopia_visits(data["date"], visits)
+    visitsdb = Visits()
+    visitsdb.update_dogtopia_visits(data["date"], visits)
 
     return "OK", 200
 
@@ -308,7 +316,8 @@ def insert_visit():
         app.logger.error(f"Missing person. Payload was {data}")
         return "Missing person", 400
 
-    cosmosdb.insert_visit(date=data["date"], location=data["location"], person=data["person"])
+    visitsdb = Visits()
+    visitsdb.insert_visit(date=data["date"], location=data["location"], person=data["person"])
 
     return "OK", 200
 
@@ -318,13 +327,20 @@ def bird_list():
         if request.content_type == "application/x-www-form-urlencoded":
             return render_template("not_authorized.html")
         return "Unauthorized", 401
-
-    return render_template("bird_list.html", bird_list=cosmosdb.get_bird_list())
+    
+    birds = Birds()
+    return render_template("bird_list.html", bird_list=birds.get_bird_list())
 
 
 @app.route("/bird_details/<string:bird_id>", methods=["GET", "POST"])
 def details(bird_id):
-    record = cosmosdb.get_bird(bird_id)
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
+        return "Unauthorized", 401
+    
+    birds = Birds()
+    record = birds.get_bird(bird_id)
     if not record:
         return "Record not found", 404
 
@@ -338,10 +354,10 @@ def details(bird_id):
 
         # Update the record in Cosmos DB
         try:
-            cosmosdb.update_bird(record)
+            birds.update_bird(record)
         except Exception as e:
             return f"Failed to update Cosmos DB: {e}", 500
         
-        return render_template("bird_list.html", bird_list=cosmosdb.get_bird_list())
+        return render_template("bird_list.html", bird_list=birds.get_bird_list())
 
     return render_template('bird_details.html', record=record)

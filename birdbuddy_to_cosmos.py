@@ -2,7 +2,7 @@ import datetime
 from birdbuddy.client import BirdBuddy
 from io import BytesIO
 from azure.storage.blob import BlobServiceClient
-import cosmosdb 
+from cosmosdb import Birds, _dbutils
 import requests
 import app_config
 import ai
@@ -57,7 +57,7 @@ async def get_media_list(api_client, since):
                                 'media_type': item['__typename'], 
                                 'image_url': item['contentUrl']} for item in media_collection if item['__typename'] == 'MediaImage' or item['__typename'] == 'MediaVideo']
                 
-                species_to_ignore = cosmosdb.get_setting("species_to_ignore")
+                species_to_ignore = _dbutils._get_setting("species_to_ignore")
                 # if species is not None, and does not contain names in list of species to ignore, add to media_list
                 if species and species not in species_to_ignore:              
                     media_list.extend(media_items)
@@ -114,9 +114,10 @@ async def update_birds(since = None):
         # Upload to Azure Storage
         blob_url = upload_to_azure_storage(blob_service_client, "bird-buddy", blob_name, data.getvalue())
 
+        birds = Birds()
         # Save to Cosmos DB
         if blob_url:
-            cosmosdb.insert_bird(media_id=item['id'], created_at = item['date_created'], postcard_id = item['encounter_id'], species = item['species'], blob_url=blob_url)
+            birds.insert_bird(media_id=item['id'], created_at = item['date_created'], postcard_id = item['encounter_id'], species = item['species'], blob_url=blob_url)
 
 
 if __name__ == "__main__":

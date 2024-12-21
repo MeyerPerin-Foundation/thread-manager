@@ -1,6 +1,6 @@
 from openai import AzureOpenAI
 import app_config
-import cosmosdb
+from cosmosdb import Prompts
 import datetime
 import pytz
 import logging
@@ -17,7 +17,8 @@ def _get_client() -> AzureOpenAI:
 
 
 def _get_prompt(prompt_name: str, version: int = None) -> str:
-    return cosmosdb.get_prompt(prompt_name, version)
+    prompts = Prompts()
+    return prompts.get_prompt(prompt_name, version)
 
 
 def _test_image_chooser():
@@ -81,7 +82,9 @@ def choose_best_bird_image(image_url_list) -> str:
 
 
 def good_birb(image_url):
-    prompt = cosmosdb.get_prompt("good_birb")
+    prompts = Prompts()
+
+    prompt = prompts.get_prompt("good_birb")
     openai_client = _get_client()
 
     response = openai_client.chat.completions.create(
@@ -111,13 +114,15 @@ def generate_blog_post_summary(title, content, target_site):
         api_version=app_config.AZURE_OPENAI_API_VERSION,
     )
 
+    prompts = Prompts()
+
     if target_site == "LinkedIn":
-        prompt = cosmosdb.get_prompt("li_blog_promo")
+        prompt = prompts.get_prompt("li_blog_promo")
     elif target_site == "Bluesky" or target_site == "Threads":
-        prompt = cosmosdb.get_prompt("bt_blog_promo")
+        prompt = prompts.get_prompt("bt_blog_promo")
     else:
         logger.warning(f"Invalid target site {target_site}")
-        prompt = cosmosdb.get_prompt("bt_blog_promo")
+        prompt = prompts.get_prompt("bt_blog_promo")
 
     prompt = prompt.replace("{title}", title)
     prompt = prompt.replace("{content}", content)
@@ -176,7 +181,8 @@ def generate_caption_for_bird_picture(
     if not voice:
         voice = "Sir David Attenborough"
 
-    prompt = cosmosdb.get_prompt("bird_caption")
+    prompts = Prompts()
+    prompt = prompts.get_prompt("bird_caption")
     prompt = prompt.replace("{sp}", sp)
     prompt = prompt.replace("{pt}", pt)
     prompt = prompt.replace("{loc}", loc)
