@@ -2,7 +2,7 @@ from ._dbutils import _get_container
 from ._dbutils import _get_setting
 import random
 import datetime
-from . import logger
+from ._dbutils import dblogger
 
 
 class Birds:
@@ -116,7 +116,7 @@ class Birds:
         try:
             container.upsert_item(data)
         except Exception as e:
-            logger.error(f"Error updating bird {data['id']}: {e}")
+            dblogger.error(f"Error updating bird {data['id']}: {e}")
             return False
 
     def set_latest_bird_update(self, latest_update_isoformat=None):

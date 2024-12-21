@@ -8,7 +8,6 @@ from .prompts import Prompts
 from .too_far import TooFar
 from .ungovernable import Ungovernable
 from .visits import Visits
-import logging
 
 __all__ = [
     "_get_container",
@@ -23,4 +22,3 @@ __all__ = [
     "Visits",
 ]
 
-logger = logging.getLogger("tm-cosmosdb")

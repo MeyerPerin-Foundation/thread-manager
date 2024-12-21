@@ -3,7 +3,7 @@ from ._dbutils import _get_container
 
 class Auth:
     def __init__(self):
-        self.container = _get_container("auth", "users")
+        self.container = _get_container("control", "users")
 
     def check_user_in_db(self, user: dict) -> bool:
         # Get the sub from the user

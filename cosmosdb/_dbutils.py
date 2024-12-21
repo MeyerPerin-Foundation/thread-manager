@@ -2,7 +2,9 @@ from azure.cosmos import CosmosClient
 import app_config
 import uuid
 import datetime
+import logging
 
+dblogger = logging.getLogger("tm-cosmosdb")
 
 def _get_container(database_name, container_name):
     client = CosmosClient(app_config.COSMOS_ENDPOINT, app_config.COSMOS_KEY)

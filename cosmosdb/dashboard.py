@@ -4,7 +4,7 @@ import datetime
 
 class Dashboard:
     def __init__(self):
-        self.container = _get_container
+        self.container = _get_container("control", "daily_dashboard")
 
     def latest_dashboard_data(self):
         # select the record for the current date
@@ -19,8 +19,6 @@ class Dashboard:
             return None
 
     def update_dashboard(self, d: dict):
-        container = _get_container("control", "daily_dashboard")
-
         # get the date in UTC in the format YYYYMMDD
         date = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d")
 
@@ -34,10 +32,10 @@ class Dashboard:
             # update the existing record
             item = items[0]
             item.update(d)
-            container.upsert_item(item)
+            self.container.upsert_item(item)
         else:
             # create a new record
             d["id"] = date
-            container.upsert_item(d)
+            self.container.upsert_item(d)
 
         return d
