@@ -3,6 +3,9 @@ import app_config
 import random
 import datetime
 import uuid
+import logging
+
+logger = logging.getLogger("tm-cosmosdb")
 
 
 def _get_container(database_name, container_name):
@@ -346,3 +349,31 @@ def insert_visit(date: str, person: str, location: str):
     id = uuid.uuid4().hex
     item = {"id": id, "date": date, "location": location, "person": person}
     container.upsert_item(item)
+
+
+def get_bird_list():
+    container = _get_container("content", "bird_buddy")
+    # latest 20 items
+    query = "SELECT * FROM c WHERE NOT IS_DEFINED(c.last_posted) AND (NOT IS_DEFINED(c.hide) or NOT c.hide) ORDER BY c.created_at DESC"
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+    return items[:20]
+
+
+def get_bird(id: str):
+    container = _get_container("content", "bird_buddy")
+    query = f"SELECT * FROM c WHERE c.id = '{id}'"
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+    if items:
+        return items[0]
+    else:
+        return None
+    
+
+def update_bird(data: dict):
+    container = _get_container("content", "bird_buddy")
+
+    try:    
+        container.upsert_item(data)
+    except Exception as e:
+        logger.error(f"Error updating bird {data['id']}: {e}")
+        return False

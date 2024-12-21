@@ -311,3 +311,37 @@ def insert_visit():
     cosmosdb.insert_visit(date=data["date"], location=data["location"], person=data["person"])
 
     return "OK", 200
+
+@app.route("/bird_list", methods=["GET"])
+def bird_list():
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
+        return "Unauthorized", 401
+
+    return render_template("bird_list.html", bird_list=cosmosdb.get_bird_list())
+
+
+@app.route("/bird_details/<string:bird_id>", methods=["GET", "POST"])
+def details(bird_id):
+    record = cosmosdb.get_bird(bird_id)
+    if not record:
+        return "Record not found", 404
+
+    if request.method == 'POST':
+        new_species = request.form.get('species')
+        hidden_status = request.form.get('hidden') == 'true'
+
+        if new_species:
+            record['species'] = new_species
+        record['hidden'] = hidden_status
+
+        # Update the record in Cosmos DB
+        try:
+            cosmosdb.update_bird(record)
+        except Exception as e:
+            return f"Failed to update Cosmos DB: {e}", 500
+        
+        return render_template("bird_list.html", bird_list=cosmosdb.get_bird_list())
+
+    return render_template('bird_details.html', record=record)

@@ -7,8 +7,6 @@ logger = logging.getLogger("tm-auth")
 def checkUserIsAuthorized(user: dict) -> bool:
     if user is None:
         return False
-    else:
-        logger.info(f"User dict:\n{user}")
     
     auth  = cosmosdb.check_user_in_db(user)
     username = user.get("preferred_username")

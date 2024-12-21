@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Bird List{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Bird Records</h1>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Species</th>
+                <th>Image</th>
+                <th>Created Date</th>
+                <th>Hidden</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in bird_list %}
+            <tr>
+                <td>{{ record.id }}</td>
+                <td>{{ record.species | default("No species") }}</td>
+                <td><img src="{{ record.blob_url }}" alt="{{ record.species }}" class="img-thumbnail" style="max-width: 100px;"></td>
+                <td>{{ record.created_at | default("No creation date") }}</td>
+                <td><input type="checkbox" {% if record.hidden %}checked{% endif %} disabled></td>
+                <td><a href="/bird_details/{{ record.id }}" class="btn btn-primary">View</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
