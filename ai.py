@@ -1,12 +1,14 @@
-from openai import AzureOpenAI
+from openai import AzureOpenAI, BadRequestError
 import app_config
 from cosmosdb import Prompts
 import datetime
 import pytz
 import logging
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+
 
 logger = logging.getLogger("tm-ai")
-
+logger.setLevel(logging.INFO)
 
 def _get_client() -> AzureOpenAI:
     return AzureOpenAI(
@@ -29,6 +31,9 @@ def _test_image_chooser():
 
     logger.info(choose_best_bird_image([image_url_1, image_url_2, image_url_3]))
 
+def handle_excess_retries(retry_state):
+    logger.error(f"Exceeded retries: {retry_state}")
+    return False
 
 def choose_best_bird_image(image_url_list) -> str:
     # Cut the list at 4
@@ -80,32 +85,44 @@ def choose_best_bird_image(image_url_list) -> str:
         logger.warning("GPT chose an invalid image number. Returning the first image.")
         return image_url_list[0]
 
-
+@retry(
+    retry=retry_if_exception_type((BadRequestError)),  
+    stop=stop_after_attempt(3),  
+    wait=wait_exponential(multiplier=1, min=1, max=10),  
+    retry_error_callback=handle_excess_retries
+)
 def good_birb(image_url):
     prompts = Prompts()
 
     prompt = prompts.get_prompt("good_birb")
     openai_client = _get_client()
 
-    response = openai_client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {
-                "role": "system",
-                "content": "You are a photography critic and social media content creator",
-            },
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": prompt},
-                    {"type": "image_url", "image_url": {"url": image_url}},
-                ],
-            },
-        ],
-    )
-
-    return "yes" in response.choices[0].message.content.lower()
-
+    try:
+        response = openai_client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a photography critic and social media content creator",
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {"type": "image_url", "image_url": {"url": image_url}},
+                    ],
+                },
+            ],
+        )
+        return "yes" in response.choices[0].message.content.lower()
+    except Exception as e:
+        logger.error(f"Exception processing image {image_url} and prompt {prompt}")
+        if isinstance(e, BadRequestError):
+            logger.error(f"Handling {e} with tenacity")
+            raise e
+        else:
+            logger.error(f"Handling {e} without tenacity")
+            return False
 
 def generate_blog_post_summary(title, content, target_site):
     openai_client = AzureOpenAI(
@@ -126,6 +143,7 @@ def generate_blog_post_summary(title, content, target_site):
 
     prompt = prompt.replace("{title}", title)
     prompt = prompt.replace("{content}", content)
+
 
     response = openai_client.chat.completions.create(
         model="gpt-4o",
@@ -187,7 +205,7 @@ def generate_caption_for_bird_picture(
     prompt = prompt.replace("{pt}", pt)
     prompt = prompt.replace("{loc}", loc)
     prompt = prompt.replace("{voice}", voice)
-    prompt = prompt.replace("{len}, ", str(300 - 40 - len(voice)))
+    prompt = prompt.replace("{len}, ", str(300 - 45 - len(voice)))
 
     response = client.chat.completions.create(
         model="gpt-4o",

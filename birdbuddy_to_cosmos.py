@@ -9,6 +9,7 @@ import ai
 import logging
 
 logger = logging.getLogger("tm-birdbuddy-loader")
+logger.setLevel(logging.INFO)
 
 def upload_to_azure_storage(blob_service_client, container_name, blob_name, data):
     blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
@@ -32,6 +33,16 @@ async def get_media_list(api_client, since):
         node_id = edge.get('id')
         media_collection = None
         errors = 0
+
+        if node_id in ['fa45e52e-fe57-47f4-86ae-d09816b1772f', 
+                       '0aee2c1e-8219-4433-9da0-3580c0398d76',
+                       'b43b120c-110c-48fe-9a77-6a7b305c611f',
+                       '765e01b7-6ea9-4319-8bc8-915c5c38601c',
+                       '59271c4c-68ef-4331-9819-02b57ce60560',
+                       ]:
+            logger.info(f"Skipping postcard {node_id} as it causes Birdbuddy server errors.")
+            continue
+        
 
         if typename == "FeedItemNewPostcard":
             try:
@@ -119,6 +130,7 @@ async def update_birds(since = None):
         if blob_url:
             birds.insert_bird(media_id=item['id'], created_at = item['date_created'], postcard_id = item['encounter_id'], species = item['species'], blob_url=blob_url)
 
+    logger.info("Finished processing bird items")
 
 if __name__ == "__main__":
     import asyncio
