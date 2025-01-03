@@ -193,6 +193,24 @@ def generate_and_post_too_far():
 
     return social_media_poster.post(post_data)
 
+def generate_caption(voices, blob_url, species, created_at, location) -> str:
+    # Choose a random voice based on the weights
+    weights = [voice["weight"] for voice in voices]
+    voice = random.choices(voices, weights, k=1)[0]["voice"]
+
+    # get the caption for the bird picture
+    caption = ai.generate_caption_for_bird_picture(
+        blob_url, species, created_at, location, voice
+    )
+
+    # if the message is in quotes, remove the quotes
+    if caption.startswith('"') and caption.endswith('"'):
+        caption = caption[1:-1]
+
+    caption = f'As {voice}: "{caption}"'
+
+    return caption
+
 
 def generate_and_post_birdbuddy_picture(n_choices: int = 4, n_latest: int = 20):
     birds = Birds()
@@ -223,27 +241,17 @@ def generate_and_post_birdbuddy_picture(n_choices: int = 4, n_latest: int = 20):
     species = birdbuddy_dict.get("species", None)
     blob_url = birdbuddy_dict.get("blob_url", None)
     created_at = birdbuddy_dict.get("created_at", None)
+    
     # feeder_name = birdbuddy_dict.get("feeder_name", None)
     location = birdbuddy_dict.get("location", "Fulshear,  Texas")
-
+    
     # Create a dictionary with voice options and weights and choose a random one.
     voices = birds.get_bird_description_voice_options()
 
-    # Choose a random voice based on the weights
-    weights = [voice["weight"] for voice in voices]
-    voice = random.choices(voices, weights, k=1)[0]["voice"]
-
-    # get the caption for the bird picture
-    caption = ai.generate_caption_for_bird_picture(
-        blob_url, species, created_at, location, voice
-    )
-
-    # if the message is in quotes, remove the quotes
-    if caption.startswith('"') and caption.endswith('"'):
-        caption = caption[1:-1]
-
-    caption = f'As {voice}: "{caption}"'
-
+    caption = generate_caption(voices, blob_url, species, created_at, location)
+    while len(caption) > 300:
+        caption = generate_caption(voices, blob_url, species, created_at, location)    
+ 
     # # Create a dictionary with the post text and the social media platforms to post to
     post_data = {
         "text": f"{caption}",
