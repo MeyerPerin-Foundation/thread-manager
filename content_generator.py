@@ -124,7 +124,7 @@ def generate_and_post_severance_s2_countdown():
         "Severance Season 2",
         "2025-01-17",
         bluesky=True,
-        threads=True,
+        threads=False,
         plural=False,
         stop=7,
     )
@@ -153,7 +153,7 @@ def generate_and_post_ungovernable():
         "text": message,
         "image": ungovernable_dict["blob_url"],
         "hashtags": ["BecomeUngovernable"],
-        "threads": True,
+        "threads": False,
         "instagram": False,
         "bluesky": True,
         "linkedin": False,
@@ -182,7 +182,7 @@ def generate_and_post_too_far():
         "text": message,
         "image": too_far_dict["blob_url"],
         "hashtags": ["GoneTooFar"],
-        "threads": True,
+        "threads": False,
         "instagram": False,
         "bluesky": True,
         "linkedin": False,
@@ -258,7 +258,7 @@ def generate_and_post_birdbuddy_picture(n_choices: int = 4, n_latest: int = 20):
         "emojis": ["🪶"],
         "image": blob_url,
         "hashtags": ["birds"],
-        "threads": True,
+        "threads": False,
         "instagram": False,
         "bluesky": True,
         "linkedin": False,
@@ -289,7 +289,7 @@ def generate_and_post_blog_promo():
         "text": bt_message,
         "url": blog_post_metadata["url"],
         "hashtags": ["BlogPost"],
-        "threads": True,
+        "threads": False,
         "instagram": False,
         "bluesky": True,
         "linkedin": False,
@@ -316,12 +316,12 @@ def generate_and_post_blog_promo():
 
 def generate_and_post_bsky_reminder():
     post_data = {
-        "text": "A semi-regular reminder that I am also on Bluesky at @lucasmeyer.bsky.social.",
+        "text": "A regular reminder that I am also on Bluesky at @lucasmeyer.bsky.social.",
         "url": "https://bsky.app/profile/lucasmeyer.bsky.social",
         "threads": True,
         "instagram": False,
         "bluesky": False,
-        "linkedin": True,
+        "linkedin": False,
     }
 
     social_media_poster.post(post_data)
