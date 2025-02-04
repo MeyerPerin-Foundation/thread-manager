@@ -1,12 +1,14 @@
 import identity.web
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_session import Session
+from social_media import Bluesky
 import authorization
 import content_generator
 import app_config
 import birdbuddy_to_cosmos
 import datetime
 from cosmosdb import _dbutils, Birds, Dashboard, TooFar, Ungovernable, Visits
+from fred import FredContent
 import threads_data
 import bluesky_data
 import sitemaps
@@ -361,3 +363,17 @@ def details(bird_id):
         return render_template("bird_list.html", bird_list=birds.get_bird_list())
 
     return render_template('bird_details.html', record=record)
+
+@app.route("/post_egg_prices", methods=["POST"])
+def post_egg_prices():
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
+        return "Unauthorized", 401
+
+    fred = FredContent()
+    bsky = Bluesky()
+    caption, file_name = fred.egg_prices()
+
+    return bsky.post(text=caption, img_file=file_name, hashtags=["BecomeUngoverned"])
+

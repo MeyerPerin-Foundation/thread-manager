@@ -111,7 +111,7 @@ def generate_and_post_motd():
 
 def generate_and_post_midterms_countdown():
     midterms_dict = _generate_days_until_dict(
-        "the US midterms", "2026-11-03", bluesky=True, threads=True, plural=True, stop=0
+        "the US midterms", "2026-11-03", bluesky=True, threads=False, plural=True, stop=0
     )
 
     if not midterms_dict:
@@ -281,8 +281,8 @@ def generate_and_post_blog_promo():
     blog_post_metadata = blog.get_latest_blog_post()
 
     if not blog_post_metadata:
-        logger.info("No too far content found")
-        return "No too far content found", 204
+        logger.info("No blog promo content found")
+        return "No blog promo content found", 204
 
     # Different promo for LinkedIn and Threads/Bluesky
     bt_message = blog_reader.blog_bt_summary(blog_post_metadata["url"])
