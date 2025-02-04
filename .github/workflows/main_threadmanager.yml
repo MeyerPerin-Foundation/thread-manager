@@ -27,7 +27,7 @@ jobs:
 
       - name: Install dependencies with uv
         run: |
-          uv install  # Installs dependencies from pyproject.toml`
+          uv sync  # Installs dependencies from pyproject.toml`
 
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
