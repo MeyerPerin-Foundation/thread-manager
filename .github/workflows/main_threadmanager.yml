@@ -24,7 +24,7 @@ jobs:
 
       - name: Install UV
         run: |
-          pipx instal uv
+          pipx install uv
       
       - name: Sync uv
         run: uv sync
