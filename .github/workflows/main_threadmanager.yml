@@ -22,13 +22,12 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install uv package manager
-        run: pipx install uv
-
-      - name: Install dependencies with uv
+      - name: Install UV
         run: |
-          uv sync  # Installs dependencies from pyproject.toml`
-
+          pipx instal uv
+      
+      - name: Sync uv
+        run: uv sync
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
@@ -61,7 +60,6 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
 
-      
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -75,4 +73,7 @@ jobs:
         with:
           app-name: 'threadmanager'
           slot-name: 'Production'
-          
+
+      - name: 'Check Deployment Logs'
+        run: |
+          curl -s ${{ steps.deploy-to-webapp.outputs.webapp-url }}/api/deployments/latest/log          
