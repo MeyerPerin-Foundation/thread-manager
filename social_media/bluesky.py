@@ -3,10 +3,11 @@ import requests
 from atproto import client_utils, Client
 from datetime import datetime, timezone
 
-from . import app_config
+import app_config
 from social_media.document import SocialMediaDocument, SocialMediaPostResult
 
 logger = logging.getLogger("tm-bluesky")
+logger.setLevel(logging.DEBUG)
 
 
 class Bluesky:
