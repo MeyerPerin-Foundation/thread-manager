@@ -19,6 +19,11 @@ def get_mpf_blog_post_content(url: str):
     article_title = soup.find('h1').get_text()
     return article_title, article_text
 
+def blog_li_full_text(url):
+    title, content = get_mpf_blog_post_content(url)
+    return f"{title}\n\n{content}"
+
+
 def blog_li_summary(url):
     title, content = get_mpf_blog_post_content(url)
     generated_post = ai.generate_blog_post_summary(title, content, "LinkedIn")

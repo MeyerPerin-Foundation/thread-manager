@@ -1,7 +1,7 @@
 import identity.web
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_session import Session
-from social_media import Bluesky
+from social_media.poster import SocialMediaPoster
 import authorization
 import content_generator
 import app_config
@@ -372,8 +372,21 @@ def post_egg_prices():
         return "Unauthorized", 401
 
     fred = FredContent()
-    bsky = Bluesky()
-    caption, file_name = fred.egg_prices()
+    d = fred.egg_prices()
+    bsky = SocialMediaPoster()
+    r = bsky.post_document(d, "Bluesky")
+    return r.result()
 
-    return bsky.post(text=caption, img_file=file_name, hashtags=["BecomeUngoverned"])
 
+@app.route("/post_gas_prices", methods=["POST"])
+def post_gas_prices():
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
+        return "Unauthorized", 401
+
+    fred = FredContent()
+    d = fred.gas_prices()
+    bsky = SocialMediaPoster()
+    r = bsky.post_document(d, "Bluesky")
+    return r.result()

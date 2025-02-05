@@ -1,17 +1,41 @@
 import logging
-from atproto import client_utils, Client
 import requests
+from atproto import client_utils, Client
+from datetime import datetime, timezone
 
 from . import app_config
+from social_media.document import SocialMediaDocument, SocialMediaPostResult
 
 logger = logging.getLogger("tm-bluesky")
 
-class Bluesky:
 
+class Bluesky:
     def __init__(self):
         self.client = Client()
+        self.client.login(app_config.BSKY_USER, app_config.BSKY_APP_PWD)
 
-    def post(self, text, image_url=None, img_file=None, hashtags=None, emojis=None, url=None, url_title=None):
+    def post_document(self, document: SocialMediaDocument) -> SocialMediaPostResult:
+        # extract the components of the document
+        text = document.text
+        image_url = document.image_url
+        img_file = document.img_file
+        hashtags = document.hashtags
+        emojis = document.emojis
+        url = document.url
+        url_title = document.url_title
+
+        return self.post(text, image_url, img_file, hashtags, emojis, url, url_title)
+
+    def post(
+        self,
+        text,
+        image_url=None,
+        img_file=None,
+        hashtags=None,
+        emojis=None,
+        url=None,
+        url_title=None,
+    ) -> SocialMediaPostResult:
         
         logger.info(f"Posting {text} to Bluesky")
 
@@ -39,14 +63,12 @@ class Bluesky:
             else:
                 text_builder.link(f"\n{url}\n", url)
 
-        self.client.login(app_config.BSKY_USER, app_config.BSKY_APP_PWD)
-
         # Check if there's an image
         image_data = None
         if img_file is not None:
             with open(img_file, "rb") as image_file:
                 image_data = image_file.read()
-        
+
         if image_url is not None:
             image_data = requests.get(image_url).content
 
@@ -57,5 +79,16 @@ class Bluesky:
 
         post_uri = post.uri
 
-        logger.info(f"Result of post_to_bluesky: {post_uri}")
-        return "OK", 200
+        # get the current UTC time
+        utc_now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+
+        post_result = SocialMediaPostResult(
+            service="Bluesky",
+            success=True,
+            result_message="OK",
+            result_code=200,
+            posted_uri=post_uri,
+            posted_utc_time=utc_now,
+        )
+
+        return post_result

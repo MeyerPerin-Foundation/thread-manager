@@ -20,6 +20,7 @@ dependencies = [
     "openai>=1.61.0",
     "pillow>=11.1.0",
     "pybirdbuddy>=0.0.19",
+    "pydantic>=2.10.6",
     "python-dotenv>=1.0.1",
     "pyyaml>=6.0.2",
     "requests>=2.32.3",
