@@ -1,26 +1,36 @@
 import identity.web
+import utils.auth.authorization as authorization
+
+from azure.monitor.opentelemetry import configure_azure_monitor  # noqa: F401
+
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_session import Session
-from social_media.poster import SocialMediaPoster
-import authorization
-import content_generator
-import app_config
-import birdbuddy_to_cosmos
-import datetime
-from cosmosdb import _dbutils, Birds, Dashboard, TooFar, Ungovernable, Visits
-from fred import FredContent
-import threads_data
-import bluesky_data
-import sitemaps
-import pytz
-from azure.monitor.opentelemetry import configure_azure_monitor  # noqa: F401
-from dotenv import load_dotenv
-import logging
 
+import app_config
+import datetime
+import dashboard.threads_data as threads_data
+import dashboard.bluesky_data as bluesky_data
+import content.blog_promo.sitemaps as sitemaps
+import pytz
+from dotenv import load_dotenv
+
+from social_media.poster import SocialMediaPoster
+
+from content.birds import BirdContent
+from content.blog_promo import BlogPromoContent
+from content.countdown import CountdownContent
+from content.fred import FredContent
+from content.ungovernable import UngovernableContent
+from content.too_far import TooFarContent
+
+#TODO: refactor
+from utils.cosmosdb import BirdsDB, DashboardDB, VisitsDB, UngovernableDB, TooFarDB 
+import content.birds.birdbuddy_to_cosmos as birdbuddy_to_cosmos
+
+import logging
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("azure").setLevel(logging.WARNING)
 logging.getLogger("httpx").setLevel(logging.WARNING)
-
 
 load_dotenv()
 
@@ -53,25 +63,6 @@ def check_auth() -> bool:
     ) or authorization.checkApiAuthorized(request.headers.get("Authorization"))
 
 
-@app.route("/lucas_test", methods=["POST"])
-def lucas_test():
-    if not check_auth():
-        if request.content_type == "application/x-www-form-urlencoded":
-            return render_template("not_authorized.html")
-        return "Unauthorized", 401
-
-    data = {}
-    if request.content_type == "application/x-www-form-urlencoded":
-        data["content_type"] = "form"
-        data["form"] = request.form
-    else:
-        data["content_type"] = "json"
-        data["json"] = request.json
-
-    _dbutils._insert_test_record(data)
-    return "OK", 200
-
-
 @app.route("/login")
 def login():
     return render_template(
@@ -85,7 +76,6 @@ def login():
         ),
     )
 
-
 @app.route(app_config.REDIRECT_PATH)
 def auth_response():
     result = auth.complete_log_in(request.args)
@@ -93,11 +83,9 @@ def auth_response():
         return render_template("auth_error.html", result=result)
     return redirect(url_for("index"))
 
-
 @app.route("/logout")
 def logout():
     return redirect(auth.log_out(url_for("index", _external=True)))
-
 
 @app.route("/")
 def index():
@@ -114,17 +102,6 @@ def index():
         version=identity.__version__,
     )
 
-
-@app.route("/post_motd", methods=["POST"])
-def post_motd():
-    if not check_auth():
-        if request.content_type == "application/x-www-form-urlencoded":
-            return render_template("not_authorized.html")
-        return "Unauthorized", 401
-
-    return content_generator.generate_and_post_motd()
-
-
 @app.route("/post_midterms", methods=["POST"])
 def post_midterms():
     if not check_auth():
@@ -132,18 +109,9 @@ def post_midterms():
             return render_template("not_authorized.html")
         return "Unauthorized", 401
 
-    return content_generator.generate_and_post_midterms_countdown()
-
-
-@app.route("/post_severance", methods=["POST"])
-def post_severance():
-    if not check_auth():
-        if request.content_type == "application/x-www-form-urlencoded":
-            return render_template("not_authorized.html")
-        return "Unauthorized", 401
-
-    return content_generator.generate_and_post_severance_s2_countdown()
-
+    c = CountdownContent()
+    d = c.post_midterms_countdown()
+    return d.result()
 
 @app.route("/post_ungovernable", methods=["POST"])
 def post_ungovernable():
@@ -152,8 +120,9 @@ def post_ungovernable():
             return render_template("not_authorized.html")
         return "Unauthorized", 401
 
-    return content_generator.generate_and_post_ungovernable()
-
+    u = UngovernableContent()
+    d = u.post_ungovernable()
+    return d.result()
 
 @app.route("/post_too_far", methods=["POST"])
 def post_too_far():
@@ -162,8 +131,9 @@ def post_too_far():
             return render_template("not_authorized.html")
         return "Unauthorized", 401
 
-    return content_generator.generate_and_post_too_far()
-
+    f = TooFarContent()
+    d = f.post_too_far()
+    return d.result()
 
 @app.route("/post_bird_buddy", methods=["POST"])
 def post_bird_buddy():
@@ -172,8 +142,9 @@ def post_bird_buddy():
             return render_template("not_authorized.html")
         return "Unauthorized", 401
 
-    return content_generator.generate_and_post_birdbuddy_picture()
-
+    b = BirdContent()
+    d = b.post_birdbuddy_picture()
+    return d.result()
 
 @app.route("/update_birds", methods=["POST"])
 async def update_birds():
@@ -182,7 +153,7 @@ async def update_birds():
             return render_template("not_authorized.html")
         return "Unauthorized", 401
 
-    birds = Birds()
+    birds = BirdsDB()
     now = datetime.datetime.now(datetime.UTC).isoformat()
     last_update = birds.get_latest_bird_update()
 
@@ -200,7 +171,7 @@ def dashboard():
 
     data_snapshot()
 
-    dash = Dashboard()
+    dash = DashboardDB()
     dash_data = dash.latest_dashboard_data()
 
     return render_template("dashboard.html", data_payload=dash_data)
@@ -215,10 +186,11 @@ def data_snapshot():
 
     payload = {}
 
-    birds = Birds()
-    ungov = Ungovernable()
-    too_far = TooFar()
-    dash = Dashboard()
+    birds = BirdsDB()
+    ungov = UngovernableDB()
+    too_far = TooFarDB()
+    dash = DashboardDB()
+
     # Combine the data into a single payload
     payload.update(birds.count_birds())
     payload.update(ungov.count_ungovernable())
@@ -251,18 +223,9 @@ def post_blog_promo():
         if request.content_type == "application/x-www-form-urlencoded":
             return render_template("not_authorized.html")
         return "Unauthorized", 401
-
-    return content_generator.generate_and_post_blog_promo()
-
-
-@app.route("/post_bsky_reminder", methods=["POST"])
-def post_bsky_reminder():
-    if not check_auth():
-        if request.content_type == "application/x-www-form-urlencoded":
-            return render_template("not_authorized.html")
-        return "Unauthorized", 401
-
-    return content_generator.generate_and_post_bsky_reminder()
+    
+    b = BlogPromoContent()
+    return b.post_blog_promo()
 
 
 @app.route("/update_dogtopia_visits", methods=["POST"])
@@ -287,7 +250,7 @@ def update_dogtopia_visits():
     else:
         visits = data["visits"]
 
-    visitsdb = Visits()
+    visitsdb = VisitsDB()
     visitsdb.update_dogtopia_visits(data["date"], visits)
 
     return "OK", 200
@@ -318,7 +281,7 @@ def insert_visit():
         app.logger.error(f"Missing person. Payload was {data}")
         return "Missing person", 400
 
-    visitsdb = Visits()
+    visitsdb = VisitsDB()
     visitsdb.insert_visit(date=data["date"], location=data["location"], person=data["person"])
 
     return "OK", 200
@@ -330,7 +293,7 @@ def bird_list():
             return render_template("not_authorized.html")
         return "Unauthorized", 401
     
-    birds = Birds()
+    birds = BirdsDB()
     return render_template("bird_list.html", bird_list=birds.get_bird_list())
 
 
@@ -341,7 +304,7 @@ def details(bird_id):
             return render_template("not_authorized.html")
         return "Unauthorized", 401
     
-    birds = Birds()
+    birds = BirdsDB()
     record = birds.get_bird(bird_id)
     if not record:
         return "Record not found", 404
@@ -372,10 +335,8 @@ def post_egg_prices():
         return "Unauthorized", 401
 
     fred = FredContent()
-    d = fred.egg_prices()
-    bsky = SocialMediaPoster()
-    r = bsky.post_document(d, "Bluesky")
-    return r.result()
+    d = fred.post_egg_prices()
+    return d.result()
 
 
 @app.route("/post_gas_prices", methods=["POST"])
@@ -386,7 +347,17 @@ def post_gas_prices():
         return "Unauthorized", 401
 
     fred = FredContent()
-    d = fred.gas_prices()
-    bsky = SocialMediaPoster()
-    r = bsky.post_document(d, "Bluesky")
-    return r.result()
+    d = fred.post_gas_prices()
+    return d.result()
+
+
+@app.route("/post_from_queue", methods=["POST"])
+def post_from_queue():
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
+        return "Unauthorized", 401
+
+    poster = SocialMediaPoster()
+    d = poster.post_next_document()
+    return d.result()

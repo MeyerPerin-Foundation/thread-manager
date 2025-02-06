@@ -2,20 +2,29 @@ import requests
 import json
 import app_config
 import logging
+from datetime import datetime, timezone
 from social_media.document import SocialMediaDocument, SocialMediaPostResult
 
 logger = logging.getLogger("tm-linkedin")
 logger.setLevel(logging.DEBUG)
 
-class LinkedIn:
 
-    def post_document(self, document: SocialMediaDocument) -> SocialMediaPostResult:
+class LinkedIn:
+    def post_document(self, document: SocialMediaDocument) -> SocialMediaDocument:
         # extract the components of the document
         text = document.text
         hashtags = document.hashtags
         target_url = document.url
 
-        return self.post(text, hashtags=hashtags, target_url=target_url)
+        result = self.post(text, hashtags=hashtags, target_url=target_url)
+
+        # get a string representing the current time in UTC
+        document.posted_utc = result.posted_utc
+        document.posted_uri = result.posted_uri
+        document.result_message = result.result_message
+        document.result_code = result.result_code
+
+        return document
 
     def post(text, image=None, hashtags=None, target_url=None) -> SocialMediaPostResult:
         if target_url is not None:
@@ -33,7 +42,7 @@ class LinkedIn:
         try:
             if image is None:
                 data = {}
-                with open("text_share.json") as json_file:
+                with open("social_media_templates/li_text_share.json") as json_file:
                     data = json.load(json_file)
                     data["author"] = f"{app_config.LINKEDIN_PERSON_ID}"
                     data["specificContent"]["com.linkedin.ugc.ShareContent"][
@@ -47,7 +56,9 @@ class LinkedIn:
                     "Content-Type": "application/json",
                     "X-Restli-Protocol-Version": "2.0.0",
                 }
-                response = requests.post(endpoint, headers=headers, data=json.dumps(data))
+                response = requests.post(
+                    endpoint, headers=headers, data=json.dumps(data)
+                )
 
                 # check if the response is successful
                 if response.status_code == 201:
@@ -64,6 +75,9 @@ class LinkedIn:
             action = f"Error: {e}"
             logger.error(f"Error: {e}")
 
-        return SocialMediaPostResult(service="LinkedIn", success=response.status_code == 201, result_message=action, result_code=response.status_code)
-
-        
+        return SocialMediaPostResult(
+            result_message=action,
+            result_code=response.status_code,
+            posted_uri="",
+            posted_utc=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        )

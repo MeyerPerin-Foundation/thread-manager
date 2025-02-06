@@ -27,3 +27,17 @@ dependencies = [
     "sendgrid>=6.11.0",
     "tenacity>=9.0.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+log_cli = true
+log_cli_level = "DEBUG"
+filterwarnings = [
+    "ignore:Use 'content=<...>' to upload raw bytes/text content.:DeprecationWarning"
+]
+addopts = "-k 'None'"

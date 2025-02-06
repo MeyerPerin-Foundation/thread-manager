@@ -1,21 +1,19 @@
+from app_config import BSKY_APP_PWD, BSKY_USER
 import logging
 import requests
 from atproto import client_utils, Client
 from datetime import datetime, timezone
-
-import app_config
 from social_media.document import SocialMediaDocument, SocialMediaPostResult
 
 logger = logging.getLogger("tm-bluesky")
 logger.setLevel(logging.DEBUG)
 
-
 class Bluesky:
     def __init__(self):
         self.client = Client()
-        self.client.login(app_config.BSKY_USER, app_config.BSKY_APP_PWD)
+        self.client.login(BSKY_USER, BSKY_APP_PWD)
 
-    def post_document(self, document: SocialMediaDocument) -> SocialMediaPostResult:
+    def post_document(self, document: SocialMediaDocument) -> SocialMediaDocument:
         # extract the components of the document
         text = document.text
         image_url = document.image_url
@@ -25,7 +23,14 @@ class Bluesky:
         url = document.url
         url_title = document.url_title
 
-        return self.post(text, image_url, img_file, hashtags, emojis, url, url_title)
+        result = self.post(text, image_url, img_file, hashtags, emojis, url, url_title)
+
+        document.posted_utc = result.posted_utc
+        document.posted_uri = result.posted_uri
+        document.result_message = result.result_message
+        document.result_code = result.result_code
+
+        return document
 
     def post(
         self,
@@ -81,15 +86,13 @@ class Bluesky:
         post_uri = post.uri
 
         # get the current UTC time
-        utc_now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+        utc_now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
         post_result = SocialMediaPostResult(
-            service="Bluesky",
-            success=True,
             result_message="OK",
             result_code=200,
             posted_uri=post_uri,
-            posted_utc_time=utc_now,
+            posted_utc=utc_now,
         )
 
         return post_result
