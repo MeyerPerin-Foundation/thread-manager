@@ -29,7 +29,7 @@ class BirdContent:
         return caption
 
 
-    def post_birdbuddy_picture(self, n_choices: int = 4, n_latest: int = 20):
+    def post_birdbuddy_picture(self, n_choices: int = 4, n_latest: int = 20) -> SocialMediaPoster | None:
         birds = BirdsDB()
         latest_birds = birds.get_latest_unposted_birds(n_latest)
 
@@ -43,8 +43,8 @@ class BirdContent:
 
 
         if not birdbuddy_list:
-            print("No Bird Buddy content found")
-            return "No Bird Buddy content found", 204
+            logger.info("No Bird Buddy content found")
+            return None
 
         # create a list with the image urls
         image_url_list = [birdbuddy_dict["blob_url"] for birdbuddy_dict in birdbuddy_list]

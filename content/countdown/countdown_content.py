@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from social_media import SocialMediaPoster
+from social_media import SocialMediaPoster, SocialMediaDocument
 
 logger = logging.getLogger("tm-countdown")
 logger.setLevel(logging.INFO)
@@ -83,12 +83,13 @@ class CountdownContent:
         id = p.generate_and_queue_document(text, hashtags=["DaysUntil"])
         return id
 
-    def post_midterms_countdown(self):
+    def post_midterms_countdown(self) -> SocialMediaDocument | None:
         id = self._generate_days_until_document(
             "the US midterms", "2026-11-03", plural=True, stop=0
         )
 
         if id is None:
-            return "No midterms content", 204
+            logger.info("No midterms content")
+            return None
         p = SocialMediaPoster()
         return p.post_with_id(id)

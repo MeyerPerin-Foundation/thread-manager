@@ -1,15 +1,15 @@
 from utils.cosmosdb import TooFarDB
-from social_media import SocialMediaPoster
+from social_media import SocialMediaPoster, SocialMediaDocument
 
 class TooFarContent:
 
-    def post_too_far(self):
+    def post_too_far(self) -> SocialMediaDocument | None:
         too_far = TooFarDB()
         too_far_dict = too_far.get_random_too_far()
 
         if not too_far_dict:
             print("No too far content found")
-            return "No too far content found", 204
+            return None
 
         # remove high unicode characters
         message = too_far_dict["title"]

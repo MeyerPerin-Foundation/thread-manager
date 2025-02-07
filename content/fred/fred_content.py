@@ -35,7 +35,7 @@ class FredContent:
 
         return file_name, max_index, max_value
 
-    def post_egg_prices(self) -> SocialMediaDocument:
+    def post_egg_prices(self) -> SocialMediaDocument | None:
         file_name, max_index, max_value = self.generate_time_series_plot(
             series_id="APU0000708111", chart_title="Egg prices", start_date="2024-01-01"
         )
@@ -45,7 +45,7 @@ class FredContent:
         )
         return self.poster.post_with_id(id)
             
-    def post_gas_prices(self) -> SocialMediaDocument:
+    def post_gas_prices(self) -> SocialMediaDocument | None:
         file_name, max_index, max_value = self.generate_time_series_plot(
             series_id="GASREGW", chart_title="Gas prices", start_date="2024-01-01"
         )

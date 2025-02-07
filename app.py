@@ -111,7 +111,10 @@ def post_midterms():
 
     c = CountdownContent()
     d = c.post_midterms_countdown()
-    return d.result()
+    if d:
+        return d.result()
+    else:
+        return "No content", 204
 
 @app.route("/post_ungovernable", methods=["POST"])
 def post_ungovernable():
@@ -122,7 +125,10 @@ def post_ungovernable():
 
     u = UngovernableContent()
     d = u.post_ungovernable()
-    return d.result()
+    if d:
+        return d.result()
+    else:
+        return "No content", 204
 
 @app.route("/post_too_far", methods=["POST"])
 def post_too_far():
@@ -133,7 +139,10 @@ def post_too_far():
 
     f = TooFarContent()
     d = f.post_too_far()
-    return d.result()
+    if d:
+        return d.result()
+    else:
+        return "No content", 204
 
 @app.route("/post_bird_buddy", methods=["POST"])
 def post_bird_buddy():
@@ -144,7 +153,10 @@ def post_bird_buddy():
 
     b = BirdContent()
     d = b.post_birdbuddy_picture()
-    return d.result()
+    if d:
+        return d.result()
+    else:
+        return "No content", 204
 
 @app.route("/update_birds", methods=["POST"])
 async def update_birds():
@@ -225,7 +237,11 @@ def post_blog_promo():
         return "Unauthorized", 401
     
     b = BlogPromoContent()
-    return b.post_blog_promo()
+    d = b.post_blog_promo()
+    if d:
+        return d.result()
+    else:
+        return "No content", 204
 
 
 @app.route("/update_dogtopia_visits", methods=["POST"])
@@ -336,7 +352,10 @@ def post_egg_prices():
 
     fred = FredContent()
     d = fred.post_egg_prices()
-    return d.result()
+    if d:
+        return d.result()
+    else:
+        return "No content", 204
 
 
 @app.route("/post_gas_prices", methods=["POST"])
@@ -348,7 +367,10 @@ def post_gas_prices():
 
     fred = FredContent()
     d = fred.post_gas_prices()
-    return d.result()
+    if d:
+        return d.result()
+    else:
+        return "No content", 204
 
 
 @app.route("/post_from_queue", methods=["POST"])
@@ -360,4 +382,7 @@ def post_from_queue():
 
     poster = SocialMediaPoster()
     d = poster.post_next_document()
-    return d.result()
+    if d:
+        return d.result()
+    else:
+        return "No content", 204

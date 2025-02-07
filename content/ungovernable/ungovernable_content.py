@@ -1,4 +1,4 @@
-from social_media import SocialMediaPoster
+from social_media import SocialMediaPoster, SocialMediaDocument
 from utils.cosmosdb import UngovernableDB
 import logging
 
@@ -7,13 +7,13 @@ logger.setLevel(logging.INFO)
 
 class UngovernableContent:
 
-    def post_ungovernable(self):
+    def post_ungovernable(self) -> SocialMediaDocument | None:
         ungov = UngovernableDB()
         ungovernable_dict = ungov.get_random_ungovernable()
 
         if not ungovernable_dict:
             print("No ungovernable content found")
-            return "No ungovernable content found", 204
+            return None
 
         message = ungovernable_dict["title"]
 

@@ -1,5 +1,5 @@
 import logging
-from social_media import SocialMediaPoster
+from social_media import SocialMediaPoster, SocialMediaDocument
 from utils.cosmosdb import BlogPostsDB
 from content.blog_promo.blog_reader import blog_bt_summary, blog_li_summary
 
@@ -9,14 +9,15 @@ logger.setLevel(logging.INFO)
 
 class BlogPromoContent:
 
-    def post_blog_promo(self):
+    # TODO: break by service, move decision up
+    def post_blog_promo(self) -> SocialMediaDocument | None:
 
         blog = BlogPostsDB()
         blog_post_metadata = blog.get_latest_blog_post()
 
         if not blog_post_metadata:
             logger.info("No blog promo content found")
-            return "No blog promo content found", 204
+            return None
 
         # Different promo for LinkedIn and Threads/Bluesky
         bt_message = blog_bt_summary(blog_post_metadata["url"])
