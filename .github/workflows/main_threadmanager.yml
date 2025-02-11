@@ -74,3 +74,4 @@ jobs:
         with:
           app-name: 'threadmanager'
           slot-name: 'Production'
+          package: ./flask_app
