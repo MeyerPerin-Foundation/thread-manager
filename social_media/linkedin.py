@@ -40,7 +40,7 @@ class LinkedIn:
             text += f" {hashtag_text}"
 
         try:
-            if image is None:
+            if not image:
                 data = {}
                 with open("social_media_templates/li_text_share.json") as json_file:
                     data = json.load(json_file)
@@ -74,6 +74,12 @@ class LinkedIn:
         except Exception as e:
             action = f"Error: {e}"
             logger.error(f"Error: {e}")
+            return SocialMediaPostResult(
+                result_message=action,
+                result_code=400,
+                posted_uri="",
+                posted_utc=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            )
 
         return SocialMediaPostResult(
             result_message=action,
