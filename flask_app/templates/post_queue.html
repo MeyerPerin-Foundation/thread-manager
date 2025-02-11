@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Post Queue{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Post Queue</h1>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Service</th>
+                <th>Text</th>
+                <th>Post After</th>
+                <th>Image URL</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in queue %}
+            <tr>
+                <td>{{ record.id }}</td>
+                <td>{{ record.service }}</td>
+                <td>{{ record.text }}</td>
+                <td>{{ record.after_utc }}</td>
+                <td>{{ record.img_url }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

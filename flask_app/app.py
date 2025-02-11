@@ -313,6 +313,17 @@ def bird_list():
     return render_template("bird_list.html", bird_list=birds.get_bird_list())
 
 
+@app.route("/posts_queue", methods=["GET"])
+def posts_queue():
+    if not check_auth():
+        if request.content_type == "application/x-www-form-urlencoded":
+            return render_template("not_authorized.html")
+        return "Unauthorized", 401
+
+    poster = SocialMediaPoster()
+    return render_template("post_queue.html", queue=poster.get_post_queue())
+
+
 @app.route("/bird_details/<string:bird_id>", methods=["GET", "POST"])
 def details(bird_id):
     if not check_auth():

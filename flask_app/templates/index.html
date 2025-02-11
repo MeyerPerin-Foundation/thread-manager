@@ -44,10 +44,9 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         setupFormSubmission('postBirdForm');
-        setupFormSubmission('postTooFarForm');
-        setupFormSubmission('postTestForm');
-        setupFormSubmission('postSeveranceForm');
         setupFormSubmission('postUngovernableForm');
+        setupFormSubmission('postTooFarForm');
+        setupFormSubmission('postNext');
     });
 </script>
 {% endblock %}
@@ -61,6 +60,7 @@
 <div class="text-center">
     <a href="/dashboard" class="btn btn-link">Dashboard</a>
     <a href="/bird_list" class="btn btn-link">View Bird List</a>
+    <a href="/posts_queue" class="btn btn-link">View Posts Queue</a>
     <a href="/logout" class="btn btn-link">Logout</a>
 </div>
 <div class="card shadow-sm mb-4">
@@ -76,11 +76,8 @@
             <form id="postTooFarForm" action="/post_too_far" method="post">
                 <button type="submit" class="btn btn-primary btn-lg">Post Too Far</button>
             </form>
-            <form id="postTestForm" action="/post_test" method="post">
-                <button type="submit" class="btn btn-primary btn-lg">Post Test</button>
-            </form>
-            <form id="postSeveranceForm" action="/post_severance" method="post">
-                <button type="submit" class="btn btn-primary btn-lg">Post Severance</button>
+            <form id="postNext" action="/post_from_queue" method="post">
+                <button type="submit" class="btn btn-primary btn-lg">Post next document</button>
             </form>
         </div>
     </div>

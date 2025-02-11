@@ -26,7 +26,7 @@ class LinkedIn:
 
         return document
 
-    def post(text, image=None, hashtags=None, target_url=None) -> SocialMediaPostResult:
+    def post(self, text, image=None, hashtags=None, target_url=None) -> SocialMediaPostResult:
         if target_url is not None:
             text = f"{text}\n\n{target_url}"
 

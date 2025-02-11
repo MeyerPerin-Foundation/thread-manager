@@ -2,6 +2,7 @@ from social_media import SocialMediaDocument, Bluesky, LinkedIn
 import logging
 from utils.cosmosdb import _get_container
 from datetime import datetime, timezone
+from typing import List
 
 logger = logging.getLogger("tm-poster")
 logger.setLevel(logging.DEBUG)
@@ -84,13 +85,25 @@ class SocialMediaPoster:
         self._queue_document(document)
         return document.id
 
+    def get_post_queue(self) -> List[SocialMediaDocument]:
+        container = _get_container("posts", "post_documents")
+
+        # get the current utc time
+        utc_time_now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        query = f"SELECT TOP 1 * FROM c WHERE (c.posted_utc = null AND c.after_utc < '{utc_time_now}') OR (NOT IS_DEFINED(c.posted_utc)) ORDER BY c.after_utc"
+        items = list(
+            container.query_items(query=query, enable_cross_partition_query=True)
+        )
+        return [SocialMediaDocument(**item) for item in items]
+
     def post_next_document(self) -> SocialMediaDocument | None:
         container = _get_container("posts", "post_documents")
 
         # get the current utc time
         utc_time_now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-        query = f"SELECT TOP 1 * FROM c WHERE c.posted_utc = null AND c.after_utc < '{utc_time_now}' ORDER BY c.after_utc"
+        query = f"SELECT TOP 1 * FROM c WHERE (c.posted_utc = null AND c.after_utc < '{utc_time_now}') OR (NOT IS_DEFINED(c.posted_utc)) ORDER BY c.after_utc"
         items = list(
             container.query_items(query=query, enable_cross_partition_query=True)
         )
