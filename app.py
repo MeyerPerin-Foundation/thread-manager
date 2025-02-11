@@ -1,6 +1,5 @@
 import identity.web
 import utils.auth.authorization as authorization
-import os
 
 from azure.monitor.opentelemetry import configure_azure_monitor  # noqa: F401
 
@@ -35,7 +34,7 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 
 load_dotenv()
 
-app = Flask(__name__, root_path=os.path.abspath(os.path.dirname(__file__)))
+app = Flask(__name__)
 app.config.from_object(app_config)
 assert app.config["REDIRECT_PATH"] != "/", "REDIRECT_PATH must not be /"
 Session(app)
