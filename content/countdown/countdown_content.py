@@ -51,6 +51,9 @@ class CountdownContent:
         # If the difference is more than 90 days, it should be a multiple of 10 or 365
         if difference > 90:
             if not ((difference % 10 == 0) or (difference % 365 == 0)):
+                logger.warning(
+                    f"Event {event_name} is {difference} days away, which is not a multiple of 10 or 365. No content will be generated."
+                )
                 return None
 
         text = ""
