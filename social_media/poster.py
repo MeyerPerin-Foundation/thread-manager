@@ -104,7 +104,7 @@ class SocialMediaPoster:
         # get the current utc time
         utc_time_now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-        query = f"SELECT TOP 1 * FROM c WHERE (c.posted_utc = null AND c.after_utc < '{utc_time_now}') OR (NOT IS_DEFINED(c.posted_utc)) ORDER BY c.after_utc"
+        query = f"SELECT * FROM c WHERE (c.posted_utc = null AND c.after_utc > '{utc_time_now}') OR (NOT IS_DEFINED(c.posted_utc)) ORDER BY c.after_utc"
         items = list(
             container.query_items(query=query, enable_cross_partition_query=True)
         )
