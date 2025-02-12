@@ -1,5 +1,5 @@
 from flask import Blueprint, request, render_template
-from social_media import SocialMediaPoster
+from social_media import SocialMediaPoster, SocialMediaScheduler
 
 smp_bp = Blueprint("smp", __name__, url_prefix="/smp")
 
@@ -51,3 +51,23 @@ def add_post_to_queue():
         return f"Accepted with id: {id}", 202
     else:
         return "No content", 204
+
+
+@smp_bp.route("/tickle_scheduler", methods=["POST"])
+def tickle_scheduler():
+
+    scheduler = SocialMediaScheduler()
+    
+    schedule_items = scheduler.list_expired_schedules()
+    ids = []
+    for schedule in schedule_items:
+        id = scheduler.generate_post_document(schedule)
+        scheduler.update_schedule(schedule)
+        if id:
+            ids.append(id)
+
+    if len(ids) > 0:
+        return f"Accepted with ids: {ids}", 202
+    else:
+        return "No content", 204
+

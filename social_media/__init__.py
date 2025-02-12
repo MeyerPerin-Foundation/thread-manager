@@ -2,6 +2,7 @@ from .bluesky import Bluesky
 from .document import SocialMediaDocument, SocialMediaPostResult
 from .linkedin import LinkedIn
 from .poster import SocialMediaPoster
+from .scheduler import SocialMediaScheduler
 
 __all__ = [
     "Bluesky",
@@ -9,4 +10,5 @@ __all__ = [
     "LinkedIn",
     "SocialMediaPostResult",
     "SocialMediaPoster",
+    "SocialMediaScheduler",
  ]
