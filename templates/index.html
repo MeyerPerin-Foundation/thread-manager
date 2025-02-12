@@ -59,24 +59,24 @@
 </div>
 <div class="text-center">
     <a href="/dashboard" class="btn btn-link">Dashboard</a>
-    <a href="/bird_list" class="btn btn-link">View Bird List</a>
-    <a href="/posts_queue" class="btn btn-link">View Posts Queue</a>
+    <a href="birds/list" class="btn btn-link">View Bird List</a>
+    <a href="smp/list" class="btn btn-link">View Posts Queue</a>
     <a href="/logout" class="btn btn-link">Logout</a>
 </div>
 <div class="card shadow-sm mb-4">
     <div class="card-body">
         <h3 class="card-title">Actions</h3>
         <div class="d-grid gap-3">
-            <form id="postBirdForm" action="/post_bird_buddy" method="post">
+            <form id="postBirdForm" action="birds/post_bird_buddy" method="post">
                 <button type="submit" class="btn btn-primary btn-lg">Post Bird</button>
             </form>
-            <form id="postUngovernableForm" action="/post_ungovernable" method="post">
+            <form id="postUngovernableForm" action="ungov/post_ungovernable" method="post">
                 <button type="submit" class="btn btn-primary btn-lg">Post Ungovernable</button>
             </form>
-            <form id="postTooFarForm" action="/post_too_far" method="post">
+            <form id="postTooFarForm" action="too_far/post_too_far" method="post">
                 <button type="submit" class="btn btn-primary btn-lg">Post Too Far</button>
             </form>
-            <form id="postNext" action="/post_from_queue" method="post">
+            <form id="postNext" action="smp/pop" method="post">
                 <button type="submit" class="btn btn-primary btn-lg">Post next document</button>
             </form>
         </div>

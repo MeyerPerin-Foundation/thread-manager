@@ -13,6 +13,12 @@ class Bluesky:
         self.client = Client()
         self.client.login(BSKY_USER, BSKY_APP_PWD)
 
+
+    def get_follower_count(self) -> int:
+        profile = self.client.get_profile(BSKY_USER)
+        return profile["followers_count"]
+
+
     def post_document(self, document: SocialMediaDocument) -> SocialMediaDocument:
         # extract the components of the document
         text = document.text

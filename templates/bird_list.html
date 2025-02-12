@@ -24,7 +24,7 @@
                 <td><img src="{{ record.blob_url }}" alt="{{ record.species }}" class="img-thumbnail" style="max-width: 100px;"></td>
                 <td>{{ record.created_at | default("No creation date") }}</td>
                 <td><input type="checkbox" {% if record.hidden %}checked{% endif %} disabled></td>
-                <td><a href="/bird_details/{{ record.id }}" class="btn btn-primary">View</a></td>
+                <td><a href="/birds/bird_details/{{ record.id }}" class="btn btn-primary">View</a></td>
             </tr>
             {% endfor %}
         </tbody>
