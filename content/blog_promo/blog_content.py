@@ -41,6 +41,8 @@ class BlogPromoContent:
             after_utc=after_utc,
         )
         ids.append(id)
+        if not ids:
+            return None
         blog.update_blog_posted(blog_post_metadata)
         return ids
 

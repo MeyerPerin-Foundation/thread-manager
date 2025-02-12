@@ -21,6 +21,8 @@ class TooFarContent:
 
         p = SocialMediaPoster()
         id = p.generate_and_queue_document(text=message, hashtags=["GoneTooFar"], image_url=too_far_dict["blob_url"], after_utc=after_utc)
+        if not id:
+            return None
         too_far_dict["title"] = message
         too_far.update_too_far_posted(too_far_dict)
 

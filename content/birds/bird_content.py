@@ -79,6 +79,8 @@ class BirdContent:
             url_title="📷: Birdbuddy",
             after_utc=after_utc,
         )
+        if not id:
+            return None
 
         birds.update_birdbuddy_posted(birdbuddy_dict)
         return id
