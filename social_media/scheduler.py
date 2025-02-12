@@ -1,6 +1,6 @@
 import logging
 from utils.cosmosdb import _get_container
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC, timedelta
 from typing import List
 
 from social_media import SocialMediaPoster
@@ -22,7 +22,7 @@ class SocialMediaScheduler:
 
     def list_expired_schedules (self) -> List[dict]:
 
-        now = datetime.datetime.now(datetime.UTC).isoformat()
+        now = datetime.now(UTC).isoformat()
         query = f"SELECT * FROM c WHERE c.last_scheduled_time_utc < '{now}'"
         return list(self.container.query_items(query, enable_cross_partition_query=True))
 
