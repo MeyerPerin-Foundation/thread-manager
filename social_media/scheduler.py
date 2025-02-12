@@ -69,3 +69,25 @@ class SocialMediaScheduler:
             pass
 
         return id
+
+    def next_utc_time(self, hours: str, minutes: str, tz_str: str) -> str:
+        hour = int(hours)
+        minute = int(minutes)
+        
+        local_tz = ZoneInfo(tz_str)
+        
+        now_utc = datetime.now(timezone.utc)
+        now_local = now_utc.astimezone(local_tz)
+        
+        # Build a candidate datetime for today in the target timezone with the given hour and minute.
+        candidate = now_local.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        
+        # If the candidate time is not in the future relative to now_local, move to the next day.
+        if candidate <= now_local:
+            candidate += timedelta(days=1)
+        
+        # Convert the candidate time back to UTC.
+        candidate_utc = candidate.astimezone(timezone.utc)
+        
+        # Return the UTC time as an ISO 8601 formatted string.
+        return candidate_utc.strftime("%Y-%m-%dT%H:%M:%S%UTC")
