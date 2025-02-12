@@ -10,7 +10,7 @@ def post_midterms():
     # if there's any json data in the request, get its after_utc
     after_utc = request.json.get("after_utc", None)    
     if after_utc:
-        id = queue_midterms_countdown(after_utc=after_utc)
+        id = c.queue_midterms_countdown(after_utc=after_utc)
         if id:
             return "Accepted", 202
         else:
