@@ -8,6 +8,14 @@ birds_bp = Blueprint('birds', __name__, url_prefix='/birds')
 def post_bird_buddy():
 
     b = BirdContent()
+
+    # if there's any json data in the request, get its after_utc
+    after_utc = request.json.get("after_utc", None)    
+
+    if after_utc:
+        b.generate_birdbuddy_post(after_utc=after_utc)
+        return "Accepted", 202        
+
     d = b.post_birdbuddy_picture()
     if d:
         return d.result()
