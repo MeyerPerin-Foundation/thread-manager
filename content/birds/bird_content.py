@@ -28,8 +28,7 @@ class BirdContent:
 
         return caption
 
-
-    def post_birdbuddy_picture(self, n_choices: int = 4, n_latest: int = 20) -> SocialMediaPoster | None:
+    def generate_birdbuddy_post(self, n_choices: int = 4, n_latest: int = 20, after_utc=None) -> str | None:
         birds = BirdsDB()
         latest_birds = birds.get_latest_unposted_birds(n_latest)
 
@@ -78,7 +77,14 @@ class BirdContent:
             emojis=["🪶"],
             url="https://t.ly/birdb",
             url_title="📷: Birdbuddy",
+            after_utc=after_utc,
         )
 
         birds.update_birdbuddy_posted(birdbuddy_dict)
+        return id
+
+
+    def post_birdbuddy_picture(self, n_choices: int = 4, n_latest: int = 20) -> SocialMediaPoster | None:
+        p = SocialMediaPoster()
+        id = self.generate_birdbuddy_post(n_choices, n_latest)
         return p.post_with_id(id)

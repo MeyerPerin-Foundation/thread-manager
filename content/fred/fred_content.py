@@ -35,7 +35,14 @@ class FredContent:
 
         return file_name, max_index, max_value
 
-    def post_egg_prices(self) -> SocialMediaDocument | None:
+    def queue_fred_content(self, caption, filee_name, hashtags, after_utc=None) -> str | None:
+        id = self.poster.generate_and_queue_document(
+            text=caption, img_file=file_name, hashtags=hashtags, after_utc=after_utc
+        )
+        return id
+
+
+    def queue_egg_prices(self, after_utc=None) -> SocialMediaDocument | None:
         file_name, max_index, max_value = self.generate_time_series_plot(
             series_id="APU0000708111", chart_title="Egg prices", start_date="2024-01-01"
         )
@@ -43,9 +50,9 @@ class FredContent:
         id = self.poster.generate_and_queue_document(
             text=caption, img_file=file_name, hashtags=["AreWeGreatAgainYet"]
         )
-        return self.poster.post_with_id(id)
+        return queue_fred_content(caption, file_name, ["AreWeGreatAgainYet"], after_utc)
             
-    def post_gas_prices(self) -> SocialMediaDocument | None:
+    def queue_gas_prices(self, after_utc=None) -> SocialMediaDocument | None:
         file_name, max_index, max_value = self.generate_time_series_plot(
             series_id="GASREGW", chart_title="Gas prices", start_date="2024-01-01"
         )
@@ -53,4 +60,11 @@ class FredContent:
         id = self.poster.generate_and_queue_document(
             text=caption, img_file=file_name, hashtags=["AreWeGreatAgainYet"]
         )
-        return self.poster.post_with_id(id)
+        return queue_fred_content(caption, file_name, ["AreWeGreatAgainYet"], after_utc)
+
+    def post_gas_prices(self) -> SocialMediaDocument | None:
+        return self.poster.post_with_id(self.queue_gas_prices())
+
+    def post_egg_prices(self) -> SocialMediaDocument | None:
+        return self.poster.post_with_id(self.queue_egg_prices())
+        

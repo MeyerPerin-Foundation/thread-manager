@@ -1,4 +1,5 @@
 import logging
+from typing import List
 from social_media import SocialMediaPoster, SocialMediaDocument
 from content.blog_promo.blog_posts_db import BlogPostsDB
 from content.blog_promo.blog_reader import blog_bt_summary, blog_li_summary
@@ -9,9 +10,9 @@ logger.setLevel(logging.INFO)
 
 class BlogPromoContent:
 
-    # TODO: break by service, move decision up
-    def post_blog_promo(self) -> SocialMediaDocument | None:
-
+    def generate_blog_promo(self, after_utc = None) -> List[str] | None:
+        
+        ids = []
         blog = BlogPostsDB()
         blog_post_metadata = blog.get_latest_blog_post()
 
@@ -27,8 +28,9 @@ class BlogPromoContent:
             hashtags=["BlogPost"],
             url=blog_post_metadata["url"],
             url_title="Read blog post",
+            after_utc=after_utc,
         )
-        p.post_with_id(id)
+        ids.append(id)
 
         linkedin_message = blog_li_summary(blog_post_metadata["url"])
         id = p.generate_and_queue_document(
@@ -36,7 +38,20 @@ class BlogPromoContent:
             text=linkedin_message,
             hashtags=["BlogPost"],
             url=blog_post_metadata["url"],
+            after_utc=after_utc,
         )
+        ids.append(id)
         blog.update_blog_posted(blog_post_metadata)
+        return ids
 
-        return p.post_with_id(id)
+
+    def post_blog_promo(self) -> SocialMediaDocument | None:
+        p = SocialMediaPoster()
+        ids = self.generate_blog_promo()
+        if not ids:
+            return None
+        for id in ids:
+            d = p.post_with_id(id)
+
+        # return the last document posted
+        return d

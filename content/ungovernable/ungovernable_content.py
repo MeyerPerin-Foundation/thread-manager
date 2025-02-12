@@ -7,12 +7,12 @@ logger.setLevel(logging.INFO)
 
 class UngovernableContent:
 
-    def post_ungovernable(self) -> SocialMediaDocument | None:
+    def queue_ungovernable(self, after_utc = None) -> str | None:
         ungov = UngovernableDB()
         ungovernable_dict = ungov.get_random_ungovernable()
 
         if not ungovernable_dict:
-            print("No ungovernable content found")
+            logger.warning("No ungovernable content found")
             return None
 
         message = ungovernable_dict["title"]
@@ -21,10 +21,14 @@ class UngovernableContent:
         message = message.encode("ascii", "ignore").decode("ascii")
 
         p = SocialMediaPoster()
-        
-        id = p.generate_and_queue_document(text=message, hashtags=["BecomeUngovernable"], image_url=ungovernable_dict["blob_url"])
+        id = p.generate_and_queue_document(text=message, hashtags=["BecomeUngovernable"], image_url=ungovernable_dict["blob_url"], after_utc=after_utc)
         ungovernable_dict["title"] = message
         ungov.update_ungovernable_posted(ungovernable_dict)
+        return id
+
+    def post_ungovernable(self) -> SocialMediaDocument | None:
+        p = SocialMediaPoster()
+        id = self.queue_ungovernable()
         return p.post_with_id(id)
 
     def count_ungovernable(self):

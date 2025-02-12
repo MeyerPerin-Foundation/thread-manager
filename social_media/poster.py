@@ -112,7 +112,11 @@ class SocialMediaPoster:
             return None
         return self._post_document(SocialMediaDocument(**items[0]))
 
-    def post_with_id(self, id: str) -> SocialMediaDocument | None:
+    def post_with_id(self, id: str | None) -> SocialMediaDocument | None:
+        if id is None:
+            logger.warning("No id provided to post_with_id")
+            return None
+        
         container = _get_container("posts", "post_documents")
         query = f"SELECT * FROM c WHERE c.id = '{id}'"
         items = list(
