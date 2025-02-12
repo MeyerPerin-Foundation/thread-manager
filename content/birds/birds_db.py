@@ -1,9 +1,10 @@
-from ._dbutils import _get_container
-from ._dbutils import _get_setting
+from utils.cosmosdb import _get_container
+from utils.cosmosdb import _get_setting
 import random
 import datetime
-from ._dbutils import dblogger
+import logging
 
+dblogger = logging.getLogger("tm-cosmosdb")
 
 class BirdsDB:
     def __init__(self):

@@ -1,7 +1,7 @@
 
 import random
 import logging
-from utils.cosmosdb import BirdsDB
+from .birds_db import BirdsDB
 from social_media import SocialMediaPoster
 import utils.ai.ai as ai
 

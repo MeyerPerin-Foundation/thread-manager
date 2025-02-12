@@ -1,10 +1,8 @@
 from flask import Blueprint, request, render_template
 from content.blog_promo import BlogPromoContent
-from utils.cosmosdb.birds import BirdsDB
 import content.blog_promo.sitemaps as sitemaps
 
 blog_promo_bp = Blueprint('blog_promo', __name__, url_prefix='/blog_promo')
-
 
 @blog_promo_bp.route("/post_blog_promo", methods=["POST"])
 def post_blog_promo():  

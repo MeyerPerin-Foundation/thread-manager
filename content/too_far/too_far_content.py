@@ -1,4 +1,4 @@
-from utils.cosmosdb import TooFarDB
+from .too_far_db import TooFarDB
 from social_media import SocialMediaPoster, SocialMediaDocument
 
 class TooFarContent:

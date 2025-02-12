@@ -1,5 +1,5 @@
 import app_config
-from utils.cosmosdb import AuthDB
+from .auth_db import AuthDB
 import logging
 
 logger = logging.getLogger("tm-auth")

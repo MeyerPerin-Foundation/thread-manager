@@ -1,5 +1,5 @@
 from social_media import SocialMediaPoster, SocialMediaDocument
-from utils.cosmosdb import UngovernableDB
+from .ungovernable_db import UngovernableDB
 import logging
 
 logger = logging.getLogger("tm-ungov")
@@ -26,4 +26,8 @@ class UngovernableContent:
         ungovernable_dict["title"] = message
         ungov.update_ungovernable_posted(ungovernable_dict)
         return p.post_with_id(id)
+
+    def count_ungovernable(self):
+        ungov = UngovernableDB()
+        return ungov.count_ungovernable()
 

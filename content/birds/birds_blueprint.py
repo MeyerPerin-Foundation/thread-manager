@@ -1,6 +1,6 @@
 from flask import Blueprint, request, render_template
 from content.birds import BirdContent
-from utils.cosmosdb.birds import BirdsDB
+from .birds_db import BirdsDB
 
 birds_bp = Blueprint('birds', __name__, url_prefix='/birds')
 

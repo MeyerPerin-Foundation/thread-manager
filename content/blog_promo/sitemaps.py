@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 import requests
 from azure.storage.blob import BlobServiceClient
 import app_config
-from utils.cosmosdb import BlogPostsDB
+from content.blog_promo.blog_posts_db import BlogPostsDB
 import logging
 
 logger = logging.getLogger("tm-sitemaps")

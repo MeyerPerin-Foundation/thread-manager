@@ -1,6 +1,6 @@
 import logging
 from social_media import SocialMediaPoster, SocialMediaDocument
-from utils.cosmosdb import BlogPostsDB
+from content.blog_promo.blog_posts_db import BlogPostsDB
 from content.blog_promo.blog_reader import blog_bt_summary, blog_li_summary
 
 logger = logging.getLogger("tm-blog-promo")

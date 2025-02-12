@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template
 
-from utils.cosmosdb.birds import BirdsDB
-from utils.cosmosdb.dashboard import DashboardDB
-from utils.cosmosdb.too_far import TooFarDB
-from utils.cosmosdb.ungovernable import UngovernableDB
+from content.birds import BirdContent
+from content.too_far import TooFarContent
+from content.ungovernable import UngovernableContent
+from .dashboard_db import DashboardDB
 from social_media import Bluesky
 
 dashboard_bp = Blueprint("dashboard", __name__, url_prefix="/dashboard")
@@ -22,11 +22,12 @@ def dashboard():
 def data_snapshot():
     payload = {}
 
-    birds = BirdsDB()
-    ungov = UngovernableDB()
-    too_far = TooFarDB()
     dash = DashboardDB()
+    birds = BirdContent()
+    ungov = UngovernableContent()
+    too_far = TooFarContent()
     bsky = Bluesky()
+
 
     # Combine the data into a single payload
     payload.update(birds.count_birds())

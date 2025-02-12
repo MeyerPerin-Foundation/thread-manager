@@ -1,4 +1,4 @@
-from ._dbutils import _get_container
+from utils.cosmosdb import _get_container
 import random
 import datetime
 

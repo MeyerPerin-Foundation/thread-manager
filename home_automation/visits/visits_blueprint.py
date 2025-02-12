@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from utils.cosmosdb import VisitsDB
+from .visits_db import VisitsDB
 
 import datetime
 import pytz

@@ -1,6 +1,6 @@
 from openai import AzureOpenAI, BadRequestError
 import app_config
-from utils.cosmosdb import PromptsDB
+from .prompts_db import PromptsDB
 import datetime
 import pytz
 import logging
