@@ -4,6 +4,9 @@ from azure.monitor.opentelemetry import configure_azure_monitor  # noqa: F401
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_session import Session
 from dotenv import load_dotenv
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 
 import app_config
 from social_media.poster import SocialMediaPoster
@@ -94,3 +97,37 @@ def index():
         api_token=app_config.API_TOKEN,
         version=identity.__version__,
     )
+
+@app.template_filter('tzfilter')
+def convert_timezone(value, timezone_str):
+    """
+    Convert a datetime object from UTC to the specified timezone using zoneinfo.
+    
+    :param value: datetime object assumed to be in UTC (or naive)
+    :param timezone_str: The target timezone string, e.g., 'America/Chicago'
+    :return: datetime object in the target timezone
+    """
+    if value is None:
+        return ""
+
+    value = value.replace("UTC", "Z")
+
+    value = datetime.fromisoformat(value)
+    
+    if not isinstance(value, datetime):
+        raise ValueError("The value must be a datetime object")
+    
+    # If the datetime is naive, assume it's in UTC
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=ZoneInfo("UTC"))
+    
+    # Convert the datetime to the target timezone
+    try:
+        target_tz = ZoneInfo(timezone_str)
+    except Exception as e:
+        raise ValueError(f"Invalid timezone: {timezone_str}") from e
+    
+    tzv = value.astimezone(target_tz)    
+    
+    # convert back to a string in the format 'YYYY-MM-DD HH:MM PM'
+    return tzv.strftime("%Y-%m-%d %I:%M %p")

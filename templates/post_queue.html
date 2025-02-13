@@ -21,8 +21,16 @@
                 <td>{{ record.id }}</td>
                 <td>{{ record.service }}</td>
                 <td>{{ record.text }}</td>
-                <td>{{ record.after_utc }}</td>
-                <td>{{ record.img_url }}</td>
+                <td>
+                    {{ record.after_utc | tzfilter("America/Chicago") }}
+                </td>
+                <td>
+                    {% if record.image_url %}
+                        <img src="{{ record.image_url }}" class="img-thumbnail" style="max-width: 100px;">
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
         </tbody>
