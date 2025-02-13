@@ -1,6 +1,6 @@
 import logging
 from utils.cosmosdb import _get_container
-from datetime import datetime, timezone, UTC, timedelta
+from datetime import datetime, timezone, UTC, timedelta, fromisoformat
 from typing import List
 
 from social_media import SocialMediaPoster
@@ -33,8 +33,8 @@ class SocialMediaScheduler:
         unit = schedule["repeat_unit"]
         every = schedule["repeat_every"]
         
-        new_time = next + timedelta(**{unit: every})
-        schedule["next_scheduled_time_utc"] = new_time        
+        new_time = fromisoformat(next) + timedelta(**{unit: every})
+        schedule["next_scheduled_time_utc"] = new_time.isoformat()
         self.container.upsert_item(schedule)
 
     def generate_post_document(self, schedule: dict):
