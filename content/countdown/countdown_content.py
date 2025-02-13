@@ -6,13 +6,17 @@ logger = logging.getLogger("tm-countdown")
 logger.setLevel(logging.INFO)
 
 class CountdownContent:
-    def _calculate_date_difference(self, target_date: str) -> int | None:
+    def _calculate_date_difference(self, target_date: str, after_utc: str = None) -> int | None:
         try:
             # Convert the fixed date string to a datetime object
             target_date_obj = datetime.strptime(target_date, "%Y-%m-%d").date()
 
             # Get today's date
-            today = datetime.today().date()
+            if not after_utc:
+                today = datetime.today().date()
+            else:
+                after_utc = after_utc.replace("UTC", "Z")
+                today = datetime.fromisoformat(after_utc).date()
 
             # Calculate the difference in days
             difference = (target_date_obj - today).days
@@ -33,7 +37,7 @@ class CountdownContent:
         logger.info(f"Calculating the days until {event_name} on {event_date}")
 
         # Calculate the difference in days
-        difference = self._calculate_date_difference(event_date)
+        difference = self._calculate_date_difference(event_date, after_utc)
         logger.info(f"Calculated the difference as {difference}")
 
         if difference is None:
