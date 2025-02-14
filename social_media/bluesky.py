@@ -67,7 +67,7 @@ class Bluesky:
             # if the hashtag does not start with a #, add it
             if not hashtag.startswith("#"):
                 hashtag_text = "#" + hashtag
-            text_builder.tag(hashtag_text, hashtag)
+            text_builder.tag(hashtag_text + " ", hashtag)
 
         if url is not None:
             if url_title is not None:
