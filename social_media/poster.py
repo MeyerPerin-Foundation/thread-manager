@@ -139,3 +139,32 @@ class SocialMediaPoster:
             logger.info(f"No document with id {id}")
             return None
         return self._post_document(SocialMediaDocument(**items[0]))
+
+    def get_post_details(self, id: str) -> SocialMediaDocument | None:
+        container = _get_container("posts", "post_documents")
+        query = f"SELECT * FROM c WHERE c.id = '{id}'"
+        items = list(
+            container.query_items(query=query, enable_cross_partition_query=True)
+        )
+        if len(items) == 0:
+            logger.info(f"No document with id {id}")
+            return None
+        return SocialMediaDocument(**items[0])
+
+    def delete_post(self, id: str) -> bool:
+        container = _get_container("posts", "post_documents")
+        try:
+            container.delete_item(id, partition_key=id)
+            return True
+        except Exception as e:
+            logger.error(f"Error deleting post with id {id}: {e}")
+            return False
+
+    def upsert_post(self, document: SocialMediaDocument) -> bool:
+        container = _get_container("posts", "post_documents")
+        try:
+            container.upsert_item(document.model_dump())
+            return True
+        except Exception as e:
+            logger.error(f"Error upserting post with id {document.id}: {e}")
+            return False

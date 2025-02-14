@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Post Details{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('smp.list_posts') }}" class="btn btn-link mt-3">Back to List</a>
+<div class="container mt-5">
+    <h1 class="mb-4">Post Details</h1>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="text" class="form-label">Text</label>
+            <textarea name="text" id="text" class="form-control">{{ record.text }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="after_utc" class="form-label">Post After (UTC)</label>
+            <input type="datetime-local" name="after_utc" id="after_utc" class="form-control" value="{{ record.after_utc }}">
+        </div>
+        <div class="mb-3">
+            <label for="service" class="form-label">Service</label>
+            <select name="service" id="service" class="form-select">
+                <option value="Bluesky" {% if record.service == 'Bluesky' %}selected{% endif %}>Bluesky</option>
+                <option value="LinkedIn" {% if record.service == 'LinkedIn' %}selected{% endif %}>LinkedIn</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="image_url" class="form-label">Image URL</label>
+            <input type="text" name="image_url" id="image_url" class="form-control" value="{{ record.image_url }}">
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+    </form>
+    <img src="{{ record.image_url }}" class="card-img-top">
+
+    
+</div>
+{% endblock %}

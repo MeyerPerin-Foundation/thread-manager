@@ -13,6 +13,7 @@
                 <th>Text</th>
                 <th>Post After</th>
                 <th>Image URL</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -30,6 +31,16 @@
                     {% else %}
                         N/A
                     {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('smp.post_details', post_id=record.id) }}" class="btn btn-primary">Edit</a>
+                    <form method="POST" action="{{ url_for('smp.delete_post', post_id=record.id) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('smp.publish_post', post_id=record.id) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-danger">Publish Now</button>
+                    </form>
+
                 </td>
             </tr>
             {% endfor %}
