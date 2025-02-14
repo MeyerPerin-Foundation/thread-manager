@@ -43,9 +43,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        setupFormSubmission('postBirdForm');
-        setupFormSubmission('postUngovernableForm');
-        setupFormSubmission('postTooFarForm');
+        setupFormSubmission('postSchedule');
         setupFormSubmission('postNext');
     });
 </script>
@@ -67,14 +65,8 @@
     <div class="card-body">
         <h3 class="card-title">Actions</h3>
         <div class="d-grid gap-3">
-            <form id="postBirdForm" action="birds/post_bird_buddy" method="post">
-                <button type="submit" class="btn btn-primary btn-lg">Post Bird</button>
-            </form>
-            <form id="postUngovernableForm" action="ungov/post_ungovernable" method="post">
-                <button type="submit" class="btn btn-primary btn-lg">Post Ungovernable</button>
-            </form>
-            <form id="postTooFarForm" action="too_far/post_too_far" method="post">
-                <button type="submit" class="btn btn-primary btn-lg">Post Too Far</button>
+            <form id="postSchedule" action="smp/tickle_scheduler" method="post">
+                <button type="submit" class="btn btn-primary btn-lg">Reprocess schedule</button>
             </form>
             <form id="postNext" action="smp/pop" method="post">
                 <button type="submit" class="btn btn-primary btn-lg">Post next document</button>

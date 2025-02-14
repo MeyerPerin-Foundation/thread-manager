@@ -31,4 +31,8 @@ class TooFarContent:
         p = SocialMediaPoster()
         id = self.generate_too_far()
         return p.post_with_id(id)
+        
 
+    def count_too_far(self) -> int:
+        too_far = TooFarDB()
+        return too_far.count_too_far()  
