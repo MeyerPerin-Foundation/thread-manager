@@ -65,9 +65,18 @@ class SocialMediaScheduler:
             u = UngovernableContent()
             id = u.queue_ungovernable(after_utc=after_utc)
         elif command == "fred":
-            logger.warning("Fred is not implemented yet")
-            pass
-
+            logger.info("Scheduling Fred content")
+            f = FredContent()
+            id = f.queue_time_series_plot(
+                series_id = schedule["command_parameters"]["series_id"],
+                series_description = schedule["command_parameters"]["series_description"],
+                series_highlight = schedule["command_parameters"].get("series_highlight", "max"),
+                start_date = schedule["command_parameters"]["start_date"],
+                end_date = schedule["command_parameters"].get("end_date"),
+                hashtags = schedule["command_parameters"].get("hashtags"),
+                after_utc = after_utc,
+            )
+                
         return id
 
     def next_utc_time(self, hours: str, minutes: str, tz_str: str) -> str:

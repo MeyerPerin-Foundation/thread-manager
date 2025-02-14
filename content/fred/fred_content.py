@@ -1,70 +1,101 @@
 import app_config
 from fredapi import Fred
 from social_media import SocialMediaPoster, SocialMediaDocument
+from utils.azstorage import AzureStorageClient
+import uuid
+import pandas as pd
+import io
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from tenacity import retry, wait_exponential, stop_after_attempt
 
 class FredContent:
     def __init__(self):
         self.api = Fred(api_key=app_config.FRED_API_KEY)
         self.poster = SocialMediaPoster()
 
-    def generate_time_series_plot(
-        self, series_id: str, chart_title: str, start_date=None, end_date=None
-    ) -> tuple:
-        data = self.api.get_series(
+    @retry(wait=wait_exponential(multiplier=1, min=4, max=60), stop=stop_after_attempt(3))
+    def get_series(self, 
+        series_id: str,
+        observation_start, 
+        observation_end) -> pd.Series:
+        data = self.api.get_series(series_id, observation_start, observation_end)
+        return data
+    
+
+    def queue_time_series_plot(
+        self, 
+        series_id: str, 
+        series_description: str, 
+        series_highlight: str = "max", 
+        start_date=None, 
+        end_date=None, 
+        hashtags=None,
+        after_utc=None
+    ) -> str | None:
+
+        tags = ["FredChartGenerator"]
+
+        if hashtags is not None:
+            tags.extend(hashtags)
+
+        if start_date is None:
+            raise ValueError("start_date is required")
+
+        series_frequency = self.api.get_series_info(series_id).frequency_short
+
+        data = self.get_series(
             series_id, observation_start=start_date, observation_end=end_date
         )
+        
+        if after_utc is None:
+            after_utc = "2000-01-01T00:00:00Z"
 
-        # find the max value in the data
-        max_value = max(data)
+        if series_highlight == "max":
+            # find the max value in the data
+            value = max(data)
+            index = data.idxmax()
+        else:
+            raise ValueError("Invalid series_highlight value.")
 
-        # find the datetimeindex for the max value
-        max_index = data.idxmax()
+        # adjust index to match the series frequency
+        if series_frequency == "M":
+            index = index.strftime("%B %Y")
+        elif series_frequency == "Q":
+            index = index.strftime("%B %Y")
+        elif series_frequency == "A":
+            index = index.strftime("%Y")
+        else:
+            index = index.strftime("%B %d, %Y")
 
-        # convert max index to month year
-        max_index = max_index.strftime("%B %Y")
+        # convert start_date to datetime
+        start_date = pd.to_datetime(start_date)
+        since = start_date.strftime("%B %d, %Y")
 
-        # generate a plot and save it to a file, overwriting any existing file
-        file_name = f"{series_id}.png"
+        # generate the caption
+        if series_highlight == "max":
+            caption = f"The highest {series_description} since {since} was in {index}, at ${value:.2f}."
+    
+        # capitalize the series_description
+        chart_title = series_description.capitalize()
+
+        # create a plot and upload it to Azure Storage
+        buf = io.BytesIO()
         plt.plot(data)
         plt.title(chart_title)
-        plt.savefig(file_name)
+        plt.savefig(buf, format="png")
         plt.close()
+        buf.seek(0)
+        blob_name = f"fred-{str(uuid.uuid4())}.png"
+        azs = AzureStorageClient()
+        image_url = azs.upload_blob("post-images", blob_name, buf.getvalue())
 
-        return file_name, max_index, max_value
-
-    def queue_fred_content(self, caption, filee_name, hashtags, after_utc=None) -> str | None:
         id = self.poster.generate_and_queue_document(
-            text=caption, img_file=file_name, hashtags=hashtags, after_utc=after_utc
+            text=caption, image_url=image_url, hashtags=tags, after_utc=after_utc
         )
+
         return id
 
 
-    def queue_egg_prices(self, after_utc=None) -> SocialMediaDocument | None:
-        file_name, max_index, max_value = self.generate_time_series_plot(
-            series_id="APU0000708111", chart_title="Egg prices", start_date="2024-01-01"
-        )
-        caption = f"Since January 2024, the highest price of eggs was in {max_index}, at ${max_value:.2f} per dozen."
-        id = self.poster.generate_and_queue_document(
-            text=caption, img_file=file_name, hashtags=["AreWeGreatAgainYet"]
-        )
-        return queue_fred_content(caption, file_name, ["AreWeGreatAgainYet"], after_utc)
-            
-    def queue_gas_prices(self, after_utc=None) -> SocialMediaDocument | None:
-        file_name, max_index, max_value = self.generate_time_series_plot(
-            series_id="GASREGW", chart_title="Gas prices", start_date="2024-01-01"
-        )
-        caption = f"Since January 2024, the highest nationwide average price of regular gas was in {max_index}, at ${max_value:.2f} per gallon."
-        id = self.poster.generate_and_queue_document(
-            text=caption, img_file=file_name, hashtags=["AreWeGreatAgainYet"]
-        )
-        return queue_fred_content(caption, file_name, ["AreWeGreatAgainYet"], after_utc)
-
-    def post_gas_prices(self) -> SocialMediaDocument | None:
-        return self.poster.post_with_id(self.queue_gas_prices())
-
-    def post_egg_prices(self) -> SocialMediaDocument | None:
-        return self.poster.post_with_id(self.queue_egg_prices())
         

@@ -1,6 +1,7 @@
 import datetime
 from birdbuddy.client import BirdBuddy
 from utils.cosmosdb import _get_setting
+from utils.azstorage.azs_client import AzureStorageClient
 from .birds_db import BirdsDB
 from io import BytesIO
 from azure.storage.blob import BlobServiceClient
@@ -11,12 +12,6 @@ import logging
 
 logger = logging.getLogger("tm-birdbuddy-loader")
 logger.setLevel(logging.INFO)
-
-def upload_to_azure_storage(blob_service_client, container_name, blob_name, data):
-    blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
-    blob_client.upload_blob(data, overwrite=True)
-    blob_url = blob_client.url
-    return blob_url
 
 async def fetch_new_feed_items(api_client, since):
     feed_response = await api_client.refresh_feed(since=since)
@@ -89,7 +84,6 @@ async def update_birds(since = None):
     
     logger.info(f"Updating birds captured by Birdbuddy since {since}")
 
-    blob_service_client = BlobServiceClient.from_connection_string(app_config.STORAGE_CONNECTION_STRING)
     bb = BirdBuddy(app_config.BIRD_BUDDY_USER, app_config.BIRD_BUDDY_PASSWORD)
     media_list = await get_media_list(bb, since)
 
@@ -105,7 +99,7 @@ async def update_birds(since = None):
         logger.info(f"Processing item {i} of {N}")
         uri = item['image_url']
 
-        # upload all videos, but check images with OpenAI first
+        # TODO: upload all videos, but check images with OpenAI first
         if item['media_type'] == 'MediaImage':
             # if it's not a good bird, just skip it
             if not ai.good_birb(uri):
@@ -124,7 +118,8 @@ async def update_birds(since = None):
             blob_name = f"{item['id']}.mp4"
 
         # Upload to Azure Storage
-        blob_url = upload_to_azure_storage(blob_service_client, "bird-buddy", blob_name, data.getvalue())
+        azsc = AzureStorageClient()
+        blob_url = azsc.upload_to_azure_storage("bird-buddy", blob_name, data.getvalue())
 
         birds = BirdsDB()
         # Save to Cosmos DB
