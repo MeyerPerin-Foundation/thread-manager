@@ -1,9 +1,9 @@
-
 import random
 import logging
 from .birds_db import BirdsDB
 from social_media import SocialMediaPoster
 import utils.ai.ai as ai
+from .birdbuddy_to_cosmos import update_birds
 
 logger = logging.getLogger("tm-birds")
 logger.setLevel(logging.INFO)
@@ -94,3 +94,14 @@ class BirdContent:
     def count_birds(self):
         birds = BirdsDB()
         return birds.count_birds()
+
+    def upload_birds(self, since=None):
+        return update_birds(since=since)
+
+    def get_latest_bird_update(self):
+        birds = BirdsDB()
+        return birds.get_latest_bird_update()
+
+    def set_latest_bird_update(self, last_update):
+        birds = BirdsDB()
+        return birds.set_latest_bird_update(last_update)

@@ -1,6 +1,7 @@
 from flask import Blueprint, request, render_template
 from content.birds import BirdContent
 from .birds_db import BirdsDB
+import datetime
 
 birds_bp = Blueprint('birds', __name__, url_prefix='/birds')
 
@@ -22,14 +23,14 @@ def post_bird_buddy():
     else:
         return "No content", 204
 
-@birds_bp.route("/update_birds", methods=["POST"])
-async def update_birds():
+@birds_bp.route("/upload_birds", methods=["POST"])
+async def upload_birds():
 
-    birds = BirdsDB()
+    birds = BirdContent()
     now = datetime.datetime.now(datetime.UTC).isoformat()
     last_update = birds.get_latest_bird_update()
 
-    await birdbuddy_to_cosmos.update_birds(since=last_update)
+    await birds.upload_birds(since=last_update)
     birds.set_latest_bird_update(now)
     return "OK", 200
 

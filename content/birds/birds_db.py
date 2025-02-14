@@ -135,3 +135,6 @@ class BirdsDB:
         else:
             item = {"id": "v1", "latest_bird_update": latest_update_isoformat}
         container.upsert_item(item)
+
+    def get_species_to_ignore(self):
+        return _get_setting("species_to_ignore")

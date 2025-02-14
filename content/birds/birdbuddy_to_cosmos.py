@@ -1,8 +1,9 @@
 import datetime
 from birdbuddy.client import BirdBuddy
+from utils.cosmosdb import _get_setting
+from .birds_db import BirdsDB
 from io import BytesIO
 from azure.storage.blob import BlobServiceClient
-from utils.cosmosdb import BirdsDB, _dbutils
 import requests
 import app_config
 import utils.ai.ai as ai
@@ -68,7 +69,7 @@ async def get_media_list(api_client, since):
                                 'media_type': item['__typename'], 
                                 'image_url': item['contentUrl']} for item in media_collection if item['__typename'] == 'MediaImage' or item['__typename'] == 'MediaVideo']
                 
-                species_to_ignore = _dbutils._get_setting("species_to_ignore")
+                species_to_ignore = _get_setting("species_to_ignore")
                 # if species is not None, and does not contain names in list of species to ignore, add to media_list
                 if species and species not in species_to_ignore:              
                     media_list.extend(media_items)

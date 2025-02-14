@@ -43,6 +43,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        setupFormSubmission('postUploadBirds');
         setupFormSubmission('postSchedule');
         setupFormSubmission('postNext');
     });
@@ -70,6 +71,9 @@
             </form>
             <form id="postNext" action="smp/pop" method="post">
                 <button type="submit" class="btn btn-primary btn-lg">Post next document</button>
+            </form>
+            <form id="postUploadBirds" action="birds/upload_birds" method="post">
+                <button type="submit" class="btn btn-primary btn-lg">Upload Birds</button>
             </form>
         </div>
     </div>
