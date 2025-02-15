@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Task Details - Thread Manager{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Task Details</h1>
+    <p><strong>ID:</strong> {{ task.id }}</p>
+    <p><strong>Command:</strong> {{ task.command }}</p>
+    <p><strong>Repeat:</strong> Every {{ task.repeat_every }} {{ task.repeat_unit }}</p>
+    <p><strong>Last Scheduled:</strong> {{ task.last_scheduled_time_utc }}</p>
+    <p><strong>Next Scheduled:</strong> {{ task.next_scheduled_time_utc }}</p>
+
+    <a href="{{ url_for('scheduler.edit_task', task_id=task.id) }}" class="btn btn-warning">Edit</a>
+    <a href="{{ url_for('scheduler.task_list') }}" class="btn btn-secondary">Back</a>
+</div>
+{% endblock %}

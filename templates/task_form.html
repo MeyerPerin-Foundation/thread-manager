@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}{{ "Edit" if task else "Create" }} Task - Thread Manager{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">{{ "Edit" if task else "Create" }} Task</h1>
+
+    <form method="POST">
+        <div class="mb-3">
+            <label for="id" class="form-label">Task ID</label>
+            <input type="text" class="form-control" id="id" name="id" value="{{ task.id if task else '' }}" {% if task %}readonly{% endif %} required>
+        </div>
+
+        <div class="mb-3">
+            <label for="command" class="form-label">Command</label>
+            <input type="text" class="form-control" id="command" name="command" value="{{ task.command if task else '' }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="repeat_every" class="form-label">Repeat Every</label>
+            <input type="number" class="form-control" id="repeat_every" name="repeat_every" value="{{ task.repeat_every if task else '' }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="repeat_unit" class="form-label">Repeat Unit</label>
+            <select class="form-control" id="repeat_unit" name="repeat_unit">
+                <option value="days" {% if task and task.repeat_unit == 'days' %}selected{% endif %}>Days</option>
+                <option value="hours" {% if task and task.repeat_unit == 'hours' %}selected{% endif %}>Hours</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="series_id" class="form-label">Series ID</label>
+            <input type="text" class="form-control" id="series_id" name="series_id" value="{{ task.command_parameters.series_id if task else '' }}">
+        </div>
+
+        <button type="submit" class="btn btn-success">{{ "Update" if task else "Create" }} Task</button>
+    </form>
+</div>
+{% endblock %}

@@ -20,6 +20,7 @@ from content.birds.birds_blueprint import birds_bp
 from dashboard.dashboard_blueprint import dashboard_bp
 from home_automation.visits.visits_blueprint import visits_bp
 from social_media.smp_blueprint import smp_bp
+from social_media.scheduler_blueprint import scheduler_bp
 
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -54,7 +55,7 @@ def require_auth():
             return render_template("not_authorized.html")
         return "Unauthorized", 401
 
-for bp in [fred_bp, birds_bp, blog_promo_bp, countdown_bp, dashboard_bp, ungov_bp, too_far_bp, visits_bp, smp_bp]:
+for bp in [fred_bp, birds_bp, blog_promo_bp, countdown_bp, dashboard_bp, ungov_bp, too_far_bp, visits_bp, smp_bp, scheduler_bp]:
     bp.before_request(require_auth)
     app.register_blueprint(bp)
 

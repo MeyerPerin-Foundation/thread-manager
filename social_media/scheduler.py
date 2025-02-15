@@ -100,3 +100,21 @@ class SocialMediaScheduler:
         
         # Return the UTC time as an ISO 8601 formatted string.
         return candidate_utc.strftime("%Y-%m-%dT%H:%M:%S%UTC")
+
+    def list_tasks(self) -> List[dict]:
+        query = "SELECT * FROM c ORDER BY c.next_scheduled_time_utc"
+        return list(self.container.query_items(query, enable_cross_partition_query=True))
+
+    def get_task(self, id: str) -> dict:
+        return self.container.read_item(item=id, partition_key=id)
+
+    def update_task(self, id: str, schedule: dict):
+        task = self.get_task(id)
+        task.update(schedule)
+        self.container.replace_item(item=task, partition_key=id)
+
+    def delete_task(self, id: str):
+        self.container.delete_item(id, partition_key=id)
+
+    def create_task(self, schedule: dict):
+        self.container.create_item(schedule)
