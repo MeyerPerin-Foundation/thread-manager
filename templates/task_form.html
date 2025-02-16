@@ -3,6 +3,7 @@
 {% block title %}{{ "Edit" if task else "Create" }} Task - Thread Manager{% endblock %}
 
 {% block content %}
+<a href="{{ url_for('scheduler.task_list') }}" class="btn btn-link mt-3">Back to Post List</a>
 <div class="container">
     <h1 class="mb-4">{{ "Edit" if task else "Create" }} Task</h1>
 
@@ -11,17 +12,91 @@
             <label for="id" class="form-label">Task ID</label>
             <input type="text" class="form-control" id="id" name="id" value="{{ task.id if task else '' }}" {% if task %}readonly{% endif %} required>
         </div>
-
         <div class="mb-3">
             <label for="command" class="form-label">Command</label>
-            <input type="text" class="form-control" id="command" name="command" value="{{ task.command if task else '' }}" required>
+            <select class="form-control" id="command" name="command" required>
+                <option value="post" {% if task and task.command == 'post' %}selected{% endif %}>post</option>
+                <option value="countdown" {% if task and task.command == 'countdown' %}selected{% endif %}>countdown</option>
+                <option value="bird" {% if task and task.command == 'bird' %}selected{% endif %}>bird</option>
+                <option value="too_far" {% if task and task.command == 'too_far' %}selected{% endif %}>too_far</option>
+                <option value="ungovernable" {% if task and task.command == 'ungovernable' %}selected{% endif %}>ungovernable</option>
+                <option value="fred" {% if task and task.command == 'fred' %}selected{% endif %}>fred</option>
+                <option value="imgflip" {% if task and task.command == 'imgflip' %}selected{% endif %}>imgflip</option>
+                <option value="blog" {% if task and task.command == 'blog' %}selected{% endif %}>blog</option>
+            </select>
         </div>
+        <!-- Command parameters -->
 
+            <!-- Parameters for "post" command -->
+            <div id="postFields" style="display: none;">
+                <div class="mb-3">
+                    <label for="post_text" class="form-label">Post Text</label>
+                    <input type="text" class="form-control" id="post_text" name="post_text"
+                        value="{{ task.command_parameters.post_text if task and task.command_parameters and task.command == 'post' else '' }}">
+                </div>
+                <div class="mb-3">
+                    <label for="image_url" class="form-label">Image URL</label>
+                    <input type="text" class="form-control" id="image_url" name="image_url"
+                        value="{{ task.command_parameters.image_url if task and task.command_parameters and task.command == 'post' else '' }}">
+                </div>
+            </div>        
+
+            <!-- Parameters for "countdown" command -->
+            <div id="countdownFields" style="display: none;">
+                <div class="mb-3">
+                    <label for="event" class="form-label">Event</label>
+                    <input type="text" class="form-control" id="event" name="event"
+                        value="{{ task.command_parameters.event if task and task.command_parameters and task.command == 'countdown' else '' }}">
+                </div>
+                <div class="mb-3">
+                    <label for="target_date" class="form-label">Target Date</label>
+                    <input type="date" class="form-control" id="target_date" name="target_date"
+                        value="{{ task.command_parameters.target_date if task and task.command_parameters and task.command == 'countdown' else '' }}">
+                </div>
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input" id="plural" name="plural"
+                        {% if task and task.command_parameters and task.command == 'countdown' and task.command_parameters.plural == 'on' %}checked{% endif %}>
+                    <label class="form-check-label" for="plural">Plural</label>
+                </div>
+                <div class="mb-3">
+                    <label for="stop" class="form-label">Stop (integer)</label>
+                    <input type="number" class="form-control" id="stop" name="stop"
+                        value="{{ task.command_parameters.stop if task and task.command_parameters and task.command == 'countdown' else '' }}">
+                </div>
+            </div>
+
+            <!-- Parameters for "fred" command -->
+            <div id="fredFields" style="display: none;">
+                <div class="mb-3">
+                    <label for="series_description" class="form-label">Series Description</label>
+                    <input type="text" class="form-control" id="series_description" name="series_description"
+                        value="{{ task.command_parameters.series_description if task and task.command_parameters and task.command == 'fred' else '' }}">
+                </div>
+                <div class="mb-3">
+                    <label for="series_id" class="form-label">Series ID</label>
+                    <input type="text" class="form-control" id="series_id" name="series_id"
+                        value="{{ task.command_parameters.series_id if task and task.command_parameters and task.command == 'fred' else '' }}">
+                </div>
+                <div class="mb-3">
+                    <label for="start_date" class="form-label">Start Date</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date"
+                        value="{{ task.command_parameters.start_date if task and task.command_parameters and task.command == 'fred' else '' }}">
+                </div>
+            </div>
+
+            <!-- "All the other commands" have no parameters, so no extra fields needed -->
+
+       <!-- Other task fields -->
         <div class="mb-3">
+            <label for="last_scheduled_time_utc" class="form-label">Last post (Americas/Chicago)</label>
+            <input type="datetime-local" name="last_scheduled_time_utc_local" id="last_scheduled_time_utc" class="form-control" value="{{ task.last_scheduled_time_utc | tzfilter('America/Chicago', picker=True) }}" required>
+            <input type="hidden" name="last_scheduled_time_utc" id="last_scheduled_time_utc" value="2000-01-01T12:00:00">  
+            <input type="hidden" name="last_scheduled_time_utc" id="last_scheduled_time_utc_utc">  <!-- Hidden UTC field -->        
+        </div>
+       <div class="mb-3">
             <label for="repeat_every" class="form-label">Repeat Every</label>
             <input type="number" class="form-control" id="repeat_every" name="repeat_every" value="{{ task.repeat_every if task else '' }}" required>
         </div>
-
         <div class="mb-3">
             <label for="repeat_unit" class="form-label">Repeat Unit</label>
             <select class="form-control" id="repeat_unit" name="repeat_unit">
@@ -29,13 +104,101 @@
                 <option value="hours" {% if task and task.repeat_unit == 'hours' %}selected{% endif %}>Hours</option>
             </select>
         </div>
-
         <div class="mb-3">
-            <label for="series_id" class="form-label">Series ID</label>
-            <input type="text" class="form-control" id="series_id" name="series_id" value="{{ task.command_parameters.series_id if task else '' }}">
+            <label for="next_scheduled_time_utc" class="form-label">Next post (Americas/Chicago)</label>
+            <input type="datetime-local" name="next_scheduled_time_utc_local" id="next_scheduled_time_utc" class="form-control" value="{{ task.next_scheduled_time_utc | tzfilter('America/Chicago', picker=True) }}" required>
+            <input type="hidden" name="last_scheduled_time_utc" id="last_scheduled_time_utc" value="2000-01-01T12:00:00">  
+            <input type="hidden" name="next_scheduled_time_utc" id="next_scheduled_time_utc_utc">  <!-- Hidden UTC field -->        
         </div>
 
         <button type="submit" class="btn btn-success">{{ "Update" if task else "Create" }} Task</button>
     </form>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+    /////////////////////////////////////
+    // Date/time conversion functions
+    /////////////////////////////////////
+
+    function convertToLocal() {
+        let utcInput = document.getElementById("next_scheduled_time_utc_utc");
+        let localInput = document.getElementById("next_scheduled_time_utc");
+
+        if (utcInput && localInput && utcInput.value) {
+            let utcDate = new Date(utcInput.value + ":00");
+            let localDate = new Date(utcDate.getTime() + utcDate.getTimezoneOffset() * 60000);
+            localInput.value = localDate.toISOString().slice(0, 16);
+        }
+    }
+
+    function convertToUTC() {
+        let localInput = document.getElementById("next_scheduled_time_utc");
+        let utcInput = document.getElementById("next_scheduled_time_utc_utc");
+
+        if (localInput && utcInput && localInput.value) {
+            const  localDate = new Date(localInput.value);
+            const isoFull = localDate.toISOString();
+            utcInput.value = isoFull.slice(0, 16);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        let utcInput = document.getElementById("next_scheduled_time_utc_utc");
+        let localInput = document.getElementById("next_scheduled_time_utc");
+
+        localInput.addEventListener("change", convertToUTC);
+
+        document.querySelector("form").addEventListener("submit", function() {
+            convertToUTC();
+        });
+
+    });
+
+    /////////////////////////////////////
+    // Command change listeners
+    /////////////////////////////////////
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // Set up command change listener
+        document.getElementById("command").addEventListener("change", toggleCommandParameters);
+        toggleCommandParameters(); // Run once at load in case we're editing
+
+        // Date/time conversion
+        let localInput = document.getElementById("next_scheduled_time_utc");
+        localInput.addEventListener("change", convertToUTC);
+
+        document.querySelector("form").addEventListener("submit", function() {
+            convertToUTC();
+        });
+    });    
+
+    // Show/hide parameter fields based on selected command
+    function toggleCommandParameters() {
+        const commandVal = document.getElementById("command").value;
+
+        // Sections for each command
+        const postSection = document.getElementById("postFields");
+        const countdownSection = document.getElementById("countdownFields");
+        const fredSection = document.getElementById("fredFields");
+
+        // Hide all sections first
+        postSection.style.display = "none";
+        countdownSection.style.display = "none";
+        fredSection.style.display = "none";
+
+        // Show relevant section
+        if (commandVal === "post") {
+            postSection.style.display = "block";
+        } else if (commandVal === "countdown") {
+            countdownSection.style.display = "block";
+        } else if (commandVal === "fred") {
+            fredSection.style.display = "block";
+        }
+        // For any other command, do nothing (fields remain hidden)
+    }
+
+</script>
 {% endblock %}

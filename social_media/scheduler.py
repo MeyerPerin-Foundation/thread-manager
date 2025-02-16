@@ -108,10 +108,8 @@ class SocialMediaScheduler:
     def get_task(self, id: str) -> dict:
         return self.container.read_item(item=id, partition_key=id)
 
-    def update_task(self, id: str, schedule: dict):
-        task = self.get_task(id)
-        task.update(schedule)
-        self.container.replace_item(item=task, partition_key=id)
+    def update_task(self, id, schedule: dict):
+        self.container.replace_item(item=id, body=schedule)
 
     def delete_task(self, id: str):
         self.container.delete_item(id, partition_key=id)

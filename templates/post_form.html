@@ -1,43 +1,35 @@
 {% extends "base.html" %}
 
-{% block title %}Post Details{% endblock %}
+{% block title %}{{ "Edit" if task else "Create" }} Post - Thread Manager{% endblock %}
 
 {% block content %}
-<a href="{{ url_for('smp.list_posts') }}" class="btn btn-link mt-3">Back to Post List</a>
-<div class="container mt-5">
-    <h1 class="mb-4">Post Details</h1>
-    <form method="POST">
+<div class="container">
+    <h1 class="mb-4">{{ "Edit" if task else "Create" }} Post</h1>
+
+    <form method="POST" enctype="multipart/form-data">
         <div class="mb-3">
             <label for="text" class="form-label">Text</label>
-            <textarea name="text" id="text" class="form-control">{{ record.text }}</textarea>
+            <textarea name="text" id="text" class="form-control">{{ record.text if record else ""}}</textarea>
             <small id="textCharCount" class="form-text text-muted">0 characters</small>
         </div>
         <div class="mb-3">
             <label for="after_utc" class="form-label">Post After (Americas/Chicago)</label>
-            <input type="datetime-local" id="after_utc" name="after_utc_local" class="form-control" value="{{ record.after_utc | tzfilter('America/Chicago', picker=True) }}">
+            <input type="datetime-local" id="after_utc" name="after_utc_local" class="form-control" value="{{ record.after_utc | tzfilter('America/Chicago', picker=True) if record and record.after_utc else now_utc |tzfilter('America/Chicago', picker=True) }}">
             <input type="hidden" name="after_utc" id="after_utc_utc">  <!-- Hidden UTC field -->        
         </div>
         <div class="mb-3">
             <label for="service" class="form-label">Service</label>
             <select name="service" id="service" class="form-select">
-                <option value="Bluesky" {% if record.service == 'Bluesky' %}selected{% endif %}>Bluesky</option>
-                <option value="LinkedIn" {% if record.service == 'LinkedIn' %}selected{% endif %}>LinkedIn</option>
+                <option value="Bluesky" {% if not record or record.service == 'Bluesky' %}selected{% endif %}>Bluesky</option>
+                <option value="LinkedIn" {% if record and record.service == 'LinkedIn' %}selected{% endif %}>LinkedIn</option>
             </select>
         </div>
         <div class="mb-3">
-            <label for="image_url" class="form-label">Image URL</label>
-            <input type="text" name="image_url" id="image_url" class="form-control" value="{{ record.image_url if record.image_url else ''}}">
-        </div>
-        <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+            <label for="image" class="form-label">Upload Image</label>
+            <input type="file" name="image" id="image" class="form-control">
+        </div>       
+        <button type="submit" class="btn btn-success">{{ "Update" if record else "Create" }} Post</button>
     </form>
-    <h2 class="mt-5">Image Preview</h2>
-    {% if record.image_url %}
-        <img src="{{ record.image_url }}" class="img-fluid" alt="Image Preview">
-    {% else %}
-        <p>No image available.</p>
-    {% endif %}
-
-    
 </div>
 {% endblock %}
 
@@ -78,8 +70,6 @@
 
     });
 
-
-    // character counter for text field
     document.addEventListener("DOMContentLoaded", function() {
         const commandInput = document.getElementById("text");
         const commandCountDisplay = document.getElementById("textCharCount");
@@ -92,7 +82,6 @@
         // Update on every input change
         commandInput.addEventListener("text", updateCommandCharCount);
     });    
-
 
 </script>
 {% endblock %}

@@ -5,6 +5,8 @@
 {% block content %}
 <div class="container mt-5">
     <h1 class="mb-4">Post Queue</h1>
+
+    <a href="{{ url_for('smp.create_post') }}" class="btn btn-primary mb-3">Create post</a>
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
@@ -38,7 +40,7 @@
                         <button type="submit" class="btn btn-danger">Delete</button>
                     </form>
                     <form method="POST" action="{{ url_for('smp.publish_post', post_id=record.id) }}" style="display:inline;">
-                        <button type="submit" class="btn btn-danger">Publish Now</button>
+                        <button type="submit" class="btn btn-warning">Publish</button>
                     </form>
 
                 </td>

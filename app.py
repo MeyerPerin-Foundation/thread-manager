@@ -23,10 +23,6 @@ from social_media.smp_blueprint import smp_bp
 from social_media.scheduler_blueprint import scheduler_bp
 
 import logging
-logging.basicConfig(level=logging.INFO)
-logging.getLogger("azure").setLevel(logging.WARNING)
-logging.getLogger("httpx").setLevel(logging.WARNING)
-
 load_dotenv()
 
 app = Flask(__name__)
@@ -100,7 +96,7 @@ def index():
     )
 
 @app.template_filter('tzfilter')
-def convert_timezone(value, timezone_str):
+def convert_timezone(value, timezone_str, picker=False):
     """
     Convert a datetime object from UTC to the specified timezone using zoneinfo.
     
@@ -108,10 +104,11 @@ def convert_timezone(value, timezone_str):
     :param timezone_str: The target timezone string, e.g., 'America/Chicago'
     :return: datetime object in the target timezone
     """
-    if value is None:
-        return ""
+    if not value:
+        # set value for the current time in utc
+        value = datetime.now(tz=ZoneInfo("UTC")).strftime("%Y-%m-%dT%H:%M")
 
-    value = value.replace("UTC", "Z")
+        # return value.strftime("%Y-%m-%dT%H:%M")  # Format for <input type="datetime-local">
 
     value = datetime.fromisoformat(value)
     
@@ -130,5 +127,8 @@ def convert_timezone(value, timezone_str):
     
     tzv = value.astimezone(target_tz)    
     
+    if picker:
+        return tzv.strftime("%Y-%m-%dT%H:%M")  # Format for <input type="datetime-local">
+      
     # convert back to a string in the format 'YYYY-MM-DD HH:MM PM'
     return tzv.strftime("%Y-%m-%d %I:%M %p")

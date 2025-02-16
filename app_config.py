@@ -1,12 +1,23 @@
 import os
+import logging
 from dotenv import load_dotenv
 
 if os.getenv("WEBSITE_HTTPLOGGING_RETENTION_DAYS") is None:
     # running locally
     print("Running locally")
+    logging.basicConfig(level=logging.DEBUG)
+    logging.getLogger("identity.web").setLevel(logging.WARNING)
+    logging.getLogger("msal").setLevel(logging.WARNING)
+    
     load_dotenv()
 else:
     print("Running in Azure")
+    logging.basicConfig(level=logging.INFO)
+
+logging.getLogger("azure").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("matplotlib").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 AUTHORITY = os.getenv("AUTHORITY") 
 AUTHORIZED_USER = os.getenv("AUTHORIZED_USER")

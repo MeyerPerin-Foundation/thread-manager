@@ -1,5 +1,8 @@
 from flask import Blueprint, request, render_template, redirect, url_for, jsonify
 from social_media import SocialMediaScheduler
+import logging
+
+logger = logging.getLogger("tm-scheduler")
 
 scheduler_bp = Blueprint("scheduler", __name__, url_prefix="/scheduler")
 
@@ -17,9 +20,11 @@ def edit_task(task_id):
         task["command"] = request.form["command"]
         task["repeat_every"] = int(request.form["repeat_every"])
         task["repeat_unit"] = request.form["repeat_unit"]
+        task["last_scheduled_time_utc"] = request.form["last_scheduled_time_utc"]
+        task["next_scheduled_time_utc"] = request.form["next_scheduled_time_utc"]
         s.update_task(task_id, task)
         return redirect(url_for("scheduler.task_list"))
-    return render_template("task_detail.html", task=task)
+    return render_template("task_form.html", task=task)
     
 @scheduler_bp.route("/<string:task_id>", methods=["GET"])
 def view_task(task_id):
@@ -38,6 +43,8 @@ def create_task():
             "command": request.form["command"],
             "repeat_every": int(request.form["repeat_every"]),
             "repeat_unit": request.form["repeat_unit"],
+            "last_scheduled_time_utc": request.form["last_scheduled_time_utc"],
+            "next_scheduled_time_utc": request.form["next_scheduled_time_utc"],
         }
         s = SocialMediaScheduler()
         s.create_task(task_data)

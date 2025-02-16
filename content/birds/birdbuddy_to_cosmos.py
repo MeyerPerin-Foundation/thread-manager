@@ -119,7 +119,7 @@ async def update_birds(since = None):
 
         # Upload to Azure Storage
         azsc = AzureStorageClient()
-        blob_url = azsc.upload_to_azure_storage("bird-buddy", blob_name, data.getvalue())
+        blob_url = azsc.upload_blob("bird-buddy", blob_name, data.getvalue())
 
         birds = BirdsDB()
         # Save to Cosmos DB
