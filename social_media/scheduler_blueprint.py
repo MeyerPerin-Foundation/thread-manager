@@ -6,6 +6,24 @@ logger = logging.getLogger("tm-scheduler")
 
 scheduler_bp = Blueprint("scheduler", __name__, url_prefix="/scheduler")
 
+@scheduler_bp.route("/tickle_scheduler", methods=["POST"])
+def tickle_scheduler():
+
+    scheduler = SocialMediaScheduler()
+    
+    schedule_items = scheduler.list_expired_schedules()
+    ids = []
+    for schedule in schedule_items:
+        id = scheduler.generate_post_document(schedule)
+        scheduler.update_schedule(schedule)
+        if id:
+            ids.append(id)
+
+    if len(ids) > 0:
+        return f"Accepted with ids: {ids}", 202
+    else:
+        return "No content", 204
+
 @scheduler_bp.route("/", methods=["GET"])
 def task_list():
     s = SocialMediaScheduler()
@@ -57,3 +75,4 @@ def delete_task(task_id):
     s = SocialMediaScheduler()
     s.delete_task(task_id)
     return redirect(url_for("scheduler.task_list"))
+

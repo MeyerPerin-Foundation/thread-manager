@@ -465,6 +465,19 @@ wheels = [
 ]
 
 [[package]]
+name = "eg4-solar-client"
+version = "0.1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "python-dotenv" },
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/bf/ee/8e0edc4333b3182f424e079f62174d692777d8ef38db82de4d7d8ea7167b/eg4_solar_client-0.1.1.tar.gz", hash = "sha256:a27efff6e1adcc1a0df2c24f7ab0e0610c27a093bc711b487079ada1ac9596e3", size = 9950 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c4/29/c9a5522eaccd2b5cb88b7b9146dfbb98d3688b30795f070b80691f20dd61/eg4_solar_client-0.1.1-py3-none-any.whl", hash = "sha256:0ede375d45b754b23e9ebd5d20af8db270fceaf791d77cf74b99e88daf0c70e8", size = 4242 },
+]
+
+[[package]]
 name = "fixedint"
 version = "0.1.6"
 source = { registry = "https://pypi.org/simple" }
@@ -959,6 +972,21 @@ wheels = [
 ]
 
 [[package]]
+name = "mpfutils"
+version = "0.3.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "azure-cosmos" },
+    { name = "azure-storage-blob" },
+    { name = "openai" },
+    { name = "python-dotenv" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/86/64/5d3003a14f0f8ee43d75cc8a46461ffaee7a85d7051e7170c53f3dde9d30/mpfutils-0.3.2.tar.gz", hash = "sha256:569868bfd5c97ed5c690f1c491f7da07a3c68c60579ab0340b451b28be0bf8f9", size = 22780 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7c/67/8a5894de51a1a70cf9a8bf90764430226dc8ea75605a93a7af0591fb0280/mpfutils-0.3.2-py3-none-any.whl", hash = "sha256:25319ada572f5f8f11310364d083e1a160d49202679cba1bc772ead0e1f7b54e", size = 5022 },
+]
+
+[[package]]
 name = "msal"
 version = "1.31.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1098,7 +1126,7 @@ wheels = [
 
 [[package]]
 name = "openai"
-version = "1.61.1"
+version = "1.63.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -1110,9 +1138,9 @@ dependencies = [
     { name = "tqdm" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d9/cf/61e71ce64cf0a38f029da0f9a5f10c9fa0e69a7a977b537126dac50adfea/openai-1.61.1.tar.gz", hash = "sha256:ce1851507218209961f89f3520e06726c0aa7d0512386f0f977e3ac3e4f2472e", size = 350784 }
+sdist = { url = "https://files.pythonhosted.org/packages/e6/1c/11b520deb71f9ea54ced3c52cd6a5f7131215deba63ad07f23982e328141/openai-1.63.2.tar.gz", hash = "sha256:aeabeec984a7d2957b4928ceaa339e2ead19c61cfcf35ae62b7c363368d26360", size = 356902 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9a/b6/2e2a011b2dc27a6711376808b4cd8c922c476ea0f1420b39892117fa8563/openai-1.61.1-py3-none-any.whl", hash = "sha256:72b0826240ce26026ac2cd17951691f046e5be82ad122d20a8e1b30ca18bd11e", size = 463126 },
+    { url = "https://files.pythonhosted.org/packages/15/64/db3462b358072387b8e93e6e6a38d3c741a17b4a84171ef01d6c85c63f25/openai-1.63.2-py3-none-any.whl", hash = "sha256:1f38b27b5a40814c2b7d8759ec78110df58c4a614c25f182809ca52b080ff4d4", size = 472282 },
 ]
 
 [[package]]
@@ -1785,12 +1813,14 @@ dependencies = [
     { name = "azure-monitor-opentelemetry" },
     { name = "azure-storage-blob" },
     { name = "beautifulsoup4" },
+    { name = "eg4-solar-client" },
     { name = "flask" },
     { name = "flask-session" },
     { name = "fredapi" },
     { name = "hubspot-api-client" },
     { name = "identity" },
     { name = "matplotlib" },
+    { name = "mpfutils" },
     { name = "openai" },
     { name = "pillow" },
     { name = "pybirdbuddy" },
@@ -1815,12 +1845,14 @@ requires-dist = [
     { name = "azure-monitor-opentelemetry", specifier = ">=1.6.4" },
     { name = "azure-storage-blob", specifier = ">=12.24.1" },
     { name = "beautifulsoup4", specifier = ">=4.13.3" },
+    { name = "eg4-solar-client", specifier = ">=0.1.1" },
     { name = "flask", specifier = ">=3.1.0" },
     { name = "flask-session", specifier = ">=0.8.0" },
     { name = "fredapi", specifier = ">=0.5.2" },
     { name = "hubspot-api-client", specifier = ">=11.1.0" },
     { name = "identity", specifier = ">=0.9.2" },
     { name = "matplotlib", specifier = ">=3.10.0" },
+    { name = "mpfutils", specifier = ">=0.3.2" },
     { name = "openai", specifier = ">=1.61.0" },
     { name = "pillow", specifier = ">=11.1.0" },
     { name = "pybirdbuddy", specifier = ">=0.0.19" },

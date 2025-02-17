@@ -23,6 +23,9 @@
                 <option value="fred" {% if task and task.command == 'fred' %}selected{% endif %}>fred</option>
                 <option value="imgflip" {% if task and task.command == 'imgflip' %}selected{% endif %}>imgflip</option>
                 <option value="blog" {% if task and task.command == 'blog' %}selected{% endif %}>blog</option>
+                <option value="refresh_solar" {% if task and task.command == 'refresh_solar' %}selected{% endif %}>refresh_solar</option>
+                <option value="collect_bird_postcards" {% if task and task.command == 'collect_bird_postcards' %}selected{% endif %}>collect_bird_postcards</option>
+                <option value="refresh_dashboard" {% if task and task.command == 'refresh_dashboard' %}selected{% endif %}>refresh_dashboard</option>
             </select>
         </div>
         <!-- Command parameters -->

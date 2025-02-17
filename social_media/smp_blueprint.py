@@ -1,5 +1,5 @@
 from flask import Blueprint, request, render_template
-from social_media import SocialMediaPoster, SocialMediaScheduler, SocialMediaDocument
+from social_media import SocialMediaPoster, SocialMediaDocument
 from werkzeug.utils import secure_filename
 from utils.azstorage import AzureStorageClient
 from uuid import uuid4
@@ -110,9 +110,6 @@ def create_post():
             image_url=image_url,
         )
 
-        logger.info(f"Would createfe rgy6v5 5r efcxdwsh6g5tyeref scdawxAQZ  weq  with after_utc: {d.after_utc}")
-        return None
-
         if id:
             return render_template('post_queue.html', queue=poster.get_post_queue())
         else:
@@ -145,27 +142,7 @@ def post_details(post_id):
     
     return render_template('post_details.html', record=d)
 
-
-
-@smp_bp.route("/tickle_scheduler", methods=["POST"])
-def tickle_scheduler():
-
-    scheduler = SocialMediaScheduler()
-    
-    schedule_items = scheduler.list_expired_schedules()
-    ids = []
-    for schedule in schedule_items:
-        id = scheduler.generate_post_document(schedule)
-        scheduler.update_schedule(schedule)
-        if id:
-            ids.append(id)
-
-    if len(ids) > 0:
-        return f"Accepted with ids: {ids}", 202
-    else:
-        return "No content", 204
-
-   
+ 
 @smp_bp.route("/delete_post/<string:post_id>", methods=["POST"])
 def delete_post(post_id):
 

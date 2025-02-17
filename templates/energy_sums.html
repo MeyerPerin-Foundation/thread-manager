@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Energy Sums{% endblock %}
+
+{% block content %}
+  <h1>Solar Performance</h1>
+  <form method="POST" action="/solar/energy_sums">
+    <div class="mb-3">
+      <label for="start_date" class="form-label">Start Date</label>
+      <!-- Use the type="date" for a date picker -->
+      <input type="date" name="start_date" id="start_date" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="end_date" class="form-label">End Date</label>
+      <!-- Use the type="date" for a date picker -->
+      <input type="date" name="end_date" id="end_date" class="form-control" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Calculate</button>
+  </form>
+
+  {% if sums is defined %}
+    <hr>
+    <h3>Energy summary between {{ start_date }} and {{ end_date}} </h3>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Field</th>
+          <th>Sum</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for field, value in sums.items() %}
+        <tr>
+          <td>{{ field }}</td>
+          <td>{{ value }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+{% endblock %}

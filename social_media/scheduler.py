@@ -1,6 +1,7 @@
 import logging
 from utils.cosmosdb import _get_container
 from datetime import datetime, timezone, UTC, timedelta
+from zoneinfo import ZoneInfo
 from typing import List
 
 from social_media import SocialMediaPoster
@@ -10,6 +11,11 @@ from content.too_far import TooFarContent
 from content.ungovernable import UngovernableContent
 from content.fred import FredContent
 from content.blog_promo import BlogPromoContent
+
+from home_automation.solar import SolarClient
+
+from dashboard import DashboardDB
+
 
 logger = logging.getLogger("tm-scheduler")
 logger.setLevel(logging.DEBUG)
@@ -46,6 +52,7 @@ class SocialMediaScheduler:
             logger.info("Scheduling bird content")
             b = BirdContent()
             id = b.generate_birdbuddy_post(after_utc=after_utc)
+
         elif command == "countdown":
             logger.info("Scheduling countdown content")
             c = CountdownContent()
@@ -56,14 +63,17 @@ class SocialMediaScheduler:
                 stop = schedule["command_parameters"]["stop"],
                 after_utc = after_utc,                
             )
+
         elif command == "too_far":
             logger.info("Scheduling Too Far content")
             t = TooFarContent()
             id = t.generate_too_far(after_utc=after_utc)
+
         elif command == "ungovernable":
             logger.info("Scheduling ungovernable content")
             u = UngovernableContent()
             id = u.queue_ungovernable(after_utc=after_utc)
+
         elif command == "fred":
             logger.info("Scheduling Fred content")
             f = FredContent()
@@ -76,6 +86,46 @@ class SocialMediaScheduler:
                 hashtags = schedule["command_parameters"].get("hashtags"),
                 after_utc = after_utc,
             )
+
+        elif command == "blog":
+            logger.info("Scheduling blog promo content")
+            b = BlogPromoContent()
+            id = b.generate_blog_promo(after_utc=after_utc)
+
+        elif command == "refresh_solar":
+            logger.info("Executing solar refresh")            
+            s = SolarClient()
+
+            # get current year and month
+            now = datetime.now()
+            year = now.year
+            month = now.month
+
+            # get last year month
+            last_month = month - 1
+            if last_month == 0:
+                last_month = 12
+                last_year -= 1
+            else:
+                last_year = year
+
+            s.update_year_month(year, month)
+            s.update_year_month(last_year, last_month)
+
+        elif command == "collect_bird_postcards":
+            logger.info("Collecting bird postcards")
+            birds = BirdContent()
+            now = datetime.now(UTC).isoformat()
+            last_update = birds.get_latest_bird_update()
+
+            birds.upload_birds(since=last_update)
+            birds.set_latest_bird_update(now)
+
+        elif command == "refresh_dashboard":
+            logger.warning("Refresh dashboard not implemented")
+
+        else:
+            logger.warning(f"Unknown command: {command}")
                 
         return id
 
