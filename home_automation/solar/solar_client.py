@@ -24,9 +24,9 @@ class SolarClient:
             # convert the day to a two digit string
             str_day = str(doc["day"]).zfill(2)
             # 
-            id = f"{midbox_sn}-{str_year}-{str_month}-{str_day}"
+            id = f"{self.midbox_sn}-{str_year}-{str_month}-{str_day}"
             doc["id"] = id
-            doc["midbox_sn"] = midbox_sn
+            doc["midbox_sn"] = self.midbox_sn
             doc["year"] = year
             doc["month"] = month
             doc["date"] = f"{str_year}-{str_month}-{str_day}"
