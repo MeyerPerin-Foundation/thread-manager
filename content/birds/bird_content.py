@@ -10,6 +10,8 @@ from social_media import SocialMediaPoster
 import utils.ai.ai as ai
 from birdbuddy.client import BirdBuddy
 import asyncio
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 logger = logging.getLogger("tm-birds")
 logger.setLevel(logging.INFO)
@@ -104,9 +106,13 @@ class BirdContent:
     def upload_birds(self, since=None):
         return self.update_birds(since=since)
 
-    def get_latest_bird_update(self):
+    def get_latest_bird_update(self, timezone="UTC") -> str:
         birds = BirdsDB()
-        return birds.get_latest_bird_update()
+        time_str =  birds.get_latest_bird_update()
+        if time_str:
+            time = datetime.fromisoformat(time_str)
+            time = time.astimezone(ZoneInfo(timezone))
+            return time.isoformat()
 
     def set_latest_bird_update(self, last_update):
         birds = BirdsDB()

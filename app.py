@@ -23,6 +23,8 @@ from home_automation.solar.solar_blueprint import solar_bp
 from social_media.smp_blueprint import smp_bp
 from social_media.scheduler_blueprint import scheduler_bp
 
+from content.birds import BirdContent
+
 import logging
 load_dotenv()
 
@@ -89,11 +91,20 @@ def index():
         return render_template("config_error.html")
     if not app.auth.get_user():
         return redirect(url_for("login"))
+
+    b = BirdContent()
+    latest_bird_update = b.get_latest_bird_update("America/Chicago")
+
+    # convert to date and then format latest_bird_update as 'YYYY-MM-DD HH:MM AM/PM'
+    latest_bird_update = datetime.fromisoformat(latest_bird_update).strftime("%Y-%m-%d %I:%M %p")
+
+    
     return render_template(
         "index.html",
         user=app.auth.get_user(),
         api_token=app_config.API_TOKEN,
         version=identity.__version__,
+        latest_bird_update = latest_bird_update,
     )
 
 @app.template_filter('tzfilter')

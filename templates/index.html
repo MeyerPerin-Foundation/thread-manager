@@ -51,25 +51,34 @@
 {% endblock %}
 
 {% block content %}
-<div class="text-center mb-5">
+  <div class="text-center mb-5">
     <h1 class="display-4">Thread Manager</h1>
-    <p class="lead">Welcome {{ user.get("name") }}! Now with UV!</p>
+    <p class="lead">Welcome {{ user.get("name") }}</p>
     <p>Your subscription ID is <strong>{{ user.get("sub") }}</strong>.</p>
-</div>
-<div class="card shadow-sm mb-4">
+  </div>
+
+  <div class="card shadow-sm mb-4">
     <div class="card-body">
-        <h3 class="card-title">Actions</h3>
-        <div class="d-grid gap-3">
-            <form id="postSchedule" action="smp/tickle_scheduler" method="post">
-                <button type="submit" class="btn btn-primary btn-lg">Reprocess schedule</button>
-            </form>
-            <form id="postNext" action="smp/pop" method="post">
-                <button type="submit" class="btn btn-primary btn-lg">Post next document</button>
-            </form>
-            <form id="postUploadBirds" action="birds/upload_birds" method="post">
-                <button type="submit" class="btn btn-primary btn-lg">Upload Birds</button>
-            </form>
+      <h3 class="card-title">Actions</h3>
+      <!-- Use a flex container to arrange the buttons and the "last updated" text on one line -->
+      <div class="d-flex justify-content-start align-items-center gap-3">
+        <form id="postSchedule" action="smp/tickle_scheduler" method="post">
+          <button type="submit" class="btn btn-primary btn-lg">Reprocess schedule</button>
+        </form>
+
+        <form id="postNext" action="smp/pop" method="post">
+          <button type="submit" class="btn btn-primary btn-lg">Post next document</button>
+        </form>
+
+        <form id="postUploadBirds" action="birds/upload_birds" method="post">
+          <button type="submit" class="btn btn-primary btn-lg">Upload Birds</button>
+        </form>
+
+        <!-- Add the "last updated" text on the right -->
+        <div class="ms-auto">
+          Last postcard collection: {{ latest_bird_update }}
         </div>
+      </div>
     </div>
-</div>
+  </div>
 {% endblock %}
