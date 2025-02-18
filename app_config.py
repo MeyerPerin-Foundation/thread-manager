@@ -8,6 +8,9 @@ if os.getenv("WEBSITE_HTTPLOGGING_RETENTION_DAYS") is None:
     logging.basicConfig(level=logging.DEBUG)
     logging.getLogger("identity.web").setLevel(logging.WARNING)
     logging.getLogger("msal").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
+    logging.getLogger("birdbuddy").setLevel(logging.WARNING)
+    logging.getLogger("openai").setLevel(logging.WARNING)
     
     load_dotenv()
 else:

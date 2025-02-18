@@ -24,13 +24,13 @@ def post_bird_buddy():
         return "No content", 204
 
 @birds_bp.route("/upload_birds", methods=["POST"])
-async def upload_birds():
+def upload_birds():
 
     birds = BirdContent()
     now = datetime.datetime.now(datetime.UTC).isoformat()
     last_update = birds.get_latest_bird_update()
 
-    await birds.upload_birds(since=last_update)
+    birds.upload_birds(since=last_update)
     birds.set_latest_bird_update(now)
     return "OK", 200
 
