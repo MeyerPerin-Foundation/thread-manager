@@ -19,13 +19,23 @@ def list_posts():
 
 @smp_bp.route("/pop", methods=["POST"])
 def post_from_queue():
-
     poster = SocialMediaPoster()
-    d = poster.post_next_document()
-    if d:
-        return d.result()
+    results = []
+
+    max_result_code = 200
+
+    while True:
+        d = poster.post_next_document()
+        if d:
+            results.append(d.result())
+            max_result_code = max(max_result_code, d.result_code)
+        else:
+            break
+
+    if results:
+        return {"results": results}, max_result_code
     else:
-        return "No content", 204
+        return {"message": "No content"}, 204
 
 @smp_bp.route("/push", methods=["POST"])
 def add_post_to_queue():

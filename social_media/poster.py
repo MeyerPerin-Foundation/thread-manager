@@ -72,18 +72,6 @@ class SocialMediaPoster:
         emojis: list[str] | None = None,
     ) -> str:
 
-        # Check if there's already a document at the same time and service
-        container = _get_container("posts", "post_documents")
-        query = f"SELECT * FROM c WHERE c.after_utc = '{after_utc}' AND c.service = '{service}' AND c.after_utc > '2000-01-02' AND NOT IS_DEFINED(c.posted_utc)"
-        items = list(
-            container.query_items(query=query, enable_cross_partition_query=True)
-        )
-        if len(items) > 0:
-            logger.warning(
-                f"Document already exists for {service} at {after_utc}. Not creating a new document."
-            )
-            return None
-
         document = self._generate_document(
             text=text,
             service=service,
