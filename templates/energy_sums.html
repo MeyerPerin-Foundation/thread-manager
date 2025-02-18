@@ -4,36 +4,60 @@
 {% block content %}
   <h1>Solar Performance</h1>
   <form method="POST" action="/solar/energy_sums">
+
     <div class="mb-3">
       <label for="start_date" class="form-label">Start Date</label>
-      <!-- Use the type="date" for a date picker -->
-      <input type="date" name="start_date" id="start_date" class="form-control" required>
+      <!-- Default to last day of last month -->
+      <input 
+        type="date" 
+        name="start_date" 
+        id="start_date" 
+        class="form-control" 
+        required
+        value="{{ default_start|default('') }}"
+      >
     </div>
 
     <div class="mb-3">
       <label for="end_date" class="form-label">End Date</label>
-      <!-- Use the type="date" for a date picker -->
-      <input type="date" name="end_date" id="end_date" class="form-control" required>
+      <!-- Default to today's date -->
+      <input 
+        type="date" 
+        name="end_date" 
+        id="end_date" 
+        class="form-control" 
+        required
+        value="{{ default_end|default('') }}"
+      >
     </div>
-
     <button type="submit" class="btn btn-primary">Calculate</button>
-  </form>
+  </form>    
 
-  {% if sums is defined %}
-    <hr>
-    <h3>Energy summary between {{ start_date }} and {{ end_date}} </h3>
+{% if results is defined %}
+    <hr/>
+    <h3>Results for {{ results.num_days }} day(s)</h3>
     <table class="table table-striped">
       <thead>
         <tr>
           <th>Field</th>
-          <th>Sum</th>
+          <th>Cumulative (kWh)</th>
+          <th>Daily Average (kWh)</th>
         </tr>
       </thead>
       <tbody>
-        {% for field, value in sums.items() %}
+        {% for label, metrics in results.field_data.items() %}
         <tr>
-          <td>{{ field }}</td>
-          <td>{{ value }}</td>
+          <!-- label is the "Solar Generation kWh," "Consumption kWh," etc. -->
+          <td>{{ label }}</td>
+          <!-- Sum -->
+          <td class="{{ 'text-danger' if metrics.sum < 0 else 'text-black' }}">
+            {{ metrics.sum }}
+          </td>
+
+          <!-- Daily average -->
+          <td class="{{ 'text-danger' if metrics.avg < 0 else 'text-black' }}">
+            {{ metrics.avg }}
+          </td>
         </tr>
         {% endfor %}
       </tbody>

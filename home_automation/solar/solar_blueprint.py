@@ -1,6 +1,8 @@
 from flask import Blueprint, request, render_template, redirect, url_for, jsonify
 from .solar_client import SolarClient
 import logging
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 solar_bp = Blueprint("solar", __name__, url_prefix="/solar")
 
@@ -8,18 +10,30 @@ logger = logging.getLogger("tm-solar")
 
 @solar_bp.route('/energy_sums', methods=['GET', 'POST'])
 def energy_sums():
+
+    today = datetime.now(ZoneInfo("America/Chicago"))  # Get current date in the specified timezone
+
+    # Last day of this month’s 1st - 1 day = last day of last month
+    first_day_of_this_month = today.replace(day=1)
+    last_day_of_prev_month = first_day_of_this_month - timedelta(days=1)
+
+    default_start = last_day_of_prev_month.strftime('%Y-%m-%d')
+    default_end = today.strftime('%Y-%m-%d')
+
     if request.method == 'GET':
-        # Just render the form
-        return render_template('energy_sums.html')
+        return render_template(
+            'energy_sums.html',
+            default_start=default_start,
+            default_end=default_end
+        )
 
     # POST -> process the form
     start_date_str = request.form['start_date']  # e.g. "2025-02-01"
     end_date_str = request.form['end_date']      # e.g. "2025-02-17"
 
     s = SolarClient()
-    results = s.get_energy(start_date_str, end_date_str)
+    query_results = s.get_energy(start_date_str, end_date_str)
 
-    # If you know exactly which fields you want, define them below:
     fields = [
         "ePvDay",
         "eExportDay",
@@ -27,23 +41,50 @@ def energy_sums():
         "eConsumptionDay",
     ]
 
-    # Initialize sums to 0 for each field
-    sums = {field: 0.0 for field in fields}
 
-    # Sum each document’s “e” field individually
-    for doc in results:
-        for field in fields:
-            if field in doc and isinstance(doc[field], (int, float)):
-                sums[field] += doc[field]
-
-    # rename the keys in sums: ePVDay -> Solar Generation kWh, eExportDay -> Exported kWh, eImportDay -> Imported kWh, eConsumptionDay -> Consumption kWh
-    sums = {
-        "Solar Generation kWh": sums["ePvDay"],
-        "Consumption kWh": sums["eConsumptionDay"],
-        "Exported kWh": sums["eExportDay"],
-        "Imported kWh": sums["eImportDay"],
+    fields_map = {
+        "Solar Generation": "ePvDay",
+        "Consumption": "eConsumptionDay",
+        "Exported": "eExportDay",
+        "Imported": "eImportDay"
     }
-    
-    # Pass these sums to the template
-    return render_template('energy_sums.html', sums=sums, start_date=start_date_str, end_date=end_date_str)
+
+    sums = {label: 0.0 for label in fields_map}
+
+    num_days = len(query_results)
+
+    for doc in query_results:
+        for label, field_name in fields_map.items():
+            val = doc.get(field_name, 0)
+            if isinstance(val, (int, float)):
+                sums[label] += val        
+
+    net_generation = sums["Solar Generation"] - sums["Consumption"]
+    net_exports = sums["Exported"] - sums["Imported"]
+
+    sums["Net Generation"] = net_generation
+    sums["Net Exports"] = net_exports
+
+    field_data = {}
+    for label, total_sum in sums.items():
+        daily_avg = round(total_sum / num_days, 1)
+        field_data[label] = {
+            "sum": round(total_sum, 1),
+            "avg": daily_avg
+        }
+
+    results = {
+        "num_days": num_days,
+        "field_data": field_data
+    }
+
+    return render_template(
+        'energy_sums.html', 
+        results=results, 
+        start_date=start_date_str, 
+        end_date=end_date_str,
+        default_start=start_date_str,
+        default_end=end_date_str        
+    )
+
 
