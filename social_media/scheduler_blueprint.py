@@ -40,6 +40,8 @@ def edit_task(task_id):
         task["repeat_unit"] = request.form["repeat_unit"]
         task["last_scheduled_time_utc"] = request.form["last_scheduled_time_utc"]
         task["next_scheduled_time_utc"] = request.form["next_scheduled_time_utc"]
+        if "command_parameters" in request.form:
+            task_data["command_parameters"] = request.form["command_parameters"]
         s.update_task(task_id, task)
         return redirect(url_for("scheduler.task_list"))
     return render_template("task_form.html", task=task)
@@ -56,6 +58,7 @@ def view_task(task_id):
 @scheduler_bp.route("/new", methods=["GET", "POST"])
 def create_task():
     if request.method == "POST":
+        logger.debug(f"Received task: {request.form}")
         task_data = {
             "id": request.form["id"],
             "command": request.form["command"],
@@ -64,7 +67,10 @@ def create_task():
             "last_scheduled_time_utc": request.form["last_scheduled_time_utc"],
             "next_scheduled_time_utc": request.form["next_scheduled_time_utc"],
         }
+        if "command_parameters" in request.form:
+            task_data["command_parameters"] = request.form["command_parameters"]
         s = SocialMediaScheduler()
+        logger.debug(f"Creating task: {task_data}")
         s.create_task(task_data)
         return redirect(url_for("scheduler.task_list"))
 

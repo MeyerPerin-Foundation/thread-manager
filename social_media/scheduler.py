@@ -11,6 +11,7 @@ from content.too_far import TooFarContent
 from content.ungovernable import UngovernableContent
 from content.fred import FredContent
 from content.blog_promo import BlogPromoContent
+from content.imgflip import ImgflipContent
 
 from home_automation.solar import SolarClient
 
@@ -123,6 +124,17 @@ class SocialMediaScheduler:
 
         elif command == "refresh_dashboard":
             logger.warning("Refresh dashboard not implemented")
+        
+        elif command == "imgflip":
+            logger.info("Scheduling Imgflip content")
+            i = ImgflipContent()
+            id = i.generate_meme(
+                template = schedule["command_parameters"]["template"],
+                text0 = schedule["command_parameters"]["text0"],
+                text1 = schedule["command_parameters"]["text1"],
+                max_font_size = schedule["command_parameters"].get("max_font_size"),
+                after_utc = after_utc,
+            )
 
         else:
             logger.warning(f"Unknown command: {command}")
