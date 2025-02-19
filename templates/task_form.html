@@ -48,22 +48,22 @@
             <div id="countdownFields" style="display: none;">
                 <div class="mb-3">
                     <label for="event" class="form-label">Event</label>
-                    <input type="text" class="form-control" id="event" name="command_parameters[event]"
+                    <input type="text" class="form-control" id="event" name="command_parameters_event"
                         value="{{ task.command_parameters.event if task and task.command_parameters and task.command == 'countdown' else '' }}">
                 </div>
                 <div class="mb-3">
                     <label for="target_date" class="form-label">Target Date</label>
-                    <input type="date" class="form-control" id="target_date" name="command_parameters[target_date]"
+                    <input type="date" class="form-control" id="target_date" name="command_parameters_target_date"
                         value="{{ task.command_parameters.target_date if task and task.command_parameters and task.command == 'countdown' else '' }}">
                 </div>
                 <div class="form-check mb-3">
-                    <input type="checkbox" class="form-check-input" id="plural" name="command_parameters[plural]"
+                    <input type="checkbox" class="form-check-input" id="plural" name="command_parameters_plural"
                         {% if task and task.command_parameters and task.command == 'countdown' and task.command_parameters.plural == 'on' %}checked{% endif %}>
                     <label class="form-check-label" for="plural">Plural</label>
                 </div>
                 <div class="mb-3">
                     <label for="stop" class="form-label">Stop (integer)</label>
-                    <input type="number" class="form-control" id="stop" name="command_parameters[stop]"
+                    <input type="number" class="form-control" id="stop" name="command_parameters_stop"
                         value="{{ task.command_parameters.stop if task and task.command_parameters and task.command == 'countdown' else '' }}">
                 </div>
             </div>
@@ -72,17 +72,17 @@
             <div id="fredFields" style="display: none;">
                 <div class="mb-3">
                     <label for="series_description" class="form-label">Series Description</label>
-                    <input type="text" class="form-control" id="series_description" name="command_parameters[series_description]"
+                    <input type="text" class="form-control" id="series_description" name="command_parameters_series_description"
                         value="{{ task.command_parameters.series_description if task and task.command_parameters and task.command == 'fred' else '' }}">
                 </div>
                 <div class="mb-3">
                     <label for="series_id" class="form-label">Series ID</label>
-                    <input type="text" class="form-control" id="series_id" name="command_parameters[series_id]"
+                    <input type="text" class="form-control" id="series_id" name="command_parameters_series_id"
                         value="{{ task.command_parameters.series_id if task and task.command_parameters and task.command == 'fred' else '' }}">
                 </div>
                 <div class="mb-3">
                     <label for="start_date" class="form-label">Start Date</label>
-                    <input type="date" class="form-control" id="start_date" name="command_parameters[start_date]"
+                    <input type="date" class="form-control" id="start_date" name="command_parameters_start_date"
                         value="{{ task.command_parameters.start_date if task and task.command_parameters and task.command == 'fred' else '' }}">
                 </div>
             </div>
@@ -91,22 +91,22 @@
             <div id="imgflipFields" style="display: none;">
                 <div class="mb-3">
                     <label for="template" class="form-label">Template</label>
-                    <input type="text" class="form-control" id="template" name="command_parameters[template]"
+                    <input type="text" class="form-control" id="template" name="command_parameters_template"
                         value="{{ task.command_parameters.template if task and task.command_parameters and task.command == 'imgflip' else '' }}">
                 </div>
                 <div class="mb-3">
                     <label for="text0" class="form-label">Text 0</label>
-                    <input type="text" class="form-control" id="text0" name="command_parameters[text0]"
+                    <input type="text" class="form-control" id="text0" name="command_parameters_text0"
                         value="{{ task.command_parameters.text0 if task and task.command_parameters and task.command == 'imgflip' else '' }}">
                 </div>
                 <div class="mb-3">
                     <label for="text1" class="form-label">Text 1</label>
-                    <input type="text" class="form-control" id="text1" name="command_parameters[text1]"
+                    <input type="text" class="form-control" id="text1" name="command_parameters_text1"
                         value="{{ task.command_parameters.text1 if task and task.command_parameters and task.command == 'imgflip' else '' }}">
                 </div>
                 <div class="mb-3">
                     <label for="max_font_size" class="form-label">Max font size</label>
-                    <input type="text" class="form-control" id="max_font_size" name="command_parameters[max_font_size]"
+                    <input type="text" class="form-control" id="max_font_size" name="command_parameters_max_font_size"
                         value="{{ task.command_parameters.max_font_size if task and task.command_parameters and task.command == 'imgflip' else '' }}">
                 </div>
             </div>
