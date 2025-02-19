@@ -41,7 +41,7 @@ def edit_task(task_id):
         task["last_scheduled_time_utc"] = request.form["last_scheduled_time_utc"]
         task["next_scheduled_time_utc"] = request.form["next_scheduled_time_utc"]
         if "command_parameters" in request.form:
-            task_data["command_parameters"] = request.form["command_parameters"]
+            task["command_parameters"] = request.form["command_parameters"]
         s.update_task(task_id, task)
         return redirect(url_for("scheduler.task_list"))
     return render_template("task_form.html", task=task)
