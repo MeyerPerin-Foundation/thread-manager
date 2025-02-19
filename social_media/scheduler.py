@@ -128,7 +128,8 @@ class SocialMediaScheduler:
         elif command == "imgflip":
             logger.info("Scheduling Imgflip content")
             i = ImgflipContent()
-            id = i.generate_meme(
+            id = i.queue_meme(
+                message = "",
                 template = schedule["command_parameters"]["template"],
                 text0 = schedule["command_parameters"]["text0"],
                 text1 = schedule["command_parameters"]["text1"],
