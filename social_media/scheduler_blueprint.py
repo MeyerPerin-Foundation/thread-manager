@@ -78,6 +78,9 @@ def create_task():
         }
         for key in request.form:
             if key.startswith("command_parameters_"):
+                # if there's no command_parameters key in task_data, create it
+                if "command_parameters" not in task_data:
+                    task_data["command_parameters"] = {}
                 task_data["command_parameters"][key[len("command_parameters_"):]] = request.form[key] 
         s = SocialMediaScheduler()
         logger.debug(f"Creating task: {task_data}")
