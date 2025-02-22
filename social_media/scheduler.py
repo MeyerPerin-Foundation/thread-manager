@@ -76,7 +76,7 @@ class SocialMediaScheduler:
             id = u.queue_ungovernable(after_utc=after_utc)
 
         elif command == "fred":
-            logger.info("Scheduling Fred content")
+            logger.info("Posting Fred content")
             f = FredContent()
             id = f.queue_time_series_plot(
                 series_id = schedule["command_parameters"]["series_id"],
@@ -85,8 +85,11 @@ class SocialMediaScheduler:
                 start_date = schedule["command_parameters"]["start_date"],
                 end_date = schedule["command_parameters"].get("end_date"),
                 hashtags = schedule["command_parameters"].get("hashtags"),
-                after_utc = after_utc,
+                after_utc = None
             )
+            poster = SocialMediaPoster()
+            poster.post_with_id(id)
+
 
         elif command == "blog":
             logger.info("Scheduling blog promo content")
