@@ -111,15 +111,15 @@ class ImgflipContent:
         if "@yesterday_bdy" in text:
             yesterday = anchor_date - datetime.timedelta(days=1)
             yesterday_str = yesterday.strftime("%B, %d %Y")
-            text = text.replace("@yesterday", yesterday_str)
+            text = text.replace("@yesterday_bdy", yesterday_str)
         if "@today_bdy" in text:
             today = anchor_date
             today_str = today.strftime("%B, %d %Y")
-            text = text.replace("@today", today_str)
+            text = text.replace("@today_bdy", today_str)
         if "@tomorrow_bdy" in text:
             tomorrow = anchor_date + datetime.timedelta(days=1)
             tomorrow_str = tomorrow.strftime("%B, %d %Y")
-            text = text.replace("@tomorrow", tomorrow_str)
+            text = text.replace("@tomorrow_bdy", tomorrow_str)
         if "@yesterday_weekday" in text:
             yesterday = anchor_date - datetime.timedelta(days=1)
             yesterday_str = yesterday.strftime("%A")
