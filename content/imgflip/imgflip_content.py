@@ -38,7 +38,7 @@ class ImgflipContent:
         after_utc: str = "2000-01-01T00:00:00Z",
     ) -> str | None:
 
-        url = self.generate_meme(template, text0, text1, max_font_size)
+        url = self.generate_meme(template, text0, text1, max_font_size, after_utc)
         if url is None:
             return None
 
@@ -60,10 +60,11 @@ class ImgflipContent:
         text0: str,
         text1: str,
         max_font_size: int | None = None,
+        after_utc: str | None = None,
     ) -> str | None:
 
-        text0 = self.text_replace(text0)
-        text1 = self.text_replace(text1)
+        text0 = self.text_replace(text0, after_utc)
+        text1 = self.text_replace(text1, after_utc)
         template_id = self.get_template_id(template)
 
         if max_font_size is not None:
@@ -88,54 +89,59 @@ class ImgflipContent:
         else:
             return None
 
-    def text_replace(self, text: str) -> str:
+    def text_replace(self, text: str, after_utc = None) -> str:
+        if after_utc is None or after_utc == "2000-01-01T00:00:00Z" or after_utc <= "2000-01-02T00:00:00Z":
+            anchor_date = datetime.date.today()
+        else:
+            anchor_date = datetime.datetime.fromisoformat(after_utc).date()
+
         # look for @yesterday
         if "@yesterday_month" in text:
-            yesterday = datetime.date.today() - datetime.timedelta(days=1)
+            yesterday = anchor_date - datetime.timedelta(days=1)
             yesterday_str = yesterday.strftime("%B")
             text = text.replace("@yesterday_month", yesterday_str)
         if "@today_month" in text:
-            today = datetime.date.today()
+            today = anchor_date
             today_str = today.strftime("%B")
             text = text.replace("@today_month", today_str)
         if "@tomorrow_month" in text:
-            tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+            tomorrow = anchor_date + datetime.timedelta(days=1)
             tomorrow_str = tomorrow.strftime("%B")
             text = text.replace("@tomorrow_month", tomorrow_str)
         if "@yesterday_bdy" in text:
-            yesterday = datetime.date.today() - datetime.timedelta(days=1)
+            yesterday = anchor_date - datetime.timedelta(days=1)
             yesterday_str = yesterday.strftime("%B, %d %Y")
             text = text.replace("@yesterday", yesterday_str)
         if "@today_bdy" in text:
-            today = datetime.date.today()
+            today = anchor_date
             today_str = today.strftime("%B, %d %Y")
             text = text.replace("@today", today_str)
         if "@tomorrow_bdy" in text:
-            tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+            tomorrow = anchor_date + datetime.timedelta(days=1)
             tomorrow_str = tomorrow.strftime("%B, %d %Y")
             text = text.replace("@tomorrow", tomorrow_str)
         if "@yesterday_weekday" in text:
-            yesterday = datetime.date.today() - datetime.timedelta(days=1)
+            yesterday = anchor_date - datetime.timedelta(days=1)
             yesterday_str = yesterday.strftime("%A")
             text = text.replace("@yesterday_weekday", yesterday_str)
         if "@today_weekday" in text:
-            today = datetime.date.today()
+            today = anchor_date
             today_str = today.strftime("%A")
             text = text.replace("@today_weekday", today_str)
         if "@tomorrow_weekday" in text:
-            tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+            tomorrow = anchor_date + datetime.timedelta(days=1)
             tomorrow_str = tomorrow.strftime("%A")
             text = text.replace("@tomorrow_weekday", tomorrow_str)            
         if "@yesterday" in text:
-            yesterday = datetime.date.today() - datetime.timedelta(days=1)
+            yesterday = anchor_date - datetime.timedelta(days=1)
             yesterday_str = yesterday.strftime("%B %d")
             text = text.replace("@yesterday", yesterday_str)
         if "@today" in text:
-            today = datetime.date.today()
+            today = anchor_date
             today_str = today.strftime("%B %d")
             text = text.replace("@today", today_str)
         if "@tomorrow" in text:
-            tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+            tomorrow = anchor_date + datetime.timedelta(days=1)
             tomorrow_str = tomorrow.strftime("%B %d")
             text = text.replace("@tomorrow", tomorrow_str)
 
