@@ -28,8 +28,8 @@
                     {{ record.after_utc | tzfilter("America/Chicago") }}
                 </td>
                 <td>
-                    {% if record.image_url %}
-                        <img src="{{ record.image_url }}" class="img-thumbnail" style="max-width: 100px;">
+                    {% if record.image_urls[0] %}
+                        <img src="{{ record.image_urls[0] }}" class="img-thumbnail" style="max-width: 100px;">
                     {% else %}
                         N/A
                     {% endif %}
