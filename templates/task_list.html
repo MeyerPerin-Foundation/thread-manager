@@ -12,6 +12,7 @@
             <tr>
                 <th>ID</th>
                 <th>Command</th>
+                <th>Service</th>
                 <th>Repeat</th>
                 <th>Post creates after</th>
                 <th>Post scheduled to</th>
@@ -23,6 +24,7 @@
             <tr>
                 <td>{{ task.id }}</td>
                 <td>{{ task.command }}</td>
+                <td>{{ task.service }}</td>
                 <td>{{ task.repeat_every }} {{ task.repeat_unit }}</td>
                 <td>{{ task.last_scheduled_time_utc | tzfilter("America/Chicago") }}</td>
                 <td>{{ task.next_scheduled_time_utc | tzfilter("America/Chicago") }}</td>

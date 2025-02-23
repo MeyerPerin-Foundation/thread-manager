@@ -38,6 +38,7 @@ def edit_task(task_id):
     task_data = s.get_task(task_id)
     if request.method == "POST":
         task_data["command"] = request.form["command"]
+        task_data["service"] = request.form["service"]
         task_data["repeat_every"] = int(request.form["repeat_every"])
         task_data["repeat_unit"] = request.form["repeat_unit"]
         task_data["last_scheduled_time_utc"] = request.form["last_scheduled_time_utc"]
@@ -71,6 +72,7 @@ def create_task():
         task_data = {
             "id": request.form["id"],
             "command": request.form["command"],
+            "service": request.form["service"],
             "repeat_every": int(request.form["repeat_every"]),
             "repeat_unit": request.form["repeat_unit"],
             "last_scheduled_time_utc": request.form["last_scheduled_time_utc"],

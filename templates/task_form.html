@@ -11,6 +11,11 @@
         <div class="mb-3">
             <label for="id" class="form-label">Task ID</label>
             <input type="text" class="form-control" id="id" name="id" value="{{ task.id if task else '' }}" {% if task %}readonly{% endif %} required>
+            <label for="service" class="form-label">Service</label>
+            <select class="form-control" id="service" name="service" required>
+                <option value="Bluesky" {% if task and task.platform == 'Bluesky' %}selected{% endif %}>Bluesky</option>
+                <option value="LinkedIn" {% if task and task.platform == 'LinkedIn' %}selected{% endif %}>LinkedIn</option>
+            </select>
         </div>
         <div class="mb-3">
             <label for="command" class="form-label">Command</label>
