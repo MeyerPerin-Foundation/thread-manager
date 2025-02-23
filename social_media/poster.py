@@ -2,7 +2,6 @@ from social_media import SocialMediaDocument, Bluesky, LinkedIn
 import logging
 from utils.cosmosdb import _get_container
 from datetime import datetime, timezone
-from typing import List
 
 logger = logging.getLogger("tm-poster")
 logger.setLevel(logging.DEBUG)
@@ -17,23 +16,19 @@ class SocialMediaPoster:
         text: str,
         after_utc: str = "2000-01-01T00:00:00Z",
         service: str = "Bluesky",
-        image_url: str | None = None,
-        img_file: str | None = None,
-        url: str | None = None,
-        url_title: str | None = None,
+        image_urls: list[str] | None = None,
+        urls: list[str] | None = None,
+        url_titles: list[str] | None = None,
         hashtags: list[str] | None = None,
-        emojis: list[str] | None = None,
     ) -> SocialMediaDocument:
         document = SocialMediaDocument(
             text=text,
             service=service,
             after_utc=after_utc,
-            image_url=image_url,
-            img_file=img_file,
-            url=url,
-            url_title=url_title,
+            image_urls=image_urls,
+            urls=urls,
+            url_titles=url_titles,
             hashtags=hashtags,
-            emojis=emojis,
         )
         return document
 
@@ -64,9 +59,9 @@ class SocialMediaPoster:
         text: str,
         after_utc: str = "2000-01-01T00:00:00Z",
         service: str = "Bluesky",
-        image_urls: str | None = None,
-        urls: str | None = None,
-        url_titles: str | None = None,
+        image_urls: list[str] | None = None,
+        urls: list[str] | None = None,
+        url_titles: list[str] | None = None,
         hashtags: list[str] | None = None,
     ) -> str:
 
@@ -82,7 +77,7 @@ class SocialMediaPoster:
         self._queue_document(document)
         return document.id
 
-    def get_post_queue(self) -> List[SocialMediaDocument]:
+    def get_post_queue(self) -> list[SocialMediaDocument]:
         container = _get_container("posts", "post_documents")
 
         # get the current utc time

@@ -39,12 +39,12 @@
             <div id="postFields" style="display: none;">
                 <div class="mb-3">
                     <label for="post_text" class="form-label">Post Text</label>
-                    <input type="text" class="form-control" id="post_text" name="post_text"
+                    <input type="text" class="form-control" id="post_text" name="command_parameters_post_text"
                         value="{{ task.command_parameters.post_text if task and task.command_parameters and task.command == 'post' else '' }}">
                 </div>
                 <div class="mb-3">
                     <label for="image_url" class="form-label">Image URL</label>
-                    <input type="text" class="form-control" id="image_url" name="image_url"
+                    <input type="text" class="form-control" id="image_url" name="command_parameters_image_url"
                         value="{{ task.command_parameters.image_url if task and task.command_parameters and task.command == 'post' else '' }}">
                 </div>
             </div>        

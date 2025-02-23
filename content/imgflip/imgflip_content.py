@@ -35,6 +35,7 @@ class ImgflipContent:
         text0: str,
         text1: str,
         max_font_size = None,
+        service = "Bluesky",
         after_utc: str = "2000-01-01T00:00:00Z",
     ) -> str | None:
 
@@ -47,7 +48,7 @@ class ImgflipContent:
         d = self.poster.generate_and_queue_document(
             text=message,
             after_utc=after_utc,
-            service="Bluesky",
+            service=service,
             image_url=[url],
             hashtags=tags,
         )

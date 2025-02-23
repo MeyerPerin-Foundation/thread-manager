@@ -7,7 +7,7 @@ logger.setLevel(logging.INFO)
 
 class UngovernableContent:
 
-    def queue_ungovernable(self, after_utc = None) -> str | None:
+    def queue_ungovernable(self, service="Bluesky", after_utc = None) -> str | None:
         ungov = UngovernableDB()
         ungovernable_dict = ungov.get_random_ungovernable()
 
@@ -21,7 +21,7 @@ class UngovernableContent:
         message = message.encode("ascii", "ignore").decode("ascii")
 
         p = SocialMediaPoster()
-        id = p.generate_and_queue_document(text=message, hashtags=["BecomeUngovernable"], image_urls=[ungovernable_dict["blob_url"]], after_utc=after_utc)
+        id = p.generate_and_queue_document(text=message, service=service, hashtags=["BecomeUngovernable"], image_urls=[ungovernable_dict["blob_url"]], after_utc=after_utc)
         if not id:
             return None
             

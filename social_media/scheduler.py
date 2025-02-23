@@ -47,6 +47,7 @@ class SocialMediaScheduler:
     def generate_post_document(self, schedule: dict):
         command = schedule["command"]
         after_utc = schedule["next_scheduled_time_utc"]
+        service = schedule["service"]
 
         id = None
         if command == "bird":
@@ -57,6 +58,7 @@ class SocialMediaScheduler:
         elif command == "countdown":
             logger.info("Scheduling countdown content")
             c = CountdownContent()
+            #TODO: Add service to days until
             id = c._generate_days_until_document(
                 event_name = schedule["command_parameters"]["event"],
                 event_date = schedule["command_parameters"]["target_date"],
@@ -68,17 +70,18 @@ class SocialMediaScheduler:
         elif command == "too_far":
             logger.info("Scheduling Too Far content")
             t = TooFarContent()
-            id = t.generate_too_far(after_utc=after_utc)
+            id = t.generate_too_far(service=service, after_utc=after_utc)
 
         elif command == "ungovernable":
             logger.info("Scheduling ungovernable content")
             u = UngovernableContent()
-            id = u.queue_ungovernable(after_utc=after_utc)
+            id = u.queue_ungovernable(service=service, after_utc=after_utc)
 
         elif command == "fred":
             logger.info("Posting Fred content")
             f = FredContent()
             id = f.queue_time_series_plot(
+                service = service,
                 series_id = schedule["command_parameters"]["series_id"],
                 series_description = schedule["command_parameters"]["series_description"],
                 series_highlight = schedule["command_parameters"].get("series_highlight", "max"),
@@ -132,12 +135,22 @@ class SocialMediaScheduler:
             logger.info("Scheduling Imgflip content")
             i = ImgflipContent()
             id = i.queue_meme(
+                service = service,
                 message = "",
                 template = schedule["command_parameters"]["template"],
                 text0 = schedule["command_parameters"]["text0"],
                 text1 = schedule["command_parameters"]["text1"],
                 max_font_size = schedule["command_parameters"].get("max_font_size"),
                 after_utc = after_utc,
+            )
+        elif command == "post":
+            logger.info("Adding post to schedule")
+            poster = SocialMediaPoster()
+            id = poster.generate_and_queue_document(
+                text = schedule["command_parameters"]["post_text"],
+                service = service,
+                after_utc = after_utc,
+                image_urls = [schedule["command_parameters"].get("image_url")],
             )
 
         else:

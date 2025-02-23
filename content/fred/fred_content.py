@@ -25,9 +25,10 @@ class FredContent:
     
 
     def queue_time_series_plot(
-        self, 
+        self,
         series_id: str, 
         series_description: str, 
+        service: str = "Bluesky",
         series_highlight: str = "max", 
         start_date=None, 
         end_date=None, 
@@ -91,7 +92,7 @@ class FredContent:
         azs = AzureStorageClient()
         image_url = azs.upload_blob("post-images", blob_name, buf.getvalue())
 
-        id = self.poster.generate_and_queue_document(
+        id = self.poster.generate_and_queue_document(service=service,
             text=caption, image_urls=[image_url], hashtags=tags, after_utc=after_utc
         )
 

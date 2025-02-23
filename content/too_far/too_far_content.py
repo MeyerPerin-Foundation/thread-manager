@@ -7,7 +7,7 @@ logger.setLevel(logging.INFO)
 
 class TooFarContent:
 
-    def generate_too_far(self, after_utc = None) -> str | None:
+    def generate_too_far(self, service="Bluesky", after_utc = None) -> str | None:
         too_far = TooFarDB()
         too_far_dict = too_far.get_random_too_far()
 
@@ -20,7 +20,7 @@ class TooFarContent:
         message = message.encode("ascii", "ignore").decode("ascii")
 
         p = SocialMediaPoster()
-        id = p.generate_and_queue_document(text=message, hashtags=["GoneTooFar"], image_urls=[too_far_dict["blob_url"]], after_utc=after_utc)
+        id = p.generate_and_queue_document(text=message, service=service, hashtags=["GoneTooFar"], image_urls=[too_far_dict["blob_url"]], after_utc=after_utc)
         if not id:
             return None
         too_far_dict["title"] = message
