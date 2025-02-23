@@ -22,14 +22,16 @@ class Bluesky:
     def post_document(self, document: SocialMediaDocument) -> SocialMediaDocument:
         # extract the components of the document
         text = document.text
-        image_url = document.image_url
-        img_file = document.img_file
+        image_urls = document.image_urls
         hashtags = document.hashtags
-        emojis = document.emojis
-        url = document.url
-        url_title = document.url_title
+        urls = document.urls
+        url_titles = document.url_titles
 
-        result = self.post(text, image_url, img_file, hashtags, emojis, url, url_title)
+        result = self.post(text, 
+            image_urls=image_urls, 
+            urls=urls, 
+            url_titles=url_titles,
+            hashtags=hashtags)
 
         document.posted_utc = result.posted_utc
         document.posted_uri = result.posted_uri
@@ -41,22 +43,16 @@ class Bluesky:
     def post(
         self,
         text,
-        image_url=None,
-        img_file=None,
+        image_urls=None,
+        image_alts=None,
         hashtags=None,
-        emojis=None,
-        url=None,
-        url_title=None,
+        urls=None,
+        url_titles=None,
     ) -> SocialMediaPostResult:
         
         logger.info(f"Posting {text} to Bluesky")
 
         message = text
-
-        if emojis is not None:
-            for emoji in emojis:
-                message += emoji
-
         text_builder = client_utils.TextBuilder()
         text_builder.text(message + "\n")
 
@@ -69,25 +65,24 @@ class Bluesky:
                 hashtag_text = "#" + hashtag
             text_builder.tag(hashtag_text + " ", hashtag)
 
-        if url is not None:
-            if url_title is not None:
-                text_builder.link(f"\n{url_title}\n", url)
+        if urls is not None:
+            if url_titles is not None:
+                text_builder.link(f"\n{url_titles[0]}\n", url[0])
             else:
                 text_builder.link(f"\n{url}\n", url)
 
         # Check if there's an image
-        image_data = None
-        if img_file is not None:
-            with open(img_file, "rb") as image_file:
-                image_data = image_file.read()
+        if image_urls is not None:
 
-        if image_url is not None:
-            image_data = requests.get(image_url).content
-
-        if image_data is None:
-            post = self.client.send_post(text_builder)
+            # get the first 4 images
+            if len(image_urls) > 4:
+                logger.info(f"Only posting the first 4 images of {len(image_urls)}")
+                image_urls = image_urls[:4]
+            image_data = [requests.get(image_url).content for image_url in image_urls]
+            image_alts = [image_alts[i] if image_alts else "" for i in range(len(image_urls))]
+            post = self.client.send_images(text_builder, images=image_data, image_alts=image_alts)
         else:
-            post = self.client.send_image(text_builder, image=image_data, image_alt="")
+            post = self.client.send_post(text_builder)
 
         post_uri = post.uri
 
@@ -102,3 +97,14 @@ class Bluesky:
         )
 
         return post_result
+
+if __name__ == "__main__":
+    b = Bluesky()
+    d = SocialMediaDocument(
+        text="Trying to have fun with the API and multiple images",
+        image_urls=[
+            "https://threadmanager.blob.core.windows.net/become-ungovernable/1708107164.jpg",
+            "https://threadmanager.blob.core.windows.net/become-ungovernable/1707882387.jpg"
+        ],
+    )
+    b.post_document(d)

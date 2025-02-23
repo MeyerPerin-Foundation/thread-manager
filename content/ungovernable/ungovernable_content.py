@@ -21,7 +21,7 @@ class UngovernableContent:
         message = message.encode("ascii", "ignore").decode("ascii")
 
         p = SocialMediaPoster()
-        id = p.generate_and_queue_document(text=message, hashtags=["BecomeUngovernable"], image_url=ungovernable_dict["blob_url"], after_utc=after_utc)
+        id = p.generate_and_queue_document(text=message, hashtags=["BecomeUngovernable"], image_urls=[ungovernable_dict["blob_url"]], after_utc=after_utc)
         if not id:
             return None
             

@@ -79,12 +79,11 @@ class BirdContent:
     
         p = SocialMediaPoster()
         id = p.generate_and_queue_document(
-            text=f"{caption}",
-            image_url=blob_url,
+            text=f"{caption} 🪶",
+            image_urls=[blob_url],
             hashtags=["birds"],
-            emojis=["🪶"],
-            url="https://t.ly/birdb",
-            url_title="📷: Birdbuddy",
+            urls=["https://t.ly/birdb"],
+            url_titles=["📷: Birdbuddy"],
             after_utc=after_utc,
         )
         if not id:

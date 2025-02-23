@@ -48,7 +48,7 @@ class ImgflipContent:
             text=message,
             after_utc=after_utc,
             service="Bluesky",
-            image_url=url,
+            image_url=[url],
             hashtags=tags,
         )
 

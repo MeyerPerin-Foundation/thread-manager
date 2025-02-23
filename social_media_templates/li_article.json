@@ -1,0 +1,19 @@
+{
+ "author": "",
+ "commentary": "",
+ "visibility": "PUBLIC",
+ "distribution": {
+   "feedDistribution": "MAIN_FEED",
+   "targetEntities": [],
+   "thirdPartyDistributionChannels": []
+ },
+ "content": {
+     "article": {
+         "source": "",
+         "thumbnail": "",
+         "title": ""
+     }
+ },
+ "lifecycleState": "PUBLISHED",
+ "isReshareDisabledByAuthor": false
+}

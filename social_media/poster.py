@@ -64,24 +64,20 @@ class SocialMediaPoster:
         text: str,
         after_utc: str = "2000-01-01T00:00:00Z",
         service: str = "Bluesky",
-        image_url: str | None = None,
-        img_file: str | None = None,
-        url: str | None = None,
-        url_title: str | None = None,
+        image_urls: str | None = None,
+        urls: str | None = None,
+        url_titles: str | None = None,
         hashtags: list[str] | None = None,
-        emojis: list[str] | None = None,
     ) -> str:
 
         document = self._generate_document(
             text=text,
             service=service,
             after_utc=after_utc,
-            image_url=image_url,
-            img_file=img_file,
-            url=url,
-            url_title=url_title,
+            image_urls=image_urls,
+            urls=urls,
+            url_titles=url_titles,
             hashtags=hashtags,
-            emojis=emojis,
         )
         self._queue_document(document)
         return document.id

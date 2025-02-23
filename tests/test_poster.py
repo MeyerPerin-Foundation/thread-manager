@@ -6,11 +6,10 @@ class TestPoster:
         p = SocialMediaPoster()
         id = p.generate_and_queue_document(
             text="This document was added to the queue",
-            image_url="https://meyerperin.org/images/bird.jpg",
-            url="https://meyerperin.org",
-            url_title="MeyerPerin Foundation",
+            image_urls=["https://meyerperin.org/images/bird.jpg"],
+            urls=["https://meyerperin.org"],
+            url_titles=["MeyerPerin Foundation"],
             hashtags=["Test1", "ATProto"],
-            emojis=["👍", "👎"],
         )
         # p.post_with_id(id)
         print(id)
@@ -19,11 +18,10 @@ class TestPoster:
         p = SocialMediaPoster()
         time.sleep(1)
         id = p.generate_and_queue_document(
-            text="This document has been posted by id",
-            url="https://meyerperin.org",
-            url_title="MeyerPerin Foundation",
+            text=["This document has been posted by id"],
+            urls=["https://meyerperin.org"],
+            url_titles=["MeyerPerin Foundation"],
             hashtags=["Test2", "ATProto"],
-            emojis=["👍", "👎"],
         )
         p.post_with_id(id)
         assert True

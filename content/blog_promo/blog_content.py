@@ -26,8 +26,8 @@ class BlogPromoContent:
         id = p.generate_and_queue_document(
             text=bt_message,
             hashtags=["BlogPost"],
-            url=blog_post_metadata["url"],
-            url_title="Read blog post",
+            urls=[blog_post_metadata["url"]],
+            url_titles=["Read blog post"],
             after_utc=after_utc,
         )
         ids.append(id)
@@ -37,7 +37,7 @@ class BlogPromoContent:
             service="LinkedIn",
             text=linkedin_message,
             hashtags=["BlogPost"],
-            url=blog_post_metadata["url"],
+            urls=[blog_post_metadata["url"]],
             after_utc=after_utc,
         )
         ids.append(id)

@@ -20,7 +20,7 @@ class TooFarContent:
         message = message.encode("ascii", "ignore").decode("ascii")
 
         p = SocialMediaPoster()
-        id = p.generate_and_queue_document(text=message, hashtags=["GoneTooFar"], image_url=too_far_dict["blob_url"], after_utc=after_utc)
+        id = p.generate_and_queue_document(text=message, hashtags=["GoneTooFar"], image_urls=[too_far_dict["blob_url"]], after_utc=after_utc)
         if not id:
             return None
         too_far_dict["title"] = message

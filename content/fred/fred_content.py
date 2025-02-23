@@ -92,7 +92,7 @@ class FredContent:
         image_url = azs.upload_blob("post-images", blob_name, buf.getvalue())
 
         id = self.poster.generate_and_queue_document(
-            text=caption, image_url=image_url, hashtags=tags, after_utc=after_utc
+            text=caption, image_urls=[image_url], hashtags=tags, after_utc=after_utc
         )
 
         return id

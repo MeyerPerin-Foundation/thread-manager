@@ -43,24 +43,20 @@ def add_post_to_queue():
     text = request.json.get("text", "")
     service = request.json.get("service", "Bluesky")
     after_utc = request.json.get("after_utc", "2000-01-01T00:00:00Z")
-    image_url = request.json.get("image_url", None)
-    img_file = request.json.get("img_file", None)
-    url = request.json.get("url", None)
-    url_title = request.json.get("url_title", None)
+    image_urls = request.json.get("image_url", None)
+    urls = request.json.get("url", None)
+    url_titles = request.json.get("url_title", None)
     hashtags = request.json.get("hashtags", None)
-    emojis = request.json.get("emojis", None) 
 
     poster = SocialMediaPoster()
     id = poster.generate_and_queue_document(
         text=text,
         service=service,
         after_utc=after_utc,
-        image_url=image_url,
-        img_file=img_file,
-        url=url,
-        url_title=url_title,
+        image_urls=image_urls,
+        urls=url,
+        url_titles=url_titles,
         hashtags=hashtags,
-        emojis=emojis,
     )
 
     if d:
@@ -112,12 +108,14 @@ def create_post():
         else:
             image_url = None
 
+        image_urls = [image_url] if image_url else None
+
         poster = SocialMediaPoster()
         id = poster.generate_and_queue_document(
             text=text,
             service=service,
             after_utc=after_utc,
-            image_url=image_url,
+            image_urls=image_urls,
         )
 
         if id:
