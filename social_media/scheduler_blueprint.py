@@ -10,7 +10,7 @@ scheduler_bp = Blueprint("scheduler", __name__, url_prefix="/scheduler")
 def tickle_scheduler():
 
     scheduler = SocialMediaScheduler()
-    
+    scheduler.delete_old_tasks()    
     schedule_items = scheduler.list_expired_schedules()
     ids = []
     for schedule in schedule_items:
@@ -18,6 +18,7 @@ def tickle_scheduler():
         scheduler.update_schedule(schedule)
         if id:
             ids.append(id)
+
 
     if len(ids) > 0:
         return f"Accepted with ids: {ids}", 202

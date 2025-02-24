@@ -184,6 +184,15 @@ class SocialMediaScheduler:
         query = "SELECT * FROM c ORDER BY c.next_scheduled_time_utc"
         return list(self.container.query_items(query, enable_cross_partition_query=True))
 
+    def delete_old_tasks(self):
+        now = datetime.now(UTC).isoformat()
+        query = f"SELECT * FROM c WHERE c.delete_after_utc < '{now}'"
+        items = list(self.container.query_items(query, enable_cross_partition_query=True))        
+        for item in items:
+            id = item["id"]
+            logger.info(f"Deleting task {id} because of delete_after_utc")
+            self.delete_task(id)
+
     def get_task(self, id: str) -> dict:
         return self.container.read_item(item=id, partition_key=id)
 
@@ -191,6 +200,7 @@ class SocialMediaScheduler:
         self.container.replace_item(item=id, body=schedule)
 
     def delete_task(self, id: str):
+        logger.info(f"Deleting task {id}")
         self.container.delete_item(id, partition_key=id)
 
     def create_task(self, schedule: dict):
