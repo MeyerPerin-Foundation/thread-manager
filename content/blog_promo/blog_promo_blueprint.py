@@ -1,5 +1,5 @@
 from flask import Blueprint, request, render_template
-from content.blog_promo import BlogPromoContent
+from .blog_content import BlogPromoContent
 import content.blog_promo.sitemaps as sitemaps
 
 blog_promo_bp = Blueprint('blog_promo', __name__, url_prefix='/blog_promo')

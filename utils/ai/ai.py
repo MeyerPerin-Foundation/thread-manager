@@ -227,6 +227,35 @@ def generate_caption_for_bird_picture(
 
     return response.choices[0].message.content
 
+def fix_blog_post(title, content, target_site):
+    openai_client = AzureOpenAI(
+        azure_endpoint=app_config.AZURE_OPENAI_ENDPOINT,
+        api_key=app_config.AZURE_OPENAI_KEY,
+        api_version=app_config.AZURE_OPENAI_API_VERSION,
+    )
+
+    prompt = "The blog post below needs to be reviewed for grammar, spelling, formatting and punctuation." 
+    prompt += "Don't add any additional content, don't change the meaning, just fix grammar, spelling, formatting and punctuation."
+    prompt += "Add appropriate line breaks and paragraph breaks."
+    prompt += "Don't return the title, just the blog post content."
+    prompt += "Return the fixed blog post only in plain text, no other text. "
+    prompt += f"\n\nTitle: {title}\n\n"
+    prompt += f"{content}"
+
+    response = openai_client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {
+                "role": "system",
+                "content": f"You are a reviewer for Wired Magazine",
+            },
+            {"role": "user", "content": prompt},
+        ],
+        temperature=0.2,
+    )
+
+    return response.choices[0].message.content
+
 
 if __name__ == "__main__":
-    _test_image_chooser()
+    pass
