@@ -5,7 +5,7 @@
 {% block content %}
 <a href="{{ url_for('smp.list_posts') }}" class="btn btn-link mt-3">Back to Post List</a>
 <div class="container mt-5">
-    <h1 class="mb-4">Post Details</h1>
+    <h1 class="mb-4">Post Details</h1>  
     <form method="POST">
         <div class="mb-3">
             <label for="text" class="form-label">Text</label>
@@ -31,8 +31,10 @@
         <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
     </form>
     <h2 class="mt-5">Image Preview</h2>
-    {% if record.image_url %}
-        <img src="{{ record.image_url }}" class="img-fluid" alt="Image Preview">
+    {% if record.image_urls %}
+        {% for image_url in record.image_urls %}
+        <img src="{{ image_url }}" alt="Image" class="img-fluid mt-3">
+        {% endfor %}
     {% else %}
         <p>No image available.</p>
     {% endif %}
