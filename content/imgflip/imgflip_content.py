@@ -49,7 +49,7 @@ class ImgflipContent:
             text=message,
             after_utc=after_utc,
             service=service,
-            image_url=[url],
+            images_url=[url],
             hashtags=tags,
         )
 
