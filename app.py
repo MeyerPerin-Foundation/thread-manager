@@ -16,14 +16,16 @@ from content.countdown.countdown_blueprint import countdown_bp
 from content.ungovernable.ungovernable_blueprint import ungov_bp
 from content.too_far.too_far_blueprint import too_far_bp
 from content.fred.fred_blueprint import fred_bp  
-from content.birds.birds_blueprint import birds_bp
-from dashboard.dashboard_blueprint import dashboard_bp
+from content.birds.birds_blueprint import birds_bp, upload_birds
+from content.birds import BirdContent
+from dashboard.dashboard_blueprint import dashboard_bp, data_snapshot
 from home_automation.visits.visits_blueprint import visits_bp
 from home_automation.solar.solar_blueprint import solar_bp
-from social_media.smp_blueprint import smp_bp
-from social_media.scheduler_blueprint import scheduler_bp
+from social_media.smp_blueprint import smp_bp, post_from_queue
+from social_media.scheduler_blueprint import scheduler_bp, tickle_scheduler
 
-from content.birds import BirdContent
+from apscheduler.schedulers.background import BackgroundScheduler
+from time import sleep
 
 import logging
 load_dotenv()
@@ -58,6 +60,13 @@ for bp in [fred_bp, birds_bp, blog_promo_bp, countdown_bp, dashboard_bp, ungov_b
     bp.before_request(require_auth)
     app.register_blueprint(bp)
 
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=post_from_queue, trigger="interval", minutes=15)
+scheduler.add_job(func=tickle_scheduler, trigger="interval", minutes=15)
+scheduler.add_job(func=upload_birds, trigger="interval", hours=2)
+scheduler.add_job(func=data_snapshot, trigger="interval", hours=12)
+scheduler.start()
 
 @app.route("/login")
 def login():
