@@ -1,9 +1,11 @@
 from app_config import BSKY_APP_PWD, BSKY_USER
 import logging
 import requests
-from atproto import client_utils, Client
+from atproto import client_utils, Client, models
 from datetime import datetime, timezone
 from social_media.document import SocialMediaDocument, SocialMediaPostResult
+from PIL import Image
+from io import BytesIO
 
 logger = logging.getLogger("tm-bluesky")
 logger.setLevel(logging.DEBUG)
@@ -77,8 +79,12 @@ class Bluesky:
                 logger.info(f"Only posting the first 4 images of {len(image_urls)}")
                 image_urls = image_urls[:4]
             image_data = [requests.get(image_url).content for image_url in image_urls]
+            image_aspect_ratios = []
+            for data in image_data:
+                with Image.open(BytesIO(data)) as img:
+                    image_aspect_ratios.append(models.AppBskyEmbedDefs.AspectRatio(height=img.height, width=img.width))
             image_alts = [image_alts[i] if image_alts else "" for i in range(len(image_urls))]
-            post = self.client.send_images(text_builder, images=image_data, image_alts=image_alts)
+            post = self.client.send_images(text_builder, images=image_data, image_alts=image_alts, image_aspect_ratios=image_aspect_ratios)
         else:
             post = self.client.send_post(text_builder)
 

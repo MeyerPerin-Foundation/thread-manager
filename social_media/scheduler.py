@@ -12,6 +12,7 @@ from content.ungovernable import UngovernableContent
 from content.fred import FredContent
 from content.blog_promo import BlogPromoContent
 from content.imgflip import ImgflipContent
+from content.financial.alpha_vantage import AlphaVantageContent
 
 from home_automation.solar import SolarClient
 
@@ -151,6 +152,21 @@ class SocialMediaScheduler:
                 service = service,
                 after_utc = after_utc,
                 image_urls = [schedule["command_parameters"].get("image_url")],
+            )
+        elif command == "alpha_vantage":
+            logger.info("Scheduling Alpha Vantage content")
+            a = AlphaVantageContent()
+            id = a.queue_symbol_plot(
+                service = service,
+                symbol = schedule["command_parameters"]["av_symbol"],
+                symbol_name = schedule["command_parameters"]["av_symbol_name"],
+                series_description = schedule["command_parameters"]["av_series_description"],
+                period_name = schedule["command_parameters"].get("av_period_name"),
+                start_date = schedule["command_parameters"].get("av_start_date"),
+                end_date = schedule["command_parameters"].get("av_end_date"),
+                condition_type = schedule["command_parameters"].get("av_condition_type"),
+                condition_value = schedule["command_parameters"].get("av_condition_value"),
+                after_utc = after_utc,
             )
 
         else:
