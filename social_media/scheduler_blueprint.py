@@ -42,15 +42,37 @@ def edit_task(task_id):
         task_data["service"] = request.form["service"]
         task_data["repeat_every"] = int(request.form["repeat_every"])
         task_data["repeat_unit"] = request.form["repeat_unit"]
+        
+        # ensure last_scheduled_time_utc, next_scheduled_time_utc, delete_after_utc are in ISO format
+        # if not, convert them to ISO format 
         task_data["last_scheduled_time_utc"] = request.form["last_scheduled_time_utc"]
         task_data["next_scheduled_time_utc"] = request.form["next_scheduled_time_utc"]
+        task_data["delete_after_utc"] = request.form["delete_after_utc"]    
+
         # for each key in request.form, if the key starts with "command_parameters.", add it to task_data
         for key in request.form:
             if key.startswith("command_parameters_"):
                 # if there's no command_parameters key in task_data, create it
                 if "command_parameters" not in task_data:
                     task_data["command_parameters"] = {}
-                task_data["command_parameters"][key[len("command_parameters_"):]] = request.form[key] 
+                task_data["command_parameters"][key[len("command_parameters_"):]] = request.form[key]
+        # check if command parameters contains a key plural
+        if "command_parameters" in task_data and "plural" in task_data["command_parameters"]:
+        # if plural is empty or nonexistent, make it False otherwise make it True
+            task_data["command_parameters"]["plural"] = True if task_data["command_parameters"]["plural"] else False
+
+        # check if command parameters contains a key stop
+        if "command_parameters" in task_data and "stop" in task_data["command_parameters"]:
+            # make it an int
+            # if stop is empty or nonexistent, make it 0 otherwise make it int
+            if task_data["command_parameters"]["stop"] == "":
+                task_data["command_parameters"]["stop"] = 0
+            else:
+                # if stop is not empty, make it an int
+                task_data["command_parameters"]["stop"] = int(task_data["command_parameters"]["stop"])
+        else:
+            task_data["command_parameters"]["stop"] = 0
+
         logger.debug(f"Updating task {task_id}: {task_data}")
         s.update_task(task_id, task_data)
         return redirect(url_for("scheduler.task_list"))

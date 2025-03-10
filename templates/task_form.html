@@ -118,12 +118,46 @@
             <!-- "All the other commands" have no parameters, so no extra fields needed -->
 
        <!-- Other task fields -->
+        <!-- Last scheduled time field -->
         <div class="mb-3">
-            <label for="last_scheduled_time_utc" class="form-label">Last post (Americas/Chicago)</label>
-            <input type="datetime-local" name="last_scheduled_time_utc_local" id="last_scheduled_time_utc" class="form-control" value="{{ task.last_scheduled_time_utc | tzfilter('America/Chicago', picker=True) }}" required>
-            <input type="hidden" name="last_scheduled_time_utc" id="last_scheduled_time_utc" value="2000-01-01T12:00:00">  
-            <input type="hidden" name="last_scheduled_time_utc" id="last_scheduled_time_utc_utc">  <!-- Hidden UTC field -->        
+            <label for="last_scheduled_time_local" class="form-label">Last post (Americas/Chicago)</label>
+            <input type="datetime-local" name="last_scheduled_time_local" id="last_scheduled_time_local" class="form-control" 
+                value="{{ task.last_scheduled_time_utc | tzfilter('America/Chicago', picker=True) }}" required>
+            {% if task.last_scheduled_time_utc %}
+                <input type="hidden" name="last_scheduled_time_utc" id="last_scheduled_time_utc" value="{{ task.last_scheduled_time_utc }}">
+            {% else %}
+                <input type="hidden" name="last_scheduled_time_utc" id="last_scheduled_time_utc" value="2000-01-01T00:00">
+            {% endif %}
         </div>
+
+        <!-- Next scheduled time field -->
+        <div class="mb-3">
+            <label for="next_scheduled_time_local" class="form-label">Next post (Americas/Chicago)</label>
+            <input type="datetime-local" name="next_scheduled_time_local" id="next_scheduled_time_local" class="form-control" 
+                value="{{ task.next_scheduled_time_utc | tzfilter('America/Chicago', picker=True) }}" required>
+            {% if task.next_scheduled_time_utc %}
+                <input type="hidden" name="next_scheduled_time_utc" id="next_scheduled_time_utc" value="{{ task.next_scheduled_time_utc }}">
+            {% else %}
+                <input type="hidden" name="next_scheduled_time_utc" id="next_scheduled_time_utc" value="2000-01-01T00:00">
+            {% endif %}
+
+
+        </div>
+
+        <!-- Delete after field -->
+        <div class="mb-3">
+            <label for="delete_after_local" class="form-label">Delete after (Americas/Chicago)</label>
+            {% if task.delete_after_utc %}
+            <input type="datetime-local" name="delete_after_local" id="delete_after_local" class="form-control" 
+                value="{{ task.delete_after_utc | tzfilter('America/Chicago', picker=True) }}" required>
+                <input type="hidden" name="delete_after_utc" id="delete_after_utc" value="{{ task.delete_after_utc }}">
+            {% else %}
+            <input type="datetime-local" name="delete_after_local" id="delete_after_local" class="form-control" 
+                value="{{ '2030-01-01T00:00' | tzfilter('America/Chicago', picker=True) }}" required>
+                <input type="hidden" name="delete_after_utc" id="delete_after_utc" value="2030-01-01T00:00">
+            {% endif %}
+        </div>
+
        <div class="mb-3">
             <label for="repeat_every" class="form-label">Repeat Every</label>
             <input type="number" class="form-control" id="repeat_every" name="repeat_every" value="{{ task.repeat_every if task else '' }}" required>
@@ -135,12 +169,6 @@
                 <option value="hours" {% if task and task.repeat_unit == 'hours' %}selected{% endif %}>Hours</option>
             </select>
         </div>
-        <div class="mb-3">
-            <label for="next_scheduled_time_utc" class="form-label">Next post (Americas/Chicago)</label>
-            <input type="datetime-local" name="next_scheduled_time_utc_local" id="next_scheduled_time_utc" class="form-control" value="{{ task.next_scheduled_time_utc | tzfilter('America/Chicago', picker=True) }}" required>
-            <input type="hidden" name="last_scheduled_time_utc" id="last_scheduled_time_utc" value="2000-01-01T12:00:00">  
-            <input type="hidden" name="next_scheduled_time_utc" id="next_scheduled_time_utc_utc">  <!-- Hidden UTC field -->        
-        </div>
 
         <button type="submit" class="btn btn-success">{{ "Update" if task else "Create" }} Task</button>
     </form>
@@ -149,80 +177,129 @@
 
 {% block scripts %}
 <script>
+    // Default date values in ISO format (without seconds)
+    const defaultDateTime = "2000-01-01T00:00"; 
+    const deleteAfterDefault = "2030-01-01T00:00"; 
 
-    /////////////////////////////////////
-    // Date/time conversion functions
-    /////////////////////////////////////
+    // -- [1] Converting a hidden UTC value to an <input> in America/Chicago
+    function convertUTCToLocal(utcId, localId, defaultVal = defaultDateTime) {
+        const utcInput = document.getElementById(utcId);
+        const localInput = document.getElementById(localId);
+        if (!utcInput || !localInput) return;
 
-    function convertToLocal() {
-        let utcInput = document.getElementById("next_scheduled_time_utc_utc");
-        let localInput = document.getElementById("next_scheduled_time_utc");
-
-        if (utcInput && localInput && utcInput.value) {
-            let utcDate = new Date(utcInput.value + ":00");
-            let localDate = new Date(utcDate.getTime() + utcDate.getTimezoneOffset() * 60000);
-            localInput.value = localDate.toISOString().slice(0, 16);
+        const rawUtc = utcInput.value;
+        if (!rawUtc) {
+            localInput.value = defaultVal;
+            return;
         }
+        // We have a string like "2025-03-09T21:30"
+        // Turn that into a Date object in UTC by appending "Z"
+        const utcDate = new Date(rawUtc + "Z");
+
+        // Now convert that to Chicago time with Intl:
+        // "sv" or "en-CA" produce an ISO-like YYYY-MM-DD HH:mm output
+        const fmtOptions = {
+            timeZone: "America/Chicago",
+            year: "numeric", month: "2-digit", day: "2-digit",
+            hour: "2-digit", minute: "2-digit",
+            hour12: false
+        };
+        let chicagoString = new Intl.DateTimeFormat("en-CA", fmtOptions).format(utcDate);
+        // e.g. "2025-03-09 15:30"
+        // We want "2025-03-09T15:30" for <input type="datetime-local">
+        chicagoString = chicagoString.replace(",","").replace(" ", "T");
+
+        localInput.value = chicagoString;
     }
 
-    function convertToUTC() {
-        let localInput = document.getElementById("next_scheduled_time_utc");
-        let utcInput = document.getElementById("next_scheduled_time_utc_utc");
+    // -- [2] Converting a local value to a hidden UTC value
 
-        if (localInput && utcInput && localInput.value) {
-            const  localDate = new Date(localInput.value);
-            const isoFull = localDate.toISOString();
-            utcInput.value = isoFull.slice(0, 16);
+    function convertLocalToUTC(localId, utcId, defaultVal = defaultDateTime) {
+        const localInput = document.getElementById(localId);
+        const utcInput = document.getElementById(utcId);
+        if (!localInput || !utcInput) return;
+
+        const rawLocal = localInput.value;
+        if (!rawLocal) {
+            utcInput.value = defaultVal;
+            return;
         }
+
+        // We have a string like "2025-03-09T15:30"
+        // Turn that into a Date object in local time
+
+        const localDate = new Date(rawLocal);
+
+        // Now convert that to UTC with Intl:
+        // "sv" or "en-CA" produce an ISO-like YYYY-MM-DD HH:mm output
+
+        const fmtOptions = {
+            timeZone: "UTC",
+            year: "numeric", month: "2-digit", day: "2-digit",
+            hour: "2-digit", minute: "2-digit",
+            hour12: false
+        };
+
+        let utcString = new Intl.DateTimeFormat("en-CA", fmtOptions).format(localDate);
+
+        // e.g. "2025-03-09 21:30"
+        // We want "2025-03-09T21:30" for <input type="datetime-local">
+        utcString = utcString.replace(",","").replace(" ", "T");
+
+        utcInput.value = utcString;
+
+
+
+
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        let utcInput = document.getElementById("next_scheduled_time_utc_utc");
-        let localInput = document.getElementById("next_scheduled_time_utc");
 
-        localInput.addEventListener("change", convertToUTC);
+    // Gather fields for consistent usage
+    const datetimeFields = [
+        { local: "last_scheduled_time_local", utc: "last_scheduled_time_utc", default: defaultDateTime },
+        { local: "next_scheduled_time_local", utc: "next_scheduled_time_utc", default: defaultDateTime },
+        { local: "delete_after_local",        utc: "delete_after_utc",        default: deleteAfterDefault }
+    ];
 
-        document.querySelector("form").addEventListener("submit", function() {
-            convertToUTC();
+    document.addEventListener("DOMContentLoaded", function() {
+        // Convert from hidden UTC → local (America/Chicago)
+        datetimeFields.forEach(field => {
+            convertUTCToLocal(field.utc, field.local, field.default);
+            
+            // Whenever user changes local field, update hidden UTC
+            document.getElementById(field.local).addEventListener('change', () => {
+                convertLocalToUTC(field.local, field.utc, field.default);
+            });
         });
 
+        // On form submit, be sure the final hidden UTC fields are up-to-date
+        document.querySelector("form").addEventListener("submit", function() {
+            datetimeFields.forEach(field => {
+                convertLocalToUTC(field.local, field.utc, field.default);
+            });
+        });
     });
 
     /////////////////////////////////////
     // Command change listeners
     /////////////////////////////////////
-
     document.addEventListener("DOMContentLoaded", function () {
-        // Set up command change listener
         document.getElementById("command").addEventListener("change", toggleCommandParameters);
-        toggleCommandParameters(); // Run once at load in case we're editing
+        toggleCommandParameters();
+    });
 
-        // Date/time conversion
-        let localInput = document.getElementById("next_scheduled_time_utc");
-        localInput.addEventListener("change", convertToUTC);
-
-        document.querySelector("form").addEventListener("submit", function() {
-            convertToUTC();
-        });
-    });    
-
-    // Show/hide parameter fields based on selected command
     function toggleCommandParameters() {
-        const commandVal = document.getElementById("command").value;
-
-        // Sections for each command
-        const postSection = document.getElementById("postFields");
+        const commandVal       = document.getElementById("command").value;
+        const postSection      = document.getElementById("postFields");
         const countdownSection = document.getElementById("countdownFields");
-        const fredSection = document.getElementById("fredFields");
-        const imgflipSection = document.getElementById("imgflipFields");
+        const fredSection      = document.getElementById("fredFields");
+        const imgflipSection   = document.getElementById("imgflipFields");
 
-        // Hide all sections first
-        postSection.style.display = "none";
+        postSection.style.display      = "none";
         countdownSection.style.display = "none";
-        fredSection.style.display = "none";
-        imgflipSection.style.display = "none";
+        fredSection.style.display      = "none";
+        imgflipSection.style.display   = "none";
 
-        // Show relevant section
         if (commandVal === "post") {
             postSection.style.display = "block";
         } else if (commandVal === "countdown") {
@@ -232,7 +309,6 @@
         } else if (commandVal === "imgflip") {
             imgflipSection.style.display = "block";
         }
-        // For any other command, do nothing (fields remain hidden)
     }
 
 </script>

@@ -16,6 +16,7 @@
                 <th>Repeat</th>
                 <th>Post creates after</th>
                 <th>Post scheduled to</th>
+                <th>Delete after</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -28,6 +29,11 @@
                 <td>{{ task.repeat_every }} {{ task.repeat_unit }}</td>
                 <td>{{ task.last_scheduled_time_utc | tzfilter("America/Chicago") }}</td>
                 <td>{{ task.next_scheduled_time_utc | tzfilter("America/Chicago") }}</td>
+                {% if task.delete_after_utc %}
+                <td>{{ task.delete_after_utc | tzfilter("America/Chicago") }}</td>
+                {% else %}
+                <td>n/a</td>
+                {% endif %}
                 <td>
                     <a href="{{ url_for('scheduler.view_task', task_id=task.id) }}" class="btn btn-info btn-sm">View</a>
                     <a href="{{ url_for('scheduler.edit_task', task_id=task.id) }}" class="btn btn-warning btn-sm">Edit</a>
