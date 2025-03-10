@@ -139,7 +139,10 @@ class AlphaVantageContent:
         if text == "":
             return None
         image_url = self.generate_chart(data, symbol_name + " Daily Close Prices")
-        
+
+        if after_utc is None:
+            after_utc = "2000-01-01T00:00:00Z"
+
         poster = SocialMediaPoster()
         id = poster.generate_and_queue_document(
             service=service,

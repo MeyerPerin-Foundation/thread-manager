@@ -154,7 +154,7 @@ class SocialMediaScheduler:
                 image_urls = [schedule["command_parameters"].get("image_url")],
             )
         elif command == "alpha_vantage":
-            logger.info("Scheduling Alpha Vantage content")
+            logger.info("Posting Alpha Vantage content")
             a = AlphaVantageContent()
             id = a.queue_symbol_plot(
                 service = service,
@@ -166,8 +166,10 @@ class SocialMediaScheduler:
                 end_date = schedule["command_parameters"].get("av_end_date"),
                 condition_type = schedule["command_parameters"].get("av_condition_type"),
                 condition_value = schedule["command_parameters"].get("av_condition_value"),
-                after_utc = after_utc,
+                after_utc = None,
             )
+            poster = SocialMediaPoster()
+            poster.post_with_id(id)
 
         else:
             logger.warning(f"Unknown command: {command}")
