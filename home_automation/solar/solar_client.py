@@ -2,7 +2,10 @@ from eg4_solar_client import EG4Client
 from dotenv import load_dotenv
 from mpfutils.cosmosdb import CosmosDBContainer
 import os
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 import pprint
+import app_config
 
 class SolarClient:
 
@@ -36,6 +39,31 @@ class SolarClient:
 
             self.db_client.upsert_item(doc)
 
+    def check_new_max_ePvDay(self):
+        
+        # Get today's date in local time YYYY-MM-DD format in TZ America/Chicago using zoneinfo
+        
+
+        local_date = datetime.now(ZoneInfo(app_config.LOCAL_TIME_ZONE)).strftime("%Y-%m-%d")
+        local_date_one_year_ago = (datetime.now(ZoneInfo(app_config.LOCAL_TIME_ZONE)) - timedelta(days=365)).strftime("%Y-%m-%d")
+        query = f"SELECT TOP 1 * FROM c WHERE c.ePvDay > 0 AND c.date >= '{local_date_one_year_ago}' ORDER BY c.date DESC"
+
+        results = self.db_client.run_query(query=query, results_as_list=True)
+        if results:
+            last_doc = results[0]
+            max_ePvDay = last_doc["ePvDay"]
+            date = last_doc["date"]
+
+            # Check if the date is today
+            if date == local_date:
+                # If the date is today, return the value
+                return max_ePvDay
+            else:
+                # If the date is not today, return None
+                return None
+
+
+
     def get_energy(self, start_date, end_date):
             # Query for documents whose 'date' is between the given range
         query = "SELECT * FROM c WHERE c.date >= @start AND c.date <= @end"
@@ -45,3 +73,10 @@ class SolarClient:
         ]
         results = self.db_client.run_query(query=query, parameters=parameters, results_as_list=True)
         return results
+
+if __name__ == "__main__":
+    load_dotenv()
+    s = SolarClient()
+    d = s.check_new_max_ePvDay()
+    print(f"Max ePvDay: {d}")
+    

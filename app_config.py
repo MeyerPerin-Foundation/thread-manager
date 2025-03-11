@@ -92,3 +92,6 @@ IMGFLIP_PASSWORD = os.getenv("IMGFLIP_PASSWORD")
 
 # Alpha Vantage
 ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
+
+# Home
+LOCAL_TIME_ZONE = os.getenv("LOCAL_TIME_ZONE")

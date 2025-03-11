@@ -69,7 +69,8 @@ class Bluesky:
 
         if urls is not None:
             if url_titles is not None:
-                text_builder.link(f"\n{url_titles[0]}\n", urls[0])
+                for i in range(len(urls)):
+                    text_builder.link(f"\n{url_titles[i]}\n", urls[i])
 
         # Check if there's an image
         if image_urls is not None:

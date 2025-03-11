@@ -120,6 +120,30 @@ class SocialMediaScheduler:
             s.update_year_month(year, month)
             s.update_year_month(last_year, last_month)
 
+            e = s.check_new_max_ePvDay()
+            if e is not None:
+                logger.info(f"New max ePvDay: {e}")
+                # create a post with the new max ePvDay
+                poster = SocialMediaPoster()
+                
+                text = f"Today, my solar panel installation generated {e} kWh of energy, a record for the last 365 days. It uses Enphase panels, EG4 GridBoss + 2 FlexBoss + batteries. Installed by Texas Solar Professional. Links below."
+                urls = ["https://eg4electronics.com/", "https://www.texassolar.pro/", "https://www.enphase.com/en-us/"]
+                url_titles = ["EG4", "Texas Solar Professional", "Enphase"]
+                image_urls = ["https://threadmanager.blob.core.windows.net/post-images/enphase.jpg"]
+                after_utc = "2020-01-01T00:00:00Z"
+
+                id = poster.generate_and_queue_document(
+                    text = text,
+                    service = "Bluesky",
+                    after_utc = after_utc,
+                    image_urls = image_urls,
+                    urls = urls,
+                    url_titles = url_titles,
+                )
+                poster.post_with_id(id)
+                logger.info(f"Posted new max ePvDay: {e}")
+
+
         elif command == "collect_bird_postcards":
             logger.info("Collecting bird postcards")
             birds = BirdContent()
@@ -223,3 +247,46 @@ class SocialMediaScheduler:
 
     def create_task(self, schedule: dict):
         self.container.create_item(schedule)
+
+if __name__ == "__main__":
+    logger.info("Executing solar refresh")            
+    s = SolarClient()
+
+    # get current year and month
+    now = datetime.now()
+    year = now.year
+    month = now.month
+
+    # get last year month
+    last_month = month - 1
+    if last_month == 0:
+        last_month = 12
+        last_year -= 1
+    else:
+        last_year = year
+
+    s.update_year_month(year, month)
+    s.update_year_month(last_year, last_month)
+
+    e = s.check_new_max_ePvDay()
+    if e is not None:
+        logger.info(f"New max ePvDay: {e}")
+        # create a post with the new max ePvDay
+        poster = SocialMediaPoster()
+        
+        text = f"Today, my solar panel installation generated {e} kWh of energy, a record for the last 365 days. It uses Enphase panels, EG4 GridBoss + 2 FlexBoss + batteries. Installed by Texas Solar Professional. Links below."
+        urls = ["https://eg4electronics.com/", "https://www.texassolar.pro/", "https://www.enphase.com/en-us/"]
+        url_titles = ["EG4", "Texas Solar Professional", "Enphase"]
+        image_urls = ["https://threadmanager.blob.core.windows.net/post-images/enphase.jpg"]
+        after_utc = "2020-01-01T00:00:00Z"
+
+        id = poster.generate_and_queue_document(
+            text = text,
+            service = "Bluesky",
+            after_utc = after_utc,
+            image_urls = image_urls,
+            urls = urls,
+            url_titles = url_titles,
+        )
+        poster.post_with_id(id)
+        logger.info(f"Posted new max ePvDay: {e}")
