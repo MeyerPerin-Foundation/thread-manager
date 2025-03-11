@@ -12,7 +12,7 @@ logger = logging.getLogger("tm-solar")
 @solar_bp.route('/energy_sums', methods=['GET', 'POST'])
 def energy_sums():
 
-    today = datetime.now(ZoneInfo(app_config.LOCAL_TIME_ZONE)  # Get current date in the specified timezone
+    today = datetime.now(ZoneInfo(app_config.LOCAL_TIME_ZONE))  # Get current date in the specified timezone
 
     # Last day of this month’s 1st - 1 day = last day of last month
     first_day_of_this_month = today.replace(day=1)
