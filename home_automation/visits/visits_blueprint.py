@@ -1,8 +1,9 @@
 from flask import Blueprint, request
 from .visits_db import VisitsDB
 
-import datetime
+from datetime import datetime, timezone
 import pytz
+
 
 visits_bp = Blueprint('visits', __name__, url_prefix='/visits')
 
@@ -13,7 +14,7 @@ def update_dogtopia_visits():
 
     if "date" not in data:
         # get the time in UTC and convert it to the CST timezone using the pytz library
-        now = datetime.datetime.now(datetime.UTC)
+        now = datetime.now(datetime.UTC)
         cst = pytz.timezone("America/Chicago")
         cst_now = now.astimezone(cst)
         data["date"] = cst_now.strftime("%Y-%m-%d")
@@ -36,7 +37,7 @@ def insert_visit():
 
     if "date" not in data:
         # get the time in UTC and convert it to the CST timezone using the pytz library
-        now = datetime.datetime.now(datetime.UTC)
+        now = datetime.now(datetime.UTC)
         cst = pytz.timezone("America/Chicago")
         cst_now = now.astimezone(cst)
         data["date"] = cst_now.strftime("%Y-%m-%d %H:%M:%S")
@@ -53,3 +54,16 @@ def insert_visit():
     visitsdb.insert_visit(date=data["date"], location=data["location"], person=data["person"])
 
     return "OK", 200
+
+@visits_bp.route("/current_balance", methods=["GET"])
+def current_balance():
+    date = request.args.get("date")
+    
+
+    if date is None:
+        current_date_utc = datetime.now(timezone.utc).date().strftime("%Y-%m-%d")
+
+    visitsdb = VisitsDB()
+    balance = visitsdb.current_balance(date)
+
+    return {"balance": balance}, 200

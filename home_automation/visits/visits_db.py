@@ -27,3 +27,19 @@ class VisitsDB:
         id = uuid.uuid4().hex
         item = {"id": id, "date": date, "location": location, "person": person}
         container.upsert_item(item)
+    
+    def current_balance(self, date: str) -> int:
+        container = _get_container("content", "dogtopia_visits")
+        query = f"SELECT * FROM c WHERE c.date <= '{date}'"
+        items = list(container.query_items(query=query, enable_cross_partition_query=True))
+
+        if len(items) == 0:
+            return 0
+
+        balance = 0
+        for item in items:
+                balance += item["visits"]
+
+        balance = int(balance)
+        return balance
+        
