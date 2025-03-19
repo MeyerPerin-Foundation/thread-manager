@@ -110,17 +110,25 @@ class FolderContent:
         count = self.db.run_query(query)
         return count[0] if count else 0
 
-    def get_oldest_last_posted(self) -> str | None:
+    def get_oldest_last_posted(self) -> int | None:
         """
         Returns the oldest last_posted date from the database.
         """
-        query = "SELECT TOP 1 c.last_posted FROM c ORDER BY c.last_posted ASC"
+        query = "SELECT TOP 1 c.last_posted FROM c WHERE IS_DEFINED(c.last_posted) ORDER BY c.last_posted ASC"
         items = self.db.run_query(query)
 
         if items:
-            return items[0]["last_posted"]
+            earliest = items[0]["last_posted"]
         else:
             return None
+        
+        if earliest:
+            # how many days ago was this date from today
+            earliest = datetime.fromisoformat(earliest.replace("Z", "+00:00"))
+            earliest = earliest.astimezone(timezone.utc)
+            days_ago = (datetime.now(timezone.utc) - earliest).days
+            return days_ago
+
 
     def queue_post(
         self, 
@@ -179,4 +187,4 @@ if __name__ == "__main__":
     days = folder_content.get_remaining_post_count(days_ago=180)
     earliest = folder_content.get_oldest_last_posted()
     logger.debug(f"Remaining posts: {days}")
-    logger.debug(f"Earliest last_posted: {earliest}")
+    logger.debug(f"Earliest post was: {earliest}")
