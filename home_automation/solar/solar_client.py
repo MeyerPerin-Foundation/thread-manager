@@ -7,6 +7,14 @@ from zoneinfo import ZoneInfo
 import pprint
 import app_config
 
+import logging
+
+logger = logging.getLogger("tm-solar-client")
+if app_config.RUNNING_LOCALLY:
+    logger.setLevel(logging.DEBUG)
+else:
+    logger.setLevel(logging.INFO)
+
 class SolarClient:
 
     def __init__(self):
@@ -46,7 +54,9 @@ class SolarClient:
 
         local_date = datetime.now(ZoneInfo(app_config.LOCAL_TIME_ZONE)).strftime("%Y-%m-%d")
         local_date_one_year_ago = (datetime.now(ZoneInfo(app_config.LOCAL_TIME_ZONE)) - timedelta(days=365)).strftime("%Y-%m-%d")
-        query = f"SELECT TOP 1 * FROM c WHERE c.ePvDay > 0 AND c.date >= '{local_date_one_year_ago}' ORDER BY c.date DESC"
+        query = f"SELECT TOP 1 * FROM c WHERE c.date >= '{local_date_one_year_ago}' ORDER BY c.ePvDay DESC"
+
+        logger.debug(f"Query: {query}")
 
         results = self.db_client.run_query(query=query, results_as_list=True)
         if results:
@@ -57,8 +67,10 @@ class SolarClient:
             # Check if the date is today
             if date == local_date:
                 # If the date is today, return the value
+                logger.debug(f"Max ePvDay: {max_ePvDay} on date {date}")
                 return max_ePvDay
             else:
+                logger.debug(f"Max ePvDay: {max_ePvDay} on date {date}, but not today")
                 # If the date is not today, return None
                 return None
 
