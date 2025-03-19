@@ -13,6 +13,7 @@ from content.fred import FredContent
 from content.blog_promo import BlogPromoContent
 from content.imgflip import ImgflipContent
 from content.financial.alpha_vantage import AlphaVantageContent
+from content.folder import FolderContent
 
 from home_automation.solar import SolarClient
 
@@ -68,15 +69,10 @@ class SocialMediaScheduler:
                 after_utc = after_utc,                
             )
 
-        elif command == "too_far":
-            logger.info("Scheduling Too Far content")
-            t = TooFarContent()
-            id = t.generate_too_far(service=service, after_utc=after_utc)
-
-        elif command == "ungovernable":
-            logger.info("Scheduling ungovernable content")
-            u = UngovernableContent()
-            id = u.queue_ungovernable(service=service, after_utc=after_utc)
+        elif command == "folder":
+            logger.info("Scheduling folder content")
+            f = FolderContent()
+            id = f.queue_post(service=service, after_utc=after_utc)
 
         elif command == "fred":
             logger.info("Posting Fred content")

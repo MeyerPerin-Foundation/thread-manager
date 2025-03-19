@@ -2,8 +2,9 @@ import os
 import logging
 from dotenv import load_dotenv
 
-if os.getenv("WEBSITE_HTTPLOGGING_RETENTION_DAYS") is None:
-    # running locally
+RUNNING_LOCALLY = os.getenv("WEBSITE_HTTPLOGGING_RETENTION_DAYS") is None
+
+if RUNNING_LOCALLY:
     print("Running locally")
     logging.basicConfig(level=logging.DEBUG)
     logging.getLogger("identity.web").setLevel(logging.WARNING)
@@ -95,3 +96,6 @@ ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
 
 # Home
 LOCAL_TIME_ZONE = os.getenv("LOCAL_TIME_ZONE")
+
+# Currently only one user
+THREAD_MANAGER_SUBSCRIPTION_ID = os.getenv("THREAD_MANAGER_SUBSCRIPTION_ID")

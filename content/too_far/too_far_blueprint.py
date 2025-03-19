@@ -9,7 +9,7 @@ def post_too_far():
     f = TooFarContent()
 
     # if there's any json data in the request, get its after_utc
-    after_utc = request.json.get("after_utc", None)    
+    after_utc = request.json.get("after_utc", None)
 
     if after_utc:
         d = f.generate_too_far(after_utc=after_utc)

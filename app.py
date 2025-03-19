@@ -60,13 +60,14 @@ for bp in [fred_bp, birds_bp, blog_promo_bp, countdown_bp, dashboard_bp, ungov_b
     bp.before_request(require_auth)
     app.register_blueprint(bp)
 
-
-scheduler = BackgroundScheduler()
-scheduler.add_job(func=post_from_queue, trigger="interval", minutes=15)
-scheduler.add_job(func=tickle_scheduler, trigger="interval", minutes=15)
-scheduler.add_job(func=upload_birds, trigger="interval", hours=2)
-scheduler.add_job(func=data_snapshot, trigger="interval", hours=12)
-scheduler.start()
+if not app_config.RUNNING_LOCALLY:
+    # running in Azure
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(func=post_from_queue, trigger="interval", minutes=15)
+    scheduler.add_job(func=tickle_scheduler, trigger="interval", minutes=15)
+    scheduler.add_job(func=upload_birds, trigger="interval", hours=2)
+    scheduler.add_job(func=data_snapshot, trigger="interval", hours=12)
+    scheduler.start()
 
 @app.route("/login")
 def login():
