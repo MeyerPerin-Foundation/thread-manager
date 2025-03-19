@@ -50,8 +50,6 @@ class SolarClient:
     def check_new_max_ePvDay(self):
         
         # Get today's date in local time YYYY-MM-DD format in TZ America/Chicago using zoneinfo
-        
-
         local_date = datetime.now(ZoneInfo(app_config.LOCAL_TIME_ZONE)).strftime("%Y-%m-%d")
         local_date_one_year_ago = (datetime.now(ZoneInfo(app_config.LOCAL_TIME_ZONE)) - timedelta(days=365)).strftime("%Y-%m-%d")
         query = f"SELECT TOP 1 * FROM c WHERE c.date >= '{local_date_one_year_ago}' ORDER BY c.ePvDay DESC"

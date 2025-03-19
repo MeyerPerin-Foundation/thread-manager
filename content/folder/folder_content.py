@@ -96,6 +96,32 @@ class FolderContent:
 
         return d
 
+    def get_remaining_post_count(self, days_ago = 180) -> int:
+        """
+        Returns the number of posts remaining in the database.
+        """
+        if days_ago > 0:
+            date = datetime.now(timezone.utc) - timedelta(days=days_ago)
+            date_str = date.isoformat()
+            query = f"SELECT VALUE COUNT(1) FROM c WHERE NOT IS_DEFINED(c.last_posted) OR c.last_posted < '{date_str}'"
+        else:
+            query = "SELECT VALUE COUNT(1) FROM c WHERE NOT IS_DEFINED(c.last_posted)"
+
+        count = self.db.run_query(query)
+        return count[0] if count else 0
+
+    def get_oldest_last_posted(self) -> str | None:
+        """
+        Returns the oldest last_posted date from the database.
+        """
+        query = "SELECT TOP 1 c.last_posted FROM c ORDER BY c.last_posted ASC"
+        items = self.db.run_query(query)
+
+        if items:
+            return items[0]["last_posted"]
+        else:
+            return None
+
     def queue_post(
         self, 
         service = "Bluesky",
@@ -150,5 +176,5 @@ def sync_last_posted():
 
 if __name__ == "__main__":
     folder_content = FolderContent()
-    id = folder_content.queue_post()
-    print(id)
+    days = folder_content.get_remaining_post_count(days_ago=180)
+    logger.debug(f"Remaining posts: {days}")

@@ -13,7 +13,7 @@ from content.fred import FredContent
 from content.blog_promo import BlogPromoContent
 from content.imgflip import ImgflipContent
 from content.financial.alpha_vantage import AlphaVantageContent
-from content.folder import FolderContent
+from content.folder.folder_content import FolderContent
 
 from home_automation.solar import SolarClient
 

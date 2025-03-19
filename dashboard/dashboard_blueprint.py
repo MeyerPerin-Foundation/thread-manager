@@ -3,6 +3,7 @@ from flask import Blueprint, render_template
 from content.birds import BirdContent
 from content.too_far import TooFarContent
 from content.ungovernable import UngovernableContent
+from content.folder.folder_content import FolderContent
 from .dashboard_db import DashboardDB
 from social_media import Bluesky
 
@@ -24,15 +25,10 @@ def data_snapshot():
 
     dash = DashboardDB()
     birds = BirdContent()
-    ungov = UngovernableContent()
-    too_far = TooFarContent()
     bsky = Bluesky()
-
 
     # Combine the data into a single payload
     payload.update(birds.count_birds())
-    payload.update(ungov.count_ungovernable())
-    payload.update(too_far.count_too_far())
     payload.update({"threads_followers": -1})
     payload.update({"bluesky_followers": bsky.get_follower_count()})
 
