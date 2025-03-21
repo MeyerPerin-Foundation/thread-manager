@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from social_media.document import SocialMediaDocument, SocialMediaPostResult
 from PIL import Image
 from io import BytesIO
+from utils.ai.ai import generate_image_alt_text
 
 logger = logging.getLogger("tm-bluesky")
 logger.setLevel(logging.DEBUG)
@@ -84,7 +85,7 @@ class Bluesky:
             for data in image_data:
                 with Image.open(BytesIO(data)) as img:
                     image_aspect_ratios.append(models.AppBskyEmbedDefs.AspectRatio(height=img.height, width=img.width))
-            image_alts = [image_alts[i] if image_alts else "" for i in range(len(image_urls))]
+            image_alts = [generate_image_alt_text(image_urls[i]) for i in range(len(image_urls))]
             post = self.client.send_images(text_builder, images=image_data, image_alts=image_alts, image_aspect_ratios=image_aspect_ratios)
         else:
             post = self.client.send_post(text_builder)

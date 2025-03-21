@@ -17,6 +17,32 @@ def _get_client() -> AzureOpenAI:
         api_version=app_config.AZURE_OPENAI_API_VERSION,
     )
 
+def generate_image_alt_text(image_url: str) -> str:
+    client = _get_client()
+    prompt = "Generate the alt-text for the image below. The alt-text should be a description of the image, including the main subject and any relevant details. The alt-text should be no more than 1000 characters long."
+
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a photographer and social media content creator",
+            },
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt},
+                    {"type": "image_url", "image_url": {"url": image_url}},
+                ],
+            },
+        ],
+        temperature=0.8,
+    )
+    alt_text = response.choices[0].message.content
+    alt_text += "\n\nalt-text automatically generated"
+    return str(alt_text).strip()
+
+
 
 def _get_prompt(prompt_name: str, version: int = None) -> str:
     prompts = PromptsDB()
@@ -257,5 +283,3 @@ def fix_blog_post(title, content, target_site):
     return response.choices[0].message.content
 
 
-if __name__ == "__main__":
-    pass

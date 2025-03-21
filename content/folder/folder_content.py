@@ -184,7 +184,5 @@ def sync_last_posted():
 
 if __name__ == "__main__":
     folder_content = FolderContent()
-    days = folder_content.get_remaining_post_count(days_ago=180)
-    earliest = folder_content.get_oldest_last_posted()
-    logger.debug(f"Remaining posts: {days}")
-    logger.debug(f"Earliest post was: {earliest}")
+    # folder_content.sync_folders_and_cosmos()
+    folder_content.queue_post(service="Bluesky", days_ago=180)
