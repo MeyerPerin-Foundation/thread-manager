@@ -13,9 +13,9 @@ def update_dogtopia_visits():
     data = request.json
 
     if "date" not in data:
-        # get the time in UTC and convert it to the CST timezone using the pytz library
-        now = datetime.now(datetime.UTC)
-        cst = pytz.timezone("America/Chicago")
+        # get the time in UTC and convert it to the CST timezone using the zoneinfo library
+        now = datetime.now(timezone.utc)
+        cst = datetime.now().astimezone().tzinfo
         cst_now = now.astimezone(cst)
         data["date"] = cst_now.strftime("%Y-%m-%d")
 
