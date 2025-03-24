@@ -13,8 +13,6 @@ from social_media.poster import SocialMediaPoster
 from utils.auth.auth_utils import check_auth
 from content.blog_promo.blog_promo_blueprint import blog_promo_bp
 from content.countdown.countdown_blueprint import countdown_bp
-from content.ungovernable.ungovernable_blueprint import ungov_bp
-from content.too_far.too_far_blueprint import too_far_bp
 from content.fred.fred_blueprint import fred_bp  
 from content.birds.birds_blueprint import birds_bp, upload_birds
 from content.birds import BirdContent
@@ -56,7 +54,7 @@ def require_auth():
             return render_template("not_authorized.html")
         return "Unauthorized", 401
 
-for bp in [fred_bp, birds_bp, blog_promo_bp, countdown_bp, dashboard_bp, ungov_bp, too_far_bp, visits_bp, smp_bp, scheduler_bp, solar_bp]:
+for bp in [fred_bp, birds_bp, blog_promo_bp, countdown_bp, dashboard_bp, visits_bp, smp_bp, scheduler_bp, solar_bp]:
     bp.before_request(require_auth)
     app.register_blueprint(bp)
 

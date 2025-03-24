@@ -7,8 +7,6 @@ from typing import List
 from social_media import SocialMediaPoster
 from content.birds import BirdContent
 from content.countdown import CountdownContent
-from content.too_far import TooFarContent
-from content.ungovernable import UngovernableContent
 from content.fred import FredContent
 from content.blog_promo import BlogPromoContent
 from content.imgflip import ImgflipContent

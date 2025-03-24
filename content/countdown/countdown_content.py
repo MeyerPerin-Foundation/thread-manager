@@ -36,6 +36,14 @@ class CountdownContent:
     ) -> str | None:
         logger.info(f"Calculating the days until {event_name} on {event_date}")
 
+        # if stop is a string, convert it to an int
+        if isinstance(stop, str):
+            try:
+                stop = int(stop)
+            except ValueError:
+                logger.error(f"Invalid stop value: {stop}. Must be an integer.")
+                return None
+
         # Calculate the difference in days
         difference = self._calculate_date_difference(event_date, after_utc)
         logger.info(f"Calculated the difference as {difference}")
