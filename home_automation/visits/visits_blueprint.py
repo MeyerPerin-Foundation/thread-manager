@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from .visits_db import VisitsDB
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 import pytz
 
 
@@ -37,7 +37,7 @@ def insert_visit():
 
     if "date" not in data:
         # get the time in UTC and convert it to the CST timezone using the pytz library
-        now = datetime.now(datetime.UTC)
+        now = datetime.now(UTC)
         cst = pytz.timezone("America/Chicago")
         cst_now = now.astimezone(cst)
         data["date"] = cst_now.strftime("%Y-%m-%d %H:%M:%S")

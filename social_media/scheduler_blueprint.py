@@ -56,10 +56,13 @@ def edit_task(task_id):
                 if "command_parameters" not in task_data:
                     task_data["command_parameters"] = {}
                 task_data["command_parameters"][key[len("command_parameters_"):]] = request.form[key]
+        
         # check if command parameters contains a key plural
         if "command_parameters" in task_data and "plural" in task_data["command_parameters"]:
         # if plural is empty or nonexistent, make it False otherwise make it True
             task_data["command_parameters"]["plural"] = True if task_data["command_parameters"]["plural"] else False
+        else:
+            task_data["command_parameters"]["plural"] = False
 
         # check if command parameters contains a key stop
         if "command_parameters" in task_data and "stop" in task_data["command_parameters"]:
