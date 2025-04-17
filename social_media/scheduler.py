@@ -70,7 +70,12 @@ class SocialMediaScheduler:
         elif command == "folder":
             logger.info("Scheduling folder content")
             f = FolderContent()
-            id = f.queue_post(service=service, after_utc=after_utc)
+            # check if there's a folder name in the command parameters
+            folder_name = schedule["command_parameters"].get("folder_name")
+            if folder_name is None:
+                id = f.queue_post(service=service, after_utc=after_utc)
+            else:
+                id = f.queue_post(service=service, folder_name=folder_name, after_utc=after_utc)
 
         elif command == "fred":
             logger.info("Posting Fred content")

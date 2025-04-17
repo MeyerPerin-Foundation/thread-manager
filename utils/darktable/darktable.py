@@ -139,6 +139,11 @@ class DarkTable:
         if "EXIF FNumber" in exif_d:
             # Convert the FNumber to a float
             num_dem = exif_d["EXIF FNumber"].split("/")
+
+            if len(num_dem) == 1:
+                # If there is no denominator, set it to 1
+                num_dem.append("1") 
+
             exif_d["FNumber"] = f"{float(num_dem[0]) / float(num_dem[1])}"
             # Convert to a string with 2 decimal places
             exif_d["FNumber"] = f"{float(exif_d['FNumber']):.1f}"
