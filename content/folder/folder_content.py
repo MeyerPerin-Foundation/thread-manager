@@ -77,6 +77,23 @@ class FolderContent:
         item = random.choice(items)
         return item
 
+    def get_random_post_from_folder(self, folder_name: str, days_ago: int = 180) -> dict:
+        """
+        Returns a random post from the specified folder in the database.
+        """
+        if days_ago > 0:
+            date = datetime.now(timezone.utc) - timedelta(days=days_ago)
+            date_str = date.isoformat()
+            query = f"SELECT * FROM c WHERE c.folder_name = '{folder_name}' AND (NOT IS_DEFINED(c.last_posted) OR c.last_posted < '{date_str}')"
+        else:
+            query = f"SELECT * FROM c WHERE c.folder_name = '{folder_name}'"
+
+        items = self.db.run_query(query)
+
+        # pick a random item from the list
+        item = random.choice(items)
+        return item
+
     def get_folder_config(self) -> dict:
         """
         Returns the folder configuration from the database.
@@ -135,12 +152,16 @@ class FolderContent:
         service = "Bluesky",
         after_utc: str = "2000-01-01T00:00:00Z",
         days_ago: int = 180,
+        folder_name: str = None,
     ) -> str | None:
         """
         Queues a post to the specified service.
         """
-        # get a random post from the database
-        item = self.get_random_post(days_ago=days_ago)
+
+        if folder_name:
+            item = self.get_random_post_from_folder(folder_name, days_ago=days_ago)
+        else:
+            item = self.get_random_post(days_ago=days_ago)
 
         # queue the post
         id = self.poster.generate_and_queue_document(
@@ -185,4 +206,4 @@ def sync_last_posted():
 if __name__ == "__main__":
     folder_content = FolderContent()
     # folder_content.sync_folders_and_cosmos()
-    folder_content.queue_post(service="Bluesky", days_ago=180)
+    folder_content.queue_post(service="Bluesky", days_ago=180, folder_name="photography")

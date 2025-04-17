@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from uuid import uuid4
 from social_media import SocialMediaPoster
+import yfinance as yf
 import io
 
 import logging
@@ -20,35 +21,20 @@ class AlphaVantageContent:
             # get the API key from the config file
             self.api_key = app_config.ALPHA_VANTAGE_API_KEY
 
-
     def get_daily_close(self, symbol, start_date = None, end_date = None):
         if start_date and end_date:
-            url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={self.api_key}&outputsize=full"
-            response = requests.get(url)
-            data = response.json()
-            time_series = data["Time Series (Daily)"]
-            # get only the dates in the range and only the close
-            filtered_data = {date: time_series[date]["4. close"] for date in time_series if start_date <= date <= end_date}
+            data = yf.download(symbol, start=start_date, end=end_date, auto_adjust=True)
         elif start_date:
-            url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={self.api_key}&outputsize=full"
-            response = requests.get(url)
-            data = response.json()
-            time_series = data["Time Series (Daily)"]
-            # get only the dates in the range and only the close
-            filtered_data = {date: time_series[date]["4. close"] for date in time_series if start_date <= date}
+            data = yf.download(symbol, start=start_date, auto_adjust=True)
         else:
-            url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={self.api_key}"
-            response = requests.get(url)
-            data = response.json()
-            time_series = data["Time Series (Daily)"]
-            # get only the close
-            filtered_data = {date: time_series[date]["4. close"] for date in time_series}
+            data = yf.download(symbol, auto_adjust=True)
 
-        # sort the data by date
-        filtered_data = dict(sorted(filtered_data.items()))
+        data = data[["Close"]].reset_index()
+        data.rename(columns={"Close": "Value", "Date": "Date"}, inplace=True)
 
-        return filtered_data
+        print(data.head())
 
+        # return filtered_data
 
     def generate_post_text(self, data, series_description, period_name = None, condition_type=None, condition_value=None):
         # get the start date of the series
@@ -90,9 +76,8 @@ class AlphaVantageContent:
 
     def generate_chart(self, data, title):
         # Convert data to DataFrame
-        df = pd.DataFrame(list(data.items()), columns=['Date', 'Value'])
-        df['Date'] = pd.to_datetime(df['Date'])
-        df['Value'] = df['Value'].astype(float)
+        df = data
+        print(df.head())
         df.sort_values('Date', inplace=True)
 
         # Plot
@@ -156,14 +141,18 @@ class AlphaVantageContent:
 
 if __name__ == "__main__":
     a = AlphaVantageContent(app_config.ALPHA_VANTAGE_API_KEY)
-    a.queue_symbol_plot(
-        "SPXX", 
-        "S&P 500 ETF", 
-        "S&P 500 ETF (SPX)", 
-        "Since Trump's inauguration", 
-        start_date="2025-01-20", 
-        condition_type="less",
-        condition_value=-7,
-        after_utc="2025-01-20T00:00:00Z")
+    a.get_daily_close("^GSPC", start_date = "2025-03-01")
+    # a.generate_chart(a.get_daily_close("^GSPC"), "S&P 500 ETF Daily Close Prices")
+
+
+    # a.queue_symbol_plot(
+    #     "SPXX", 
+    #     "S&P 500 ETF", 
+    #     "S&P 500 ETF (SPX)", 
+    #     "Since Trump's inauguration", 
+    #     start_date="2025-01-20", 
+    #     condition_type="less",
+    #     condition_value=-7,
+    #     after_utc="2025-01-20T00:00:00Z")
 
 

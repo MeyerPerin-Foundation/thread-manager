@@ -12,6 +12,10 @@ if RUNNING_LOCALLY:
     logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("birdbuddy").setLevel(logging.WARNING)
     logging.getLogger("openai").setLevel(logging.WARNING)
+    logging.getLogger("yfinance").setLevel(logging.WARNING)
+    logging.getLogger("peewee").setLevel(logging.WARNING)
+    logging.getLogger("PIL").setLevel(logging.WARNING)
+    logging.getLogger("exifread").setLevel(logging.WARNING)
     
     load_dotenv()
 else:
