@@ -41,6 +41,8 @@ class DarkTable:
                         parent_dir = os.path.basename(os.path.dirname(os.path.dirname(filepath)))
                         idpath = os.path.basename(filepath)
 
+                        logger.debug("Processing %s", idpath)
+
                         id = str(uuid.uuid5(uuid.NAMESPACE_DNS, idpath))
                         idfilename = f"{id}.jpg"
                         blob_path = f"{subscription_id}/themed_folders/photography/{parent_dir}/{idfilename}"

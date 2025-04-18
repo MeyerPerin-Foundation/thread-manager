@@ -35,6 +35,9 @@ class FolderContent:
             hashtags = [folder_config[folder_name]["hashtag"]]
             id = str(uuid.uuid5(uuid.NAMESPACE_DNS, blob.name))
 
+            if folder_name == "photography":
+                continue
+
             d = {
                 "id": id,
                 "text": text,
@@ -51,10 +54,7 @@ class FolderContent:
             existing_item = self.db.get_item(id, partition_key=self.subscription_id)
 
             if existing_item:
-                # update the existing item if it has changed after the last modified date
-                if d["last_modified"] > existing_item["last_edited"]:
-                    logger.debug(f"Updating item {id} in the database")
-                    self.db.upsert_item(d)
+                logger.debug(f"Item {id} already exists in the database")
             else:
                 # insert the new item into the database
                 logger.debug(f"Inserting new item {id} into the database")
@@ -205,5 +205,5 @@ def sync_last_posted():
 
 if __name__ == "__main__":
     folder_content = FolderContent()
-    # folder_content.sync_folders_and_cosmos()
-    folder_content.queue_post(service="Bluesky", days_ago=180, folder_name="photography")
+    folder_content.sync_folders_and_cosmos()
+    # folder_content.queue_post(service="Bluesky", days_ago=180, folder_name="photography")
