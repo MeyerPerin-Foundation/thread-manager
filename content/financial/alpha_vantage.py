@@ -32,26 +32,28 @@ class AlphaVantageContent:
         data = data[["Close"]].reset_index()
         data.rename(columns={"Close": "Value", "Date": "Date"}, inplace=True)
 
-        print(data.head())
+        return data
 
         # return filtered_data
 
     def generate_post_text(self, data, series_description, period_name = None, condition_type=None, condition_value=None):
-        # get the start date of the series
-        start_date = list(data.keys())[0]
-        # get the end date of the series
-        end_date = list(data.keys())[-1]
+        # Get the start and end dates
+        start_date = data['Date'].iloc[0].date()
+        end_date = data['Date'].iloc[-1].date()
 
-        # calculate the return between end_date and start_date
-        start_value = float(data[start_date])
-        end_value = float(data[end_date])
-        returns = (end_value - start_value) / start_value * 100
+        start_value = data['Value'].iloc[0]
+        end_value = data['Value'].iloc[-1]
+        
+        returns = float((end_value - start_value) / start_value * 100)
 
         time_frame = f"From {start_date} to {end_date}"
         if period_name:
             time_frame = period_name
 
-        epilogue = "Data as of market close on " + end_date + "."
+        # convert end_date to string
+        end_date = end_date.strftime("%Y-%m-%d")
+
+        epilogue = f"Data as of market close on {end_date}."
 
         if condition_type and condition_value:
             if condition_type == "greater":
@@ -77,7 +79,6 @@ class AlphaVantageContent:
     def generate_chart(self, data, title):
         # Convert data to DataFrame
         df = data
-        print(df.head())
         df.sort_values('Date', inplace=True)
 
         # Plot
@@ -141,18 +142,17 @@ class AlphaVantageContent:
 
 if __name__ == "__main__":
     a = AlphaVantageContent(app_config.ALPHA_VANTAGE_API_KEY)
-    a.get_daily_close("^GSPC", start_date = "2025-03-01")
     # a.generate_chart(a.get_daily_close("^GSPC"), "S&P 500 ETF Daily Close Prices")
 
 
-    # a.queue_symbol_plot(
-    #     "SPXX", 
-    #     "S&P 500 ETF", 
-    #     "S&P 500 ETF (SPX)", 
-    #     "Since Trump's inauguration", 
-    #     start_date="2025-01-20", 
-    #     condition_type="less",
-    #     condition_value=-7,
-    #     after_utc="2025-01-20T00:00:00Z")
+    a.queue_symbol_plot(
+        "^GSPC", 
+        "S&P 500", 
+        "S&P 500", 
+        "Since Trump's inauguration", 
+        start_date="2025-01-20", 
+        condition_type="less",
+        condition_value=-7,
+        after_utc="2025-01-20T00:00:00Z")
 
 
