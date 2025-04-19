@@ -15,7 +15,7 @@ from content.blog_promo.blog_promo_blueprint import blog_promo_bp
 from content.countdown.countdown_blueprint import countdown_bp
 from content.fred.fred_blueprint import fred_bp  
 from content.birds.birds_blueprint import birds_bp, upload_birds
-from content.birds import BirdContent
+from content.birds.bird_content import BirdContent
 from dashboard.dashboard_blueprint import dashboard_bp, data_snapshot
 from home_automation.visits.visits_blueprint import visits_bp
 from home_automation.solar.solar_blueprint import solar_bp

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template
 
-from content.birds import BirdContent
+from content.birds.bird_content import BirdContent
 from content.folder.folder_content import FolderContent
 from .dashboard_db import DashboardDB
 from social_media import Bluesky
