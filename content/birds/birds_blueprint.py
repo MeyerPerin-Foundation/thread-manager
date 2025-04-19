@@ -1,5 +1,5 @@
 from flask import Blueprint, request, render_template
-from content.birds import BirdContent
+from content.birds.bird_content import BirdContent
 from .birds_db import BirdsDB
 import datetime
 
