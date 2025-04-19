@@ -152,9 +152,13 @@ class Bluesky:
         """
         lo, hi, best = min_q, max_q, None
 
+        if img.mode != "RGB":
+            img = img.convert("RGB")
+
         while lo <= hi:
             q = (lo + hi) // 2
             buf = BytesIO()
+            
             img.save(buf, format="JPEG", quality=q,
                     optimize=True, progressive=True,
                     subsampling=subsampling)
