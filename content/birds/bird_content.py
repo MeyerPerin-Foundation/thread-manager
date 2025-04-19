@@ -10,8 +10,9 @@ from social_media import SocialMediaPoster
 import utils.ai.ai as ai
 from birdbuddy.client import BirdBuddy
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+import json
 
 logger = logging.getLogger("tm-birds")
 logger.setLevel(logging.INFO)
@@ -127,6 +128,7 @@ class BirdContent:
         edges = self.fetch_new_feed_items(api_client, since)
 
         media_list = []
+        sightings = []
 
         for edge in edges:
             feeder_name = ""
@@ -143,7 +145,8 @@ class BirdContent:
                         ]:
                 logger.info(f"Skipping postcard {node_id} as it causes Birdbuddy server errors.")
                 continue
-            
+
+
 
             if typename == "FeedItemNewPostcard":
                 try:
@@ -156,9 +159,7 @@ class BirdContent:
                     if feeder_name == "MeyerPerin Backyard" or feeder_name == "MeyerPerin Birdbuddy Pro" or feeder_name == "MeyerPerin Front Yard":
                         media_collection = sighting.medias
                         encounter_id = sighting.postcard_id
-
-                    if media_collection is None:
-                        continue
+                        video = sighting.get('videoMedia', [])
 
                     media_items = [{'encounter_id': encounter_id, 
                                     'id': item['id'], 
@@ -167,8 +168,18 @@ class BirdContent:
                                     'feeder_name': feeder_name,
                                     'location': feeder_location,
                                     'media_type': item['__typename'], 
-                                    'image_url': item['contentUrl']} for item in media_collection if item['__typename'] == 'MediaImage' or item['__typename'] == 'MediaVideo']
-                    
+                                    'image_url': item['contentUrl']} for item in media_collection if item['__typename'] == 'MediaImage']
+
+                    if video:
+                        media_items.extend([{'encounter_id': encounter_id,
+                                            'id': video['id'], 
+                                            'date_created': video['createdAt'], 
+                                            'species': species,
+                                            'feeder_name': feeder_name,
+                                            'location': feeder_location,
+                                            'media_type': video['__typename'], 
+                                            'image_url': video['contentUrl']}])
+
                     species_to_ignore = _get_setting("species_to_ignore")
                     # if species is not None, and does not contain names in list of species to ignore, add to media_list
                     if species and species not in species_to_ignore:              
@@ -204,13 +215,19 @@ class BirdContent:
             logger.info(f"Processing item {i} of {N}")
             uri = item['image_url']
 
-            # TODO: upload all videos, but check images with OpenAI first
+
             if item['media_type'] == 'MediaImage':
                 # if it's not a good bird, just skip it
                 if not ai.good_birb(uri):
                     continue
+                type = "image"
+            elif item['media_type'] == 'MediaVideo':
+                type = "video"
+            else:
+                logger.error(f"Unknown media type {item['media_type']} for item {item['id']}. Skipping.")
+                continue
             
-            logger.info("This is a good bird. Saving to Azure Storage and Cosmos DB.")
+            logger.info(f"This is a good bird {type}. Saving to Azure Storage and Cosmos DB.")
             
             # otherwise,  let's save it
             response = requests.get(uri)
@@ -229,6 +246,16 @@ class BirdContent:
             birds = BirdsDB()
             # Save to Cosmos DB
             if blob_url:
-                birds.insert_bird(media_id=item['id'], created_at = item['date_created'], postcard_id = item['encounter_id'], species = item['species'], blob_url=blob_url)
+                birds.insert_bird(media_id=item['id'], created_at = item['date_created'], postcard_id = item['encounter_id'], species = item['species'], blob_url=blob_url, media_type=item['media_type'], feeder_name=item['feeder_name'], location=item['location'])
+                logger.info(f"Inserted bird with ID: {item['id']} into Cosmos DB.")
 
         logger.info("Finished processing bird items")
+
+if __name__ == "__main__":
+    bc = BirdContent()
+    since = datetime.now() - timedelta(hours=25)
+
+    # make since timezone aware
+    since = since.replace(tzinfo=ZoneInfo("UTC"))
+
+    bc.update_birds(since=since)

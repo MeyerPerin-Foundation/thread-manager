@@ -16,6 +16,7 @@ if RUNNING_LOCALLY:
     logging.getLogger("peewee").setLevel(logging.WARNING)
     logging.getLogger("PIL").setLevel(logging.WARNING)
     logging.getLogger("exifread").setLevel(logging.WARNING)
+    logging.getLogger("asyncio").setLevel(logging.WARNING)
     
     load_dotenv()
 else:

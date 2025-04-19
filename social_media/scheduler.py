@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 from typing import List
 
 from social_media import SocialMediaPoster
-from content.birds import BirdContent
+from content.birds.bird_content import BirdContent
 from content.countdown import CountdownContent
 from content.fred import FredContent
 from content.blog_promo import BlogPromoContent

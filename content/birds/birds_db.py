@@ -10,7 +10,7 @@ class BirdsDB:
     def __init__(self):
         self.container = _get_container
 
-    def insert_bird(self, media_id, created_at, postcard_id, species, blob_url):
+    def insert_bird(self, media_id, created_at, postcard_id, species, blob_url, media_type, feeder_name, location):
         container = self.container("content", "bird_buddy")
 
         # try to get the item from the database
@@ -25,6 +25,9 @@ class BirdsDB:
             item["postcard_id"] = postcard_id
             item["species"] = species
             item["blob_url"] = blob_url
+            item["media_type"] = media_type
+            item["feeder_name"] = feeder_name
+            item["location"] = location
         else:
             item = {
                 "id": media_id,
@@ -32,23 +35,28 @@ class BirdsDB:
                 "postcard_id": postcard_id,
                 "species": species,
                 "blob_url": blob_url,
+                "media_type": media_type,
+                "feeder_name": feeder_name,
+                "location": location,
             }
 
         container.upsert_item(item)
 
     def get_random_birdbuddy(self):
         container = self.container("content", "bird_buddy")
-        query = "SELECT * FROM c WHERE NOT IS_DEFINED(c.last_posted)"
+        query = "SELECT * FROM c WHERE NOT IS_DEFINED(c.last_posted) and c.media_type = 'MediaImage'"
 
         items = list(
             container.query_items(query=query, enable_cross_partition_query=True)
         )
         # get a random item from the list
-        return random.choice(items)
+        if items:
+            return random.choice(items)
+        return None
 
     def get_latest_unposted_birds(self, max_items=12):
         container = self.container("content", "bird_buddy")
-        query = "SELECT * FROM c WHERE NOT IS_DEFINED(c.last_posted) ORDER BY c.created_at DESC "
+        query = "SELECT * FROM c WHERE NOT IS_DEFINED(c.last_posted) and c.media_type = 'MediaImage' ORDER BY c.created_at DESC "
         items = list(
             container.query_items(query=query, enable_cross_partition_query=True)
         )
@@ -60,6 +68,17 @@ class BirdsDB:
             items = items[:max_items]
 
         return items
+
+    def get_random_unposted_video(self):
+        container = self.container("content", "bird_buddy")
+        query = "SELECT * FROM c WHERE NOT IS_DEFINED(c.last_posted) and c.media_type = 'MediaVideo'"
+        items = list(
+            container.query_items(query=query, enable_cross_partition_query=True)
+        )
+        # get a random item from the list
+        if items:
+            return random.choice(items)
+        return None
 
     def update_birdbuddy_posted(self, birdbuddy_dict):
         container = self.container("content", "bird_buddy")
@@ -138,3 +157,14 @@ class BirdsDB:
 
     def get_species_to_ignore(self):
         return _get_setting("species_to_ignore")
+
+if __name__ == "__main__":
+    container = _get_container("content", "bird_buddy")
+
+    # count all items in the container
+    query = "SELECT VALUE COUNT(1) FROM c"
+    items = list(
+        container.query_items(query=query, enable_cross_partition_query=True)
+    )
+    all_birds = items[0]
+    print(f"All birds: {all_birds}")
