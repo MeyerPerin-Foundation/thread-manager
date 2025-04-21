@@ -61,7 +61,7 @@ for bp in [fred_bp, birds_bp, blog_promo_bp, countdown_bp, dashboard_bp, visits_
 if not app_config.RUNNING_LOCALLY:
     # running in Azure
     scheduler = BackgroundScheduler()
-    scheduler.add_job(func=post_from_queue, trigger="interval", minutes=15)
+    scheduler.add_job(func=post_from_queue, trigger="interval", minutes=5)
     scheduler.add_job(func=tickle_scheduler, trigger="interval", minutes=15)
     scheduler.add_job(func=upload_birds, trigger="interval", hours=2)
     scheduler.add_job(func=data_snapshot, trigger="interval", hours=12)
