@@ -113,13 +113,20 @@ class DarkTable:
                     exif_d[tag] = tags[tag].printable.strip()
         
         if exif_d["Image Model"] == "OM-1MarkII":
-            exif_d["Camera"] = "OM-1 Mark II"
+            exif_d["Camera"] = "OM-1ii"
         else:
             exif_d["Camera"] = exif_d["Image Model"]
         del exif_d["Image Model"]
 
         if "EXIF LensModel" in exif_d:
-            exif_d["Lens"] = exif_d["EXIF LensModel"]
+            if exif_d["EXIF LensModel"] == "M.Zuiko Digital ED 12-40mm F2.8 PRO":
+                exif_d["Lens"] = "OM 12-40mm F2.8"
+            elif exif_d["EXIF LensModel"] == "M.Zuiko Digital ED 300mm F4.0 IS PRO":
+                exif_d["Lens"] = "OM 300mm F4.0"
+            elif exif_d["EXIF LensModel"] == "M.Zuiko Digital ED 100-400mm F5.0-6.3 IS":
+                exif_d["Lens"] = "OM 100-400mm F5.0-6.3"
+            else:
+                exif_d["Lens"] = exif_d["EXIF LensModel"]
             del exif_d["EXIF LensModel"]
 
         if "EXIF DateTimeOriginal" in exif_d:
@@ -159,7 +166,7 @@ class DarkTable:
             exif_d["Focal Length"] = f"{exif_d['EXIF FocalLength']}mm"
             del exif_d["EXIF FocalLength"]
 
-        j["text"] = f"{description}\nUsing {exif_d['Camera']} with {exif_d['Lens']} @ {exif_d['Focal Length']}, {exif_d['FNumber']} f-stop, {exif_d['ISO']} ISO, {exif_d['Exposure']} exposure, on {exif_d['date']}"
+        j["text"] = f"{description}\n📷:{exif_d['Camera']}\n🔍{exif_d['Lens']} @ {exif_d['Focal Length']}\n{exif_d['FNumber']} f-stop, {exif_d['ISO']} ISO, {exif_d['Exposure']} exposure\n{exif_d['date']}"
 
         return j
 
