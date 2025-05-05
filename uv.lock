@@ -1027,7 +1027,7 @@ wheels = [
 
 [[package]]
 name = "mpfutils"
-version = "0.4.3"
+version = "0.4.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "azure-cosmos" },
@@ -1039,9 +1039,9 @@ dependencies = [
     { name = "python-dotenv" },
     { name = "seaborn" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/dd/a0/a77e34a1f9a1f12e69ec010e6ed1d498655451d835f848d4b32c0fae70a8/mpfutils-0.4.3.tar.gz", hash = "sha256:36b02751e260bb66505faf60aed60a03b47571dee4a724f5f89e46cd33e5159e", size = 47365 }
+sdist = { url = "https://files.pythonhosted.org/packages/a2/24/40ed82e0fa5a0f3265d5d27f158045e53f3f8aecab04b4fbe90661fccf8e/mpfutils-0.4.6.tar.gz", hash = "sha256:95a694321de7eef67bc525d968e546dccb5b787b3186849462e218ba4c1048c8", size = 48359 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0b/59/132fe571f7615c7f13aeab3f30ab12b7c94e23e2d7ae854c4397ce3bffb7/mpfutils-0.4.3-py3-none-any.whl", hash = "sha256:d738abe139ca0e72a2f42684b682edb7e0e15d36f02a82fca26da3e182482afb", size = 9012 },
+    { url = "https://files.pythonhosted.org/packages/b2/de/180129ca266ab56ba2a94090357c99753324e8cb094dc030a6120bd0720f/mpfutils-0.4.6-py3-none-any.whl", hash = "sha256:5d0327ca5ed3fde001df03d51a9131f855ff0bf687e44eb58d7f6eded026cf44", size = 10058 },
 ]
 
 [[package]]
@@ -1997,7 +1997,7 @@ requires-dist = [
     { name = "hubspot-api-client", specifier = ">=11.1.0" },
     { name = "identity", specifier = ">=0.9.2" },
     { name = "matplotlib", specifier = ">=3.10.0" },
-    { name = "mpfutils", specifier = ">=0.4.3" },
+    { name = "mpfutils", specifier = ">=0.4.5" },
     { name = "openai", specifier = ">=1.61.0" },
     { name = "pillow", specifier = ">=11.1.0" },
     { name = "pybirdbuddy", specifier = ">=0.0.19" },

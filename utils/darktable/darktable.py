@@ -23,6 +23,21 @@ class DarkTable:
         self.oai_client = OpenAIClient(azure=True)
         self.db = CosmosDBContainer("content", "themed_folders")
 
+    def generate_thumbnail(self, src_path: str) -> bytes:
+        """
+        Generates a thumbnail for the image at src_path
+        """
+        with Image.open(src_path) as img:
+            width = img.width
+            # generate a thumbnail with a witdth of 300px and a height that keeps the aspect ratio
+            img.thumbnail((300, int((img.height / img.width) * 300)))
+            img = ImageOps.exif_transpose(img)
+            img = img.convert("RGB")
+            img_bytes = io.BytesIO()
+            img.save(img_bytes, format="JPEG", quality=85)
+            img_bytes.seek(0)
+            return img_bytes.read()
+
     def upload_originals(self):
         """
         Uploads the original exported images to Azure Blob Storage
@@ -39,6 +54,10 @@ class DarkTable:
 
                         # get the parent directory of parent_dir
                         parent_dir = os.path.basename(os.path.dirname(os.path.dirname(filepath)))
+                        
+                        # replace spaces with - in the parent_dir
+                        parent_dir = parent_dir.replace(" ", "-")
+
                         idpath = os.path.basename(filepath)
 
                         logger.debug("Processing %s", idpath)
@@ -46,22 +65,31 @@ class DarkTable:
                         id = str(uuid.uuid5(uuid.NAMESPACE_DNS, idpath))
                         idfilename = f"{id}.jpg"
                         blob_path = f"{subscription_id}/themed_folders/photography/{parent_dir}/{idfilename}"
+                        thumbnail_blob_path = f"{subscription_id}/themed_folders/photography/{parent_dir}/{id}_thumb.jpg"
 
                         # check if the blob already exists
-                        if self.azs_client.blob_exists(blob_path):
+                        d = self.db.get_item(id, partition_key=subscription_id)
+
+
+                        if d and self.azs_client.blob_exists(blob_path):
                             logger.debug("Skipping %s, already exists", blob_path)
                             continue
+
+                        # generate the thumbnail
+                        thumbnail = self.generate_thumbnail(filepath)
+                        # upload the thumbnail to Azure Blob Storage
+                        thumbnail_url = self.azs_client.upload_blob(thumbnail_blob_path, thumbnail, content_type="image/jpeg")
 
                         # read the image data
                         with open(filepath, 'rb') as f:
                             data = f.read()
 
-                        url = self.azs_client.upload_blob(blob_path, data)
+                        url = self.azs_client.upload_blob(blob_path, data, content_type="image/jpeg")
                         bird = self.check_for_bird(url)
 
                         description = self.caption_photo(url)
                         j = self.generate_dict(id, filepath, url, description, bird=bird)
-                        
+                        j["thumbnail_blob_url"] = thumbnail_url                        
                         j["subscription_id"] = subscription_id
                         j["last_modified"] = datetime.now(timezone.utc).isoformat()
                         self.db.upsert_item(j)
@@ -113,7 +141,7 @@ class DarkTable:
                     exif_d[tag] = tags[tag].printable.strip()
         
         if exif_d["Image Model"] == "OM-1MarkII":
-            exif_d["Camera"] = "OM-1ii"
+            exif_d["Camera"] = "OM-1 MkII"
         else:
             exif_d["Camera"] = exif_d["Image Model"]
         del exif_d["Image Model"]
@@ -166,7 +194,7 @@ class DarkTable:
             exif_d["Focal Length"] = f"{exif_d['EXIF FocalLength']}mm"
             del exif_d["EXIF FocalLength"]
 
-        j["text"] = f"{description}\n📷:{exif_d['Camera']}\n🔍{exif_d['Lens']} @ {exif_d['Focal Length']}\n{exif_d['FNumber']} f-stop, {exif_d['ISO']} ISO, {exif_d['Exposure']} exposure\n{exif_d['date']}"
+        j["text"] = f"{description}\n📷:{exif_d['Camera']} • 🔍:{exif_d['Focal Length']} • f:{exif_d['FNumber']} • {exif_d['ISO']} ISO • {exif_d['Exposure']}\n{exif_d['date']}"
 
         return j
 

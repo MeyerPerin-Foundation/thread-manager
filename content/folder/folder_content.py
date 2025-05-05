@@ -157,11 +157,24 @@ class FolderContent:
         """
         Queues a post to the specified service.
         """
+        if not item:           
+            logger.error("No item found to queue.")
+            return None
 
         if folder_name:
             item = self.get_random_post_from_folder(folder_name, days_ago=days_ago)
         else:
             item = self.get_random_post(days_ago=days_ago)
+
+        if item.get("urls"):
+            urls = item["urls"]
+        else:
+            urls = None
+
+        if item.get("url_titles"):
+            url_titles = item["url_titles"]
+        else:
+            url_titles = None
 
         # queue the post
         id = self.poster.generate_and_queue_document(
@@ -170,6 +183,8 @@ class FolderContent:
             service=service,
             image_urls=[item["blob_url"]],
             hashtags=item["hashtags"],
+            urls=urls,
+            url_titles=url_titles,
         )
 
         item["last_posted"] = datetime.now(timezone.utc).isoformat()
