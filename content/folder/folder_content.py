@@ -157,14 +157,14 @@ class FolderContent:
         """
         Queues a post to the specified service.
         """
-        if not item:           
-            logger.error("No item found to queue.")
-            return None
-
         if folder_name:
             item = self.get_random_post_from_folder(folder_name, days_ago=days_ago)
         else:
             item = self.get_random_post(days_ago=days_ago)
+
+        if not item:           
+            logger.error("No item found to queue.")
+            return None
 
         if item.get("urls"):
             urls = item["urls"]
@@ -220,5 +220,5 @@ def sync_last_posted():
 
 if __name__ == "__main__":
     folder_content = FolderContent()
-    folder_content.sync_folders_and_cosmos()
-    # folder_content.queue_post(service="Bluesky", days_ago=180, folder_name="photography")
+    # folder_content.sync_folders_and_cosmos()
+    folder_content.queue_post(service="Bluesky", days_ago=180, folder_name="photography")
