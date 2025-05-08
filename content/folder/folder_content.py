@@ -67,7 +67,7 @@ class FolderContent:
         if days_ago > 0:
             date = datetime.now(timezone.utc) - timedelta(days=days_ago)
             date_str = date.isoformat()
-            query = f"SELECT * FROM c WHERE NOT IS_DEFINED(c.last_posted) OR c.last_posted < '{date_str}'"
+            query = f"SELECT * FROM c WHERE c.folder_name != 'photography' AND (NOT IS_DEFINED(c.last_posted) OR c.last_posted < '{date_str}')"
         else:
             query = "SELECT * FROM c"
 

@@ -157,6 +157,8 @@ class DarkTable:
                 exif_d["Lens"] = exif_d["EXIF LensModel"]
             del exif_d["EXIF LensModel"]
 
+        exif_d["Lens"] = exif_d["Lens"].replace("M.Zuiko Digital ED ", "M.Zuiko ")
+
         if "EXIF DateTimeOriginal" in exif_d:
             date = exif_d["EXIF DateTimeOriginal"].split(" ")[0]
             date = date.split(":")
@@ -194,7 +196,7 @@ class DarkTable:
             exif_d["Focal Length"] = f"{exif_d['EXIF FocalLength']}mm"
             del exif_d["EXIF FocalLength"]
 
-        j["text"] = f"{description}\n📷:{exif_d['Camera']} • 🔍:{exif_d['Focal Length']} • f:{exif_d['FNumber']} • {exif_d['ISO']} ISO • {exif_d['Exposure']}\n{exif_d['date']}"
+        j["text"] = f"{description}\n📷:{exif_d['Camera']}\n🔍:{exif_d['Lens']}@{exif_d['Focal Length']}\nf:{exif_d['FNumber']} • {exif_d['ISO']} ISO • {exif_d['Exposure']}\n{exif_d['date']}"
 
         return j
 
